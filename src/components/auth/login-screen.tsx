@@ -1,13 +1,13 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-    Alert,
-    Pressable,
-    SafeAreaView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  Alert,
+  Pressable,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 
 export default function LoginScreen() {
@@ -27,7 +27,7 @@ export default function LoginScreen() {
   return (
     <SafeAreaView style={styles.page}>
       <View style={styles.card}>
-        <Text style={styles.title}>CentralPet</Text>
+        <Text style={styles.title}>vasco</Text>
         <Text style={styles.subtitle}>Login</Text>
 
         <TextInput
