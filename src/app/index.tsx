@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Redirect } from "expo-router";
 
 export default function HomeScreen() {
   return (
@@ -7,16 +7,3 @@ export default function HomeScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#ffffff",
-  },
-  text: {
-    fontSize: 24,
-    color: "#000000",
-  },
-});
