@@ -1,8 +1,27 @@
+import { auth } from "@/lib/firebase";
 import { useRouter } from "expo-router";
+import { signOut } from "firebase/auth";
+import { useState } from "react";
 import { Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
 
 export default function DashboardScreen() {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  const handleLogout = async () => {
+    if (!auth) {
+      router.replace("/login");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await signOut(auth);
+      router.replace("/login");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.page}>
@@ -42,9 +61,12 @@ export default function DashboardScreen() {
 
         <Pressable
           style={styles.logoutButton}
-          onPress={() => router.replace("/login")}
+          onPress={handleLogout}
+          disabled={loading}
         >
-          <Text style={styles.logoutButtonText}>Sair</Text>
+          <Text style={styles.logoutButtonText}>
+            {loading ? "Saindo..." : "Sair"}
+          </Text>
         </Pressable>
       </View>
     </SafeAreaView>
