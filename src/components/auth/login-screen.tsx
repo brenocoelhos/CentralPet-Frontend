@@ -1,6 +1,11 @@
+import { useAuth } from "@/context/auth-context";
+import { auth } from "@/lib/firebase";
+import { getFirebaseAuthErrorMessage } from "@/utils/firebase-auth-errors";
 import { useRouter } from "expo-router";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
 import {
+    ActivityIndicator,
     Alert,
     Pressable,
     SafeAreaView,
@@ -12,16 +17,34 @@ import {
 
 export default function LoginScreen() {
   const router = useRouter();
+  const { hasFirebaseConfig, missingConfigKeys } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert("Campos obrigatorios", "Preencha email e senha.");
       return;
     }
 
-    router.replace("/dashboard");
+    if (!hasFirebaseConfig || !auth) {
+      Alert.alert(
+        "Firebase nao configurado",
+        `Defina as variaveis ${missingConfigKeys.join(", ")} para habilitar o login.`,
+      );
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await signInWithEmailAndPassword(auth, email.trim(), password);
+      router.replace("/dashboard");
+    } catch (error) {
+      Alert.alert("Falha no login", getFirebaseAuthErrorMessage(error));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -46,8 +69,16 @@ export default function LoginScreen() {
           style={styles.input}
         />
 
-        <Pressable style={styles.primaryButton} onPress={handleLogin}>
-          <Text style={styles.primaryButtonText}>Entrar</Text>
+        <Pressable
+          style={styles.primaryButton}
+          onPress={handleLogin}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#ffffff" />
+          ) : (
+            <Text style={styles.primaryButtonText}>Entrar</Text>
+          )}
         </Pressable>
 
         <Pressable onPress={() => router.push("/cadastro-usuario")}>
