@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "749249210570",
+    "project_id": "centralpet-c63b6",
+    "storage_bucket": "centralpet-c63b6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:749249210570:android:7dab315ecb31f044a1ec33",
+        "android_client_info": {
+          "package_name": "com.centralpet"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDRQorrBGOIaAEOrqtbmvo2bFBCpEeR0mM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

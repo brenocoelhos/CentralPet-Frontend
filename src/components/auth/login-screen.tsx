@@ -1,148 +1,209 @@
-import { useAuth } from "@/context/auth-context";
-import { auth } from "@/lib/firebase";
-import { getFirebaseAuthErrorMessage } from "@/utils/firebase-auth-errors";
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
-  Pressable,
-  SafeAreaView,
   StyleSheet,
   Text,
   TextInput,
+  TouchableOpacity,
   View,
 } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { hasFirebaseConfig, missingConfigKeys } = useAuth();
+  const insets = useSafeAreaInsets();
+  const [loading, setLoading] = useState<boolean>(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert("Campos obrigatorios", "Preencha email e senha.");
-      return;
-    }
-
-    if (!hasFirebaseConfig || !auth) {
-      Alert.alert(
-        "Firebase nao configurado",
-        `Defina as variaveis ${missingConfigKeys.join(", ")} para habilitar o login.`,
-      );
-      return;
-    }
-
-    try {
-      setLoading(true);
-      await signInWithEmailAndPassword(auth, email.trim(), password);
-      router.replace("/dashboard");
-    } catch (error) {
-      Alert.alert("Falha no login", getFirebaseAuthErrorMessage(error));
-    } finally {
-      setLoading(false);
-    }
+    console.log({ email, password });
   };
 
   return (
-    <SafeAreaView style={styles.page}>
-      <View style={styles.card}>
-        <Text style={styles.title}>vasco</Text>
-        <Text style={styles.subtitle}>Login</Text>
+    <View style={styles.root}>
+      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
+        <TouchableOpacity
+          onPress={() => router.canGoBack() && router.back()}
+          style={styles.headerButton}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="arrow-back" size={24} color="#1A1A1A" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Entrar</Text>
+        <View style={styles.headerButton} />
+      </View>
 
+      <KeyboardAwareScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        enableOnAndroid={true}
+        extraScrollHeight={95}
+      >
+        <View style={styles.avatarWrapper}>
+          <View style={styles.avatarCircle}>
+            <Ionicons name="person-outline" size={32} color="rgba(0,0,0,0.5)" />
+          </View>
+          <Text style={styles.avatarLabel}>Bem-vindo de volta</Text>
+        </View>
+
+        <Text style={styles.label}>E-mail</Text>
         <TextInput
-          placeholder="Email"
-          keyboardType="email-address"
-          autoCapitalize="none"
+          style={styles.input}
+          placeholder="exemplo@gmail.com"
+          placeholderTextColor="#B0A898"
           value={email}
           onChangeText={setEmail}
-          style={styles.input}
-        />
-        <TextInput
-          placeholder="Senha"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-          style={styles.input}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          returnKeyType="next"
         />
 
-        <Pressable
-          style={styles.primaryButton}
+        <Text style={styles.label}>Senha</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="••••••••"
+          placeholderTextColor="#B0A898"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          returnKeyType="done"
+        />
+
+        <TouchableOpacity activeOpacity={0.6}>
+          <Text style={styles.forgotPassword}>Esqueceu sua senha?</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.button}
           onPress={handleLogin}
+          activeOpacity={0.85}
           disabled={loading}
         >
           {loading ? (
-            <ActivityIndicator color="#ffffff" />
+            <ActivityIndicator color="#FFFFFF" />
           ) : (
-            <Text style={styles.primaryButtonText}>Entrar</Text>
+            <Text style={styles.buttonText}>Entrar</Text>
           )}
-        </Pressable>
+        </TouchableOpacity>
 
-        <Pressable onPress={() => router.push("/cadastro-usuario")}>
-          <Text style={styles.linkText}>Criar conta de usuario</Text>
-        </Pressable>
-      </View>
-    </SafeAreaView>
+        <Text style={styles.footerText}>
+          Não tem uma conta?{" "}
+          <Text
+            style={styles.link}
+            onPress={() => router.push("/cadastro-usuario")}
+          >
+            Cadastre-se
+          </Text>
+        </Text>
+      </KeyboardAwareScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  page: {
+  root: {
     flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    backgroundColor: "#FFFFFF",
+    borderBottomWidth: 1,
+    borderBottomColor: "#F0EDE8",
+  },
+  headerButton: {
+    width: 40,
+    height: 40,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f4f7fb",
-    padding: 16,
   },
-  card: {
-    width: "100%",
-    maxWidth: 420,
-    backgroundColor: "#ffffff",
-    borderRadius: 16,
-    padding: 20,
-    gap: 12,
-    borderWidth: 1,
-    borderColor: "#d9e1ec",
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "800",
+  headerTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1A1A1A",
+    flex: 1,
     textAlign: "center",
-    color: "#1a2533",
   },
-  subtitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    textAlign: "center",
-    color: "#4d6075",
+  scrollView: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
+  container: {
+    flexGrow: 1,
+    paddingHorizontal: 20,
+    paddingTop: 28,
+    paddingBottom: 48,
+  },
+  avatarWrapper: {
+    alignItems: "center",
+    marginBottom: 28,
+  },
+  avatarCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "#F0EBE0",
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: 8,
   },
+  avatarLabel: {
+    fontSize: 13,
+    color: "#1A1A1A",
+  },
+  label: {
+    fontSize: 13,
+    color: "#1A1A1A",
+    marginBottom: 6,
+    marginTop: 2,
+  },
   input: {
+    fontSize: 13,
+    color: "#1A1A1A",
     borderWidth: 1,
-    borderColor: "#cad6e5",
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    backgroundColor: "#fbfdff",
+    borderColor: "#E0DBD0",
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 13,
+    backgroundColor: "#FFFFFF",
+    marginBottom: 12,
   },
-  primaryButton: {
-    backgroundColor: "#0f6fd7",
-    paddingVertical: 12,
-    borderRadius: 10,
+  forgotPassword: {
+    fontSize: 13,
+    color: "#D97757",
+    textAlign: "right",
+    marginBottom: 20,
+  },
+  button: {
+    backgroundColor: "#D97757",
+    borderRadius: 50,
+    paddingVertical: 16,
     alignItems: "center",
-    marginTop: 8,
+    marginTop: 12,
   },
-  primaryButtonText: {
-    color: "#ffffff",
-    fontWeight: "700",
+  buttonText: {
+    fontSize: 15,
+    color: "#FFFFFF",
+    fontWeight: "bold",
   },
-  linkText: {
+  footerText: {
+    marginTop: 24,
+    fontSize: 13,
+    color: "#B0A898",
     textAlign: "center",
-    marginTop: 8,
-    color: "#0f6fd7",
+  },
+  link: {
+    color: "#1A1A1A",
     fontWeight: "600",
   },
 });
