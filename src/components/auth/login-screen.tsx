@@ -1,13 +1,18 @@
+import { useAuth } from "@/context/auth-context";
+import { auth } from "@/lib/firebase";
+import { getFirebaseAuthErrorMessage } from "@/utils/firebase-auth-errors";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import React, { useState } from "react";
 import {
-  ActivityIndicator,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -15,12 +20,34 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 export default function LoginScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { hasFirebaseConfig, missingConfigKeys } = useAuth();
   const [loading, setLoading] = useState<boolean>(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
-    console.log({ email, password });
+    if (!email.trim() || !password) {
+      Alert.alert("Atenção", "Informe e-mail e senha para continuar.");
+      return;
+    }
+
+    if (!hasFirebaseConfig || !auth) {
+      Alert.alert(
+        "Firebase nao configurado",
+        `Defina as variaveis ${missingConfigKeys.join(", ")} para habilitar o login.`,
+      );
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await signInWithEmailAndPassword(auth, email.trim(), password);
+      router.replace("/dashboard");
+    } catch (error) {
+      Alert.alert("Falha no login", getFirebaseAuthErrorMessage(error));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

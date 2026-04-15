@@ -1,9 +1,9 @@
 import { AuthProvider, useAuth } from "@/context/auth-context";
 import {
-    Stack,
-    useRootNavigationState,
-    useRouter,
-    useSegments,
+  Stack,
+  useRootNavigationState,
+  useRouter,
+  useSegments,
 } from "expo-router";
 import { useEffect } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
@@ -45,6 +45,7 @@ function AppStack() {
   return (
     <Stack
       screenOptions={{
+        headerShown: false,
         headerTitleAlign: "center",
         contentStyle: { backgroundColor: "#f4f7fb" },
       }}
