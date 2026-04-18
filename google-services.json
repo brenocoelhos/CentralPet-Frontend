@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1059025043652",
+    "project_id": "sistemas-ba26a",
+    "storage_bucket": "sistemas-ba26a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1059025043652:android:c68f1ce0e205ac293c8991",
+        "android_client_info": {
+          "package_name": "com.centralpet"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDf7sOOYArzwQZYs7gdJfWx_fYioJeFBDA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

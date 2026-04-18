@@ -1,4 +1,5 @@
 import { useAuth } from "@/context/auth-context";
+import { useGoogleLogin } from "@/hooks/use-google-login";
 import { auth } from "@/lib/firebase";
 import { getFirebaseAuthErrorMessage } from "@/utils/firebase-auth-errors";
 import { useRouter } from "expo-router";
@@ -21,6 +22,7 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const { handleGoogleLogin, loading: googleLoading } = useGoogleLogin();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -72,12 +74,24 @@ export default function LoginScreen() {
         <Pressable
           style={styles.primaryButton}
           onPress={handleLogin}
-          disabled={loading}
+          disabled={loading || googleLoading}
         >
           {loading ? (
             <ActivityIndicator color="#ffffff" />
           ) : (
             <Text style={styles.primaryButtonText}>Entrar</Text>
+          )}
+        </Pressable>
+
+        <Pressable
+          style={styles.googleButton}
+          onPress={handleGoogleLogin}
+          disabled={loading || googleLoading}
+        >
+          {googleLoading ? (
+            <ActivityIndicator color="#0f6fd7" />
+          ) : (
+            <Text style={styles.googleButtonText}>Continuar com Google</Text>
           )}
         </Pressable>
 
@@ -137,6 +151,18 @@ const styles = StyleSheet.create({
   },
   primaryButtonText: {
     color: "#ffffff",
+    fontWeight: "700",
+  },
+  googleButton: {
+    backgroundColor: "#ffffff",
+    borderWidth: 1,
+    borderColor: "#0f6fd7",
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  googleButtonText: {
+    color: "#0f6fd7",
     fontWeight: "700",
   },
   linkText: {
