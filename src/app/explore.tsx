@@ -1,5 +1,10 @@
-import { Redirect } from "expo-router";
+import AppShell from "@/components/layout/app-shell";
+import SearchScreen from "@/components/search/search-screen";
 
 export default function ExploreScreen() {
-  return <Redirect href="/dashboard" />;
+  return (
+    <AppShell>
+      <SearchScreen />
+    </AppShell>
+  );
 }

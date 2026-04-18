@@ -1,26 +1,10 @@
-import { useAuth } from "@/context/auth-context";
-import { Redirect } from "expo-router";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
+import DashboardScreen from "@/components/dashboard/dashboard-screen";
+import AppShell from "@/components/layout/app-shell";
 
 export default function HomeScreen() {
-  const { user, initializing } = useAuth();
-
-  if (initializing) {
-    return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color="#0f6fd7" />
-      </View>
-    );
-  }
-
-  return <Redirect href={user ? "/dashboard" : "/login"} />;
+  return (
+    <AppShell>
+      <DashboardScreen />
+    </AppShell>
+  );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#f4f7fb",
-  },
-});

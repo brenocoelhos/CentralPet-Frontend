@@ -1,11 +1,11 @@
 import UserSignupScreen from '@/components/auth/user-signup-screen';
+import AppShell from "@/components/layout/app-shell";
 import React from 'react';
-import { View } from 'react-native';
 
 export default function UserSignupRoute() {
   return (
-    <View style={{ flex: 1 }}>
+    <AppShell>
       <UserSignupScreen />
-    </View>
+    </AppShell>
   );
 }
