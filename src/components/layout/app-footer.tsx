@@ -1,20 +1,40 @@
+import { Ionicons } from "@expo/vector-icons";
 import { usePathname, useRouter } from "expo-router";
-import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ThemedText as Text } from "../themed-text";
 
 type FooterItem = {
-  label: string;
   route: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  activeIcon?: keyof typeof Ionicons.glyphMap;
+  matches: string[];
 };
 
 const FOOTER_ITEMS: FooterItem[] = [
-  { label: "Dashboard", route: "/dashboard" },
-  { label: "Busca", route: "/busca" },
-  { label: "Cadastro Pet", route: "/cadastro-pet" },
-  { label: "Perfil", route: "/perfil" },
-  { label: "Login", route: "/login" },
-  { label: "Cadastro", route: "/cadastro-usuario" },
+  {
+    route: "/dashboard",
+    icon: "home-outline",
+    activeIcon: "home",
+    matches: ["/", "/dashboard", "/index"],
+  },
+  {
+    route: "/busca",
+    icon: "search-outline",
+    activeIcon: "search",
+    matches: ["/busca"],
+  },
+  {
+    route: "/cadastro-pet",
+    icon: "add-outline",
+    activeIcon: "add",
+    matches: ["/cadastro-pet"],
+  },
+  {
+    route: "/perfil",
+    icon: "person-outline",
+    activeIcon: "person",
+    matches: ["/perfil"],
+  },
 ];
 
 export default function AppFooter() {
@@ -23,37 +43,37 @@ export default function AppFooter() {
   const insets = useSafeAreaInsets();
 
   const handleNavigate = (route: string) => {
-    if (pathname === route) {
-      return;
-    }
-
-    router.push(route as never);
+    if (pathname === route) return;
+    router.replace(route as never);
   };
 
   return (
-    <View style={[styles.wrapper, { paddingBottom: Math.max(insets.bottom, 10) }]}>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
+    <View style={[styles.wrapper, { paddingBottom: Math.max(insets.bottom, 14) }]}>
+      <View style={styles.nav}>
         {FOOTER_ITEMS.map((item) => {
-          const active = pathname === item.route;
+          const active = item.matches.includes(pathname);
+          const iconName = active && item.activeIcon ? item.activeIcon : item.icon;
 
           return (
             <TouchableOpacity
               key={item.route}
               activeOpacity={0.85}
               onPress={() => handleNavigate(item.route)}
-              style={[styles.item, active && styles.itemActive]}
+              style={styles.item}
+              accessibilityRole="button"
+              accessibilityLabel={item.route}
             >
-              <Text style={[styles.itemText, active && styles.itemTextActive]}>
-                {item.label}
-              </Text>
+              <View style={styles.iconWrapper}>
+                <Ionicons
+                  name={iconName}
+                  size={item.route === "/cadastro-pet" ? 36 : 32}
+                  color={active ? "#D97757" : "#7C7C7C"}
+                />
+              </View>
             </TouchableOpacity>
           );
         })}
-      </ScrollView>
+      </View>
     </View>
   );
 }
@@ -63,27 +83,23 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: "#F0EDE8",
     backgroundColor: "#FFFFFF",
-    paddingTop: 10,
+    paddingTop: 12,
+    paddingHorizontal: 24,
   },
-  scrollContent: {
-    paddingHorizontal: 12,
-    gap: 8,
+  nav: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   item: {
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 24,
-    backgroundColor: "#F5F1E8",
+    minWidth: 54,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  itemActive: {
-    backgroundColor: "#D97757",
-  },
-  itemText: {
-    color: "#1A1A1A",
-    fontWeight: "600",
-    fontSize: 13,
-  },
-  itemTextActive: {
-    color: "#FFFFFF",
+  iconWrapper: {
+    width: 48,
+    height: 48,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

@@ -1,3 +1,4 @@
+import { maskDate, maskPhone } from "@/utils/validators";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -107,13 +108,11 @@ export default function PetSignupScreen() {
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Foto */}
         <Pressable style={styles.photoBox}>
           <Ionicons name="camera-outline" size={32} color="rgba(0,0,0,0.5)" />
           <Text style={styles.photoLabel}>Adicionar foto</Text>
         </Pressable>
 
-        {/* Nome + Espécie */}
         <View style={styles.row}>
           <View style={styles.half}>
             <Text style={styles.label}>Nome:</Text>
@@ -157,7 +156,6 @@ export default function PetSignupScreen() {
           </View>
         </View>
 
-        {/* Porte + Data do desaparecimento */}
         <View style={styles.row}>
           <SelectField
             label="Porte"
@@ -170,15 +168,15 @@ export default function PetSignupScreen() {
             <ThemedTextInput
               placeholder="dd/mm/aaaa"
               value={disappearanceDate}
-              onChangeText={setDisappearanceDate}
+              onChangeText={(value) => setDisappearanceDate(maskDate(value))}
               style={styles.input}
               keyboardType="numbers-and-punctuation"
+              maxLength={10}
               placeholderTextColor="#B0A89A"
             />
           </View>
         </View>
 
-        {/* Local */}
         <View>
           <Text style={styles.label}>Local do desaparecimento</Text>
           <ThemedTextInput
@@ -190,7 +188,6 @@ export default function PetSignupScreen() {
           />
         </View>
 
-        {/* Descrição */}
         <View>
           <Text style={styles.label}>Descrição</Text>
           <ThemedTextInput
@@ -204,7 +201,6 @@ export default function PetSignupScreen() {
           />
         </View>
 
-        {/* Tags de características */}
         <View>
           {tags.length > 0 && (
             <View style={styles.tagsContainer}>
@@ -221,7 +217,6 @@ export default function PetSignupScreen() {
           )}
         </View>
 
-        {/* Seu nome + Telefone */}
         <View style={styles.row}>
           <View style={styles.half}>
             <Text style={styles.label}>Seu nome</Text>
@@ -238,9 +233,10 @@ export default function PetSignupScreen() {
             <ThemedTextInput
               placeholder="(00) 00000-0000"
               value={phone}
-              onChangeText={setPhone}
+              onChangeText={(value) => setPhone(maskPhone(value))}
               style={styles.input}
               keyboardType="phone-pad"
+              maxLength={15}
               placeholderTextColor="#B0A89A"
             />
           </View>

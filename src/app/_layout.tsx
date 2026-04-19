@@ -14,6 +14,7 @@ function AppStack() {
   return (
     <Stack
       screenOptions={{
+        animation: "none",
         headerTitleAlign: "center",
         headerTitleStyle: {
           fontFamily: "Lexend_700Bold",
