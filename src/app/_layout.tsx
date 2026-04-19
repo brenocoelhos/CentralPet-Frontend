@@ -7,6 +7,8 @@ export default function RootLayout() {
         headerTitleAlign: "center",
         contentStyle: { backgroundColor: "#f4f7fb" },
       }}
-    />
+    >
+      <Stack.Screen name="cadastro-pet" options={{ title: "Cadastrar Animal" }} />
+    </Stack>
   );
 }
