@@ -200,23 +200,6 @@ export default function PetSignupScreen() {
             placeholderTextColor="#B0A89A"
           />
         </View>
-
-        <View>
-          {tags.length > 0 && (
-            <View style={styles.tagsContainer}>
-              {tags.map((tag, i) => (
-                <Pressable
-                  key={i}
-                  style={styles.tag}
-                  onPress={() => removeTag(i)}
-                >
-                  <Text style={styles.tagText}>{tag}</Text>
-                </Pressable>
-              ))}
-            </View>
-          )}
-        </View>
-
         <View style={styles.row}>
           <View style={styles.half}>
             <Text style={styles.label}>Seu nome</Text>
