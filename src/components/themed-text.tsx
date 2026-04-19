@@ -34,36 +34,38 @@ const styles = StyleSheet.create({
   small: {
     fontSize: 14,
     lineHeight: 20,
-    fontWeight: 500,
+    fontFamily: 'Lexend_500Medium',
   },
   smallBold: {
     fontSize: 14,
     lineHeight: 20,
-    fontWeight: 700,
+    fontFamily: 'Lexend_700Bold',
   },
   default: {
     fontSize: 16,
     lineHeight: 24,
-    fontWeight: 500,
+    fontFamily: 'Lexend_400Regular',
   },
   title: {
     fontSize: 48,
-    fontWeight: 600,
+    fontFamily: 'Lexend_700Bold',
     lineHeight: 52,
   },
   subtitle: {
     fontSize: 32,
     lineHeight: 44,
-    fontWeight: 600,
+    fontFamily: 'Lexend_600SemiBold',
   },
   link: {
     lineHeight: 30,
     fontSize: 14,
+    fontFamily: 'Lexend_500Medium',
   },
   linkPrimary: {
     lineHeight: 30,
     fontSize: 14,
     color: '#3c87f7',
+    fontFamily: 'Lexend_500Medium',
   },
   code: {
     fontFamily: Fonts.mono,
