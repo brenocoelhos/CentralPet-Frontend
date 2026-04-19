@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -109,7 +109,7 @@ export default function PetSignupScreen() {
       >
         {/* Foto */}
         <Pressable style={styles.photoBox}>
-          <Ionicons name="camera-outline" size={32} color="rgba(0,0,0,0.5)" />
+          <MaterialIcons name="add-a-photo" size={24} color="rgba(0,0,0,0.5)" />
           <Text style={styles.photoLabel}>Adicionar foto</Text>
         </Pressable>
 
