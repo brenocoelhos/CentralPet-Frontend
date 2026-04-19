@@ -7,16 +7,16 @@ import { useRouter } from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ThemedText as Text } from "../themed-text";
+import { ThemedTextInput } from "../themed-text-input";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -93,7 +93,7 @@ export default function LoginScreen() {
         </View>
 
         <Text style={styles.label}>E-mail</Text>
-        <TextInput
+        <ThemedTextInput
           style={styles.input}
           placeholder="exemplo@gmail.com"
           placeholderTextColor="#B0A898"
@@ -105,7 +105,7 @@ export default function LoginScreen() {
         />
 
         <Text style={styles.label}>Senha</Text>
-        <TextInput
+        <ThemedTextInput
           style={styles.input}
           placeholder="••••••••"
           placeholderTextColor="#B0A898"

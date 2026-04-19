@@ -1,5 +1,6 @@
 import { useRouter } from "expo-router";
-import { Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { Pressable, SafeAreaView, StyleSheet, View } from "react-native";
+import { ThemedText as Text } from "../themed-text";
 
 export default function ProfileScreen() {
   const router = useRouter();

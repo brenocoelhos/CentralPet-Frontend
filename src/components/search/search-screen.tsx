@@ -1,14 +1,14 @@
 import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import {
-    FlatList,
-    Pressable,
-    SafeAreaView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  FlatList,
+  Pressable,
+  SafeAreaView,
+  StyleSheet,
+  View,
 } from "react-native";
+import { ThemedText as Text } from "../themed-text";
+import { ThemedTextInput } from "../themed-text-input";
 
 type PetItem = {
   id: string;
@@ -48,7 +48,7 @@ export default function SearchScreen() {
       <View style={styles.container}>
         <Text style={styles.title}>Busca de pets</Text>
 
-        <TextInput
+        <ThemedTextInput
           placeholder="Buscar por nome, especie ou raca"
           value={query}
           onChangeText={setQuery}

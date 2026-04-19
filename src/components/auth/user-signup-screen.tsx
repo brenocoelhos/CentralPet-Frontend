@@ -2,27 +2,27 @@ import { useAuth } from "@/context/auth-context";
 import { auth } from "@/lib/firebase";
 import { getFirebaseAuthErrorMessage } from "@/utils/firebase-auth-errors";
 import {
-    maskCPF,
-    maskDate,
-    maskPhone,
-    validaCPF,
-    validaData,
+  maskCPF,
+  maskDate,
+  maskPhone,
+  validaCPF,
+  validaData,
 } from "@/utils/validators";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import React, { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ThemedText as Text } from "../themed-text";
+import { ThemedTextInput } from "../themed-text-input";
 
 interface SignupFormState {
   nome: string;
@@ -157,7 +157,7 @@ export default function UserSignupScreen() {
         </View>
 
         <Text style={styles.label}>Nome:</Text>
-        <TextInput
+        <ThemedTextInput
           style={styles.input}
           placeholder="Nome Completo"
           placeholderTextColor="#B0A898"
@@ -170,7 +170,7 @@ export default function UserSignupScreen() {
         <View style={styles.row}>
           <View style={styles.halfGroup}>
             <Text style={styles.label}>CPF</Text>
-            <TextInput
+            <ThemedTextInput
               style={styles.input}
               placeholder="000.000.000-00"
               placeholderTextColor="#B0A898"
@@ -183,7 +183,7 @@ export default function UserSignupScreen() {
           </View>
           <View style={styles.halfGroup}>
             <Text style={styles.label}>Data do nascimento</Text>
-            <TextInput
+            <ThemedTextInput
               style={styles.input}
               placeholder="00/00/0000"
               placeholderTextColor="#B0A898"
@@ -197,7 +197,7 @@ export default function UserSignupScreen() {
         </View>
 
         <Text style={styles.label}>E-mail</Text>
-        <TextInput
+        <ThemedTextInput
           style={styles.input}
           placeholder="exemplo@gmail.com"
           placeholderTextColor="#B0A898"
@@ -209,7 +209,7 @@ export default function UserSignupScreen() {
         />
 
         <Text style={styles.label}>Telefone</Text>
-        <TextInput
+        <ThemedTextInput
           style={styles.input}
           placeholder="(00) 00000-0000"
           placeholderTextColor="#B0A898"
@@ -221,7 +221,7 @@ export default function UserSignupScreen() {
         />
 
         <Text style={styles.label}>Endereço</Text>
-        <TextInput
+        <ThemedTextInput
           style={styles.input}
           placeholder="Rua, número, cidade"
           placeholderTextColor="#B0A898"
@@ -234,7 +234,7 @@ export default function UserSignupScreen() {
         <View style={styles.row}>
           <View style={styles.halfGroup}>
             <Text style={styles.label}>Senha</Text>
-            <TextInput
+            <ThemedTextInput
               style={styles.input}
               placeholder="••••••••"
               placeholderTextColor="#B0A898"
@@ -246,7 +246,7 @@ export default function UserSignupScreen() {
           </View>
           <View style={styles.halfGroup}>
             <Text style={styles.label}>Confirmar senha</Text>
-            <TextInput
+            <ThemedTextInput
               style={styles.input}
               placeholder="••••••••"
               placeholderTextColor="#B0A898"

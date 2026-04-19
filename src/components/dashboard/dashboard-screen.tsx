@@ -2,7 +2,8 @@ import { auth } from "@/lib/firebase";
 import { useRouter } from "expo-router";
 import { signOut } from "firebase/auth";
 import { useState } from "react";
-import { Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { Pressable, SafeAreaView, StyleSheet, View } from "react-native";
+import { ThemedText as Text } from "../themed-text";
 
 export default function DashboardScreen() {
   const router = useRouter();

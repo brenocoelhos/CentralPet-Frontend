@@ -1,6 +1,7 @@
 import { usePathname, useRouter } from "expo-router";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ThemedText as Text } from "../themed-text";
 
 type FooterItem = {
   label: string;

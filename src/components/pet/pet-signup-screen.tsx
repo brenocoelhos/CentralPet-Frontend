@@ -9,10 +9,10 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
-  TextInput,
   View,
 } from "react-native";
+import { ThemedText as Text } from "../themed-text";
+import { ThemedTextInput } from "../themed-text-input";
 
 const SPECIES_OPTIONS = ["Cachorro", "Gato", "Pássaro", "Coelho", "Outro"];
 const SIZE_OPTIONS = ["Pequeno", "Médio", "Grande"];
@@ -117,7 +117,7 @@ export default function PetSignupScreen() {
         <View style={styles.row}>
           <View style={styles.half}>
             <Text style={styles.label}>Nome:</Text>
-            <TextInput
+            <ThemedTextInput
               placeholder="Ex: Rex"
               value={name}
               onChangeText={setName}
@@ -137,7 +137,7 @@ export default function PetSignupScreen() {
         <View style={styles.row}>
           <View style={styles.half}>
             <Text style={styles.label}>Raça</Text>
-            <TextInput
+            <ThemedTextInput
               placeholder="Ex: Labrador"
               value={breed}
               onChangeText={setBreed}
@@ -147,7 +147,7 @@ export default function PetSignupScreen() {
           </View>
           <View style={styles.half}>
             <Text style={styles.label}>Cor</Text>
-            <TextInput
+            <ThemedTextInput
               placeholder="Ex: Caramelo"
               value={color}
               onChangeText={setColor}
@@ -167,7 +167,7 @@ export default function PetSignupScreen() {
           />
           <View style={styles.half}>
             <Text style={styles.label}>Data do desaparecimento</Text>
-            <TextInput
+            <ThemedTextInput
               placeholder="dd/mm/aaaa"
               value={disappearanceDate}
               onChangeText={setDisappearanceDate}
@@ -181,7 +181,7 @@ export default function PetSignupScreen() {
         {/* Local */}
         <View>
           <Text style={styles.label}>Local do desaparecimento</Text>
-          <TextInput
+          <ThemedTextInput
             placeholder="Bairro, cidade"
             value={location}
             onChangeText={setLocation}
@@ -193,7 +193,7 @@ export default function PetSignupScreen() {
         {/* Descrição */}
         <View>
           <Text style={styles.label}>Descrição</Text>
-          <TextInput
+          <ThemedTextInput
             placeholder="Adicione informações"
             value={description}
             onChangeText={setDescription}
@@ -225,7 +225,7 @@ export default function PetSignupScreen() {
         <View style={styles.row}>
           <View style={styles.half}>
             <Text style={styles.label}>Seu nome</Text>
-            <TextInput
+            <ThemedTextInput
               placeholder="Nome completo"
               value={ownerName}
               onChangeText={setOwnerName}
@@ -235,7 +235,7 @@ export default function PetSignupScreen() {
           </View>
           <View style={styles.half}>
             <Text style={styles.label}>Telefone</Text>
-            <TextInput
+            <ThemedTextInput
               placeholder="(00) 00000-0000"
               value={phone}
               onChangeText={setPhone}
