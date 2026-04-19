@@ -52,29 +52,12 @@ export default function LoginScreen() {
     }
   };
 
-  const handleBack = () => {
-    if (router.canGoBack()) {
-      router.back();
-      return;
-    }
-
-    router.replace("/dashboard");
-  };
-
   return (
     <View style={styles.root}>
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <TouchableOpacity
-          onPress={handleBack}
-          style={styles.headerButton}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="arrow-back" size={24} color="#1A1A1A" />
-        </TouchableOpacity>
+        <View style={styles.headerButton} />
         <Text style={styles.headerTitle}>Entrar</Text>
-        <TouchableOpacity style={styles.headerButton} activeOpacity={0.7}>
-          <Ionicons name="notifications-outline" size={24} color="#1A1A1A" />
-        </TouchableOpacity>
+        <View style={styles.headerButton} />
       </View>
 
       <KeyboardAwareScrollView

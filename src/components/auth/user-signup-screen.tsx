@@ -136,9 +136,7 @@ export default function UserSignupScreen() {
           <Ionicons name="arrow-back" size={24} color="#1A1A1A" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Cadastrar usuário</Text>
-        <TouchableOpacity style={styles.headerButton} activeOpacity={0.7}>
-          <Ionicons name="notifications-outline" size={24} color="#1A1A1A" />
-        </TouchableOpacity>
+        <View style={styles.headerButton} />
       </View>
 
       <KeyboardAwareScrollView

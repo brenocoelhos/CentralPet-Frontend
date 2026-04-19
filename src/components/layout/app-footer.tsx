@@ -37,6 +37,8 @@ const FOOTER_ITEMS: FooterItem[] = [
   },
 ];
 
+const HOME_ROUTES = new Set(["/", "/dashboard", "/index"]);
+
 export default function AppFooter() {
   const router = useRouter();
   const pathname = usePathname();
@@ -44,6 +46,20 @@ export default function AppFooter() {
 
   const handleNavigate = (route: string) => {
     if (pathname === route) return;
+
+    const isGoingHome = HOME_ROUTES.has(route);
+    const isCurrentlyOnHome = HOME_ROUTES.has(pathname);
+
+    if (isGoingHome) {
+      router.replace(route as never);
+      return;
+    }
+
+    if (isCurrentlyOnHome) {
+      router.push(route as never);
+      return;
+    }
+
     router.replace(route as never);
   };
 

@@ -22,6 +22,16 @@ function AppStack() {
         contentStyle: { backgroundColor: "#f4f7fb" },
       }}
     >
+      <Stack.Screen name="login" options={{ headerShown: false }} />
+      <Stack.Screen name="cadastro-usuario" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="index"
+        options={{ headerBackVisible: false, headerLeft: () => null }}
+      />
+      <Stack.Screen
+        name="dashboard"
+        options={{ headerBackVisible: false, headerLeft: () => null }}
+      />
       <Stack.Screen name="cadastro-pet" options={{ title: "Cadastrar Animal" }} />
     </Stack>
   );
