@@ -1,7 +1,6 @@
-import * as Font from "expo-font";
-import React, { useEffect, useState } from "react";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import React, { useState } from "react";
 import {
-  ActivityIndicator,
   Platform,
   SafeAreaView,
   ScrollView,
@@ -78,16 +77,7 @@ const BG = "#FAF7F5";
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 const PawIcon = ({ size = 28 }: { size?: number }) => (
-  <View
-    style={{
-      width: size,
-      height: size,
-      alignItems: "center",
-      justifyContent: "center",
-    }}
-  >
-    <Text style={{ fontSize: size * 0.8 }}>🐾</Text>
-  </View>
+  <MaterialIcons name="pets" size={size} color="#555" />
 );
 
 const ChatIcon = ({ active }: { active: boolean }) => (
@@ -97,13 +87,18 @@ const ChatIcon = ({ active }: { active: boolean }) => (
       { backgroundColor: active ? "#4CAF50" : "#E8E0DC" },
     ]}
   >
-    <Text style={{ fontSize: 14 }}>💬</Text>
+    <MaterialIcons
+      name="chat-bubble"
+      size={18}
+      color={active ? "#fff" : "#555"}
+    />
   </View>
 );
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 const StatusBadge = ({ status }: { status: "PERDIDO" | "ENCONTRADO" }) => {
   const isFound = status === "ENCONTRADO";
+
   return (
     <View
       style={[
@@ -142,25 +137,31 @@ const OccurrenceCard = ({
       <View style={styles.avatar}>
         <PawIcon size={30} />
       </View>
+
       <View style={styles.cardContent}>
         <View style={styles.cardHeader}>
           <StatusBadge status={item.status} />
           <Text style={styles.timeText}>{item.time}</Text>
         </View>
+
         <Text style={styles.petName}>{item.name}</Text>
+
         <Text style={styles.petInfo}>
           {item.type} · {item.breed} · {item.size}
         </Text>
+
         <View style={styles.tagsRow}>
-          {item.tags.map((tag: string, i: number) => (
-            <TagChip key={i} label={tag} />
+          {item.tags.map((tag) => (
+            <TagChip key={tag} label={tag} />
           ))}
         </View>
+
         <Text style={styles.locationText}>
           {item.neighborhood} ·{" "}
           <Text style={styles.distanceBold}>{item.distance}</Text>
         </Text>
       </View>
+
       <ChatIcon active={item.hasNewMessage} />
     </View>
   </TouchableOpacity>
@@ -198,14 +199,16 @@ const FilterBar = ({
 const UrgentBanner = ({ onPress }: { onPress: () => void }) => (
   <TouchableOpacity style={styles.banner} onPress={onPress} activeOpacity={0.9}>
     <View style={styles.bannerIcon}>
-      <Text style={{ fontSize: 16 }}>❗</Text>
+      <MaterialIcons name="priority-high" size={18} color="#fff" />
     </View>
+
     <View style={styles.bannerContent}>
       <Text style={styles.bannerLabel}>URGENTE · HÁ 2 HORAS</Text>
       <Text style={styles.bannerTitle}>
         Bolt desapareceu no Parque Ibirapuera
       </Text>
     </View>
+
     <Text style={styles.bannerCta}>Ver →</Text>
   </TouchableOpacity>
 );
@@ -213,42 +216,6 @@ const UrgentBanner = ({ onPress }: { onPress: () => void }) => (
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function HomeScreen() {
   const [activeFilter, setActiveFilter] = useState<Filter>("Todos");
-  const [fontsLoaded, setFontsLoaded] = useState<boolean>(false);
-
-  useEffect(() => {
-    Font.loadAsync({
-      "Lexend-Regular": {
-        uri: "https://fonts.gstatic.com/s/lexend/v19/wlptgwvFAVdoq2_F94zlCfv0bz1WCzsX_LBte6KuGEo.woff2",
-      },
-      "Lexend-Medium": {
-        uri: "https://fonts.gstatic.com/s/lexend/v19/wlptgwvFAVdoq2_F94zlCfv0bz1WC8sX_LBte6KuGEo.woff2",
-      },
-      "Lexend-SemiBold": {
-        uri: "https://fonts.gstatic.com/s/lexend/v19/wlptgwvFAVdoq2_F94zlCfv0bz1WC6cX_LBte6KuGEo.woff2",
-      },
-      "Lexend-Bold": {
-        uri: "https://fonts.gstatic.com/s/lexend/v19/wlptgwvFAVdoq2_F94zlCfv0bz1WC5sX_LBte6KuGEo.woff2",
-      },
-      "Lexend-ExtraBold": {
-        uri: "https://fonts.gstatic.com/s/lexend/v19/wlptgwvFAVdoq2_F94zlCfv0bz1WC4MX_LBte6KuGEo.woff2",
-      },
-    }).then(() => setFontsLoaded(true));
-  }, []);
-
-  if (!fontsLoaded) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: BG,
-        }}
-      >
-        <ActivityIndicator size="large" color={ORANGE} />
-      </View>
-    );
-  }
 
   const filtered: Occurrence[] =
     activeFilter === "Todos"
@@ -265,14 +232,14 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.safe}>
       <StatusBar barStyle="dark-content" backgroundColor={BG} />
 
-      {/* Header */}
       <View style={styles.header}>
         <Text>
           <Text style={styles.logoBold}>Central</Text>
           <Text style={styles.logoAccent}>Pet</Text>
         </Text>
+
         <TouchableOpacity hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-          <Text style={{ fontSize: 22, color: "#1a1a1a" }}>🔔</Text>
+          <MaterialIcons name="notifications" size={24} color="#1a1a1a" />
         </TouchableOpacity>
       </View>
 
@@ -298,7 +265,6 @@ export default function HomeScreen() {
         <View style={{ height: 100 }} />
       </ScrollView>
 
-      {/* FAB */}
       <View style={styles.fabContainer}>
         <TouchableOpacity style={styles.fab} activeOpacity={0.88}>
           <Text style={styles.fabText}>Registrar ocorrência</Text>
@@ -311,6 +277,7 @@ export default function HomeScreen() {
 // ─── Styles ───────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: BG },
+
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -320,18 +287,26 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     backgroundColor: BG,
   },
+
   logoBold: {
-    fontFamily: "Lexend-ExtraBold",
+    fontFamily: "Lexend_700Bold",
     color: "#1a1a1a",
     fontSize: 24,
   },
+
   logoAccent: {
-    fontFamily: "Lexend-ExtraBold",
+    fontFamily: "Lexend_700Bold",
     color: ORANGE,
     fontSize: 24,
   },
+
   scroll: { flex: 1 },
-  scrollContent: { paddingHorizontal: 16, paddingTop: 4 },
+
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingTop: 4,
+  },
+
   banner: {
     backgroundColor: ORANGE,
     borderRadius: 14,
@@ -346,6 +321,7 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 5,
   },
+
   bannerIcon: {
     width: 32,
     height: 32,
@@ -355,27 +331,37 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginRight: 12,
   },
+
   bannerContent: { flex: 1 },
+
   bannerLabel: {
-    fontFamily: "Lexend-Bold",
+    fontFamily: "Lexend_700Bold",
     fontSize: 10,
     color: "rgba(255,255,255,0.85)",
     letterSpacing: 0.5,
     marginBottom: 2,
   },
+
   bannerTitle: {
-    fontFamily: "Lexend-Bold",
+    fontFamily: "Lexend_700Bold",
     fontSize: 13,
     color: "#fff",
     lineHeight: 20,
   },
+
   bannerCta: {
-    fontFamily: "Lexend-Bold",
+    fontFamily: "Lexend_700Bold",
     fontSize: 13,
     color: "#fff",
     marginLeft: 8,
   },
-  filterContainer: { flexDirection: "row", paddingBottom: 16, gap: 8 },
+
+  filterContainer: {
+    flexDirection: "row",
+    paddingBottom: 16,
+    gap: 8,
+  },
+
   filterBtn: {
     paddingHorizontal: 18,
     paddingVertical: 8,
@@ -384,36 +370,43 @@ const styles = StyleSheet.create({
     borderColor: "#D9D3CF",
     backgroundColor: BG,
   },
+
   filterBtnActive: {
     backgroundColor: "#1a1a1a",
     borderColor: "#1a1a1a",
   },
+
   filterText: {
-    fontFamily: "Lexend-Medium",
+    fontFamily: "Lexend_500Medium",
     fontSize: 14,
     color: "#555",
   },
+
   filterTextActive: {
-    fontFamily: "Lexend-SemiBold",
+    fontFamily: "Lexend_600SemiBold",
     color: "#fff",
   },
+
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 12,
   },
+
   sectionTitle: {
-    fontFamily: "Lexend-Bold",
+    fontFamily: "Lexend_700Bold",
     fontSize: 11,
     color: "#888",
     letterSpacing: 0.8,
   },
+
   sectionLink: {
-    fontFamily: "Lexend-SemiBold",
+    fontFamily: "Lexend_600SemiBold",
     fontSize: 13,
     color: ORANGE,
   },
+
   card: {
     backgroundColor: "#F5F2EC",
     borderRadius: 16,
@@ -425,7 +418,12 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 2,
   },
-  cardRow: { flexDirection: "row", alignItems: "flex-start" },
+
+  cardRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+
   avatar: {
     width: 48,
     height: 48,
@@ -436,66 +434,79 @@ const styles = StyleSheet.create({
     marginRight: 12,
     marginTop: 2,
   },
+
   cardContent: { flex: 1 },
+
   cardHeader: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
     marginBottom: 2,
   },
+
   badge: {
     paddingHorizontal: 7,
     paddingVertical: 2,
     borderRadius: 6,
   },
+
   badgeText: {
-    fontFamily: "Lexend-ExtraBold",
+    fontFamily: "Lexend_700Bold",
     fontSize: 10,
     letterSpacing: 0.4,
   },
+
   timeText: {
-    fontFamily: "Lexend-Regular",
+    fontFamily: "Lexend_400Regular",
     fontSize: 11,
     color: "#999",
   },
+
   petName: {
-    fontFamily: "Lexend-Bold",
+    fontFamily: "Lexend_700Bold",
     fontSize: 17,
     color: "#1a1a1a",
     marginBottom: 2,
   },
+
   petInfo: {
-    fontFamily: "Lexend-Regular",
+    fontFamily: "Lexend_400Regular",
     fontSize: 13,
     color: "#666",
     marginBottom: 8,
   },
+
   tagsRow: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 6,
     marginBottom: 8,
   },
+
   chip: {
     backgroundColor: "#E8E4DF",
     borderRadius: 8,
     paddingHorizontal: 9,
     paddingVertical: 3,
   },
+
   chipText: {
-    fontFamily: "Lexend-Medium",
+    fontFamily: "Lexend_500Medium",
     fontSize: 11,
     color: "#555",
   },
+
   locationText: {
-    fontFamily: "Lexend-Regular",
+    fontFamily: "Lexend_400Regular",
     fontSize: 12,
     color: "#888",
   },
+
   distanceBold: {
-    fontFamily: "Lexend-Bold",
+    fontFamily: "Lexend_700Bold",
     color: "#444",
   },
+
   chatIcon: {
     width: 38,
     height: 38,
@@ -505,12 +516,14 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     marginTop: 2,
   },
+
   fabContainer: {
     position: "absolute",
     bottom: 24,
     left: 16,
     right: 16,
   },
+
   fab: {
     backgroundColor: ORANGE,
     borderRadius: 30,
@@ -522,8 +535,9 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 6,
   },
+
   fabText: {
-    fontFamily: "Lexend-Bold",
+    fontFamily: "Lexend_700Bold",
     color: "#fff",
     fontSize: 16,
     letterSpacing: 0.2,
