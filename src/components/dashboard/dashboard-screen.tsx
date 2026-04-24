@@ -50,7 +50,7 @@ const OCCURRENCES: Occurrence[] = [
     breed: "SRD",
     size: "Porte pequeno",
     tags: ["Pelagem laranja", "Sem coleira", "Dócil"],
-    neighborhood: "Vila Madalena",
+    neighborhood: "Vila Mada",
     distance: "1,4 km de você",
     hasNewMessage: true,
   },
