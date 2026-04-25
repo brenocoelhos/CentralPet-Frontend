@@ -1,14 +1,12 @@
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React, { useState } from "react";
 import {
-  Platform,
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from "react-native";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -229,19 +227,8 @@ export default function HomeScreen() {
             : OCCURRENCES;
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <View style={styles.safe}>
       <StatusBar barStyle="dark-content" backgroundColor={BG} />
-
-      <View style={styles.header}>
-        <Text>
-          <Text style={styles.logoBold}>Central</Text>
-          <Text style={styles.logoAccent}>Pet</Text>
-        </Text>
-
-        <TouchableOpacity hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-          <MaterialIcons name="notifications" size={24} color="#1a1a1a" />
-        </TouchableOpacity>
-      </View>
 
       <ScrollView
         style={styles.scroll}
@@ -270,35 +257,13 @@ export default function HomeScreen() {
           <Text style={styles.fabText}>Registrar ocorrência</Text>
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: BG },
-
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === "android" ? 12 : 4,
-    paddingBottom: 12,
-    backgroundColor: BG,
-  },
-
-  logoBold: {
-    fontFamily: "Lexend_700Bold",
-    color: "#1a1a1a",
-    fontSize: 24,
-  },
-
-  logoAccent: {
-    fontFamily: "Lexend_700Bold",
-    color: ORANGE,
-    fontSize: 24,
-  },
 
   scroll: { flex: 1 },
 

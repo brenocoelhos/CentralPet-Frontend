@@ -24,15 +24,10 @@ function AppStack() {
     >
       <Stack.Screen name="login" options={{ headerShown: false }} />
       <Stack.Screen name="cadastro-usuario" options={{ headerShown: false }} />
-      <Stack.Screen
-        name="index"
-        options={{ headerBackVisible: false, headerLeft: () => null }}
-      />
-      <Stack.Screen
-        name="dashboard"
-        options={{ headerBackVisible: false, headerLeft: () => null }}
-      />
-      <Stack.Screen name="cadastro-pet" options={{ title: "Cadastrar Animal" }} />
+      <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen name="dashboard" options={{ headerShown: false }} />
+      <Stack.Screen name="busca" options={{ headerShown: false }} />
+      <Stack.Screen name="cadastro-pet" options={{ headerShown: false }} />
       <Stack.Screen name="perfil" options={{ headerShown: false }} />
     </Stack>
   );

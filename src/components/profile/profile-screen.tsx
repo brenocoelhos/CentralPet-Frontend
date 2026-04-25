@@ -4,19 +4,17 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { signOut } from "firebase/auth";
 import {
-  ActivityIndicator,
-  Alert,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    ScrollView,
+    StyleSheet,
+    TouchableOpacity,
+    View,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ThemedText as Text } from "../themed-text";
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const { user, initializing } = useAuth();
 
   const handleLogout = async () => {
@@ -38,12 +36,6 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.root}>
-      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <View style={styles.headerSpacer} />
-        <Text style={styles.headerTitle}>Perfil</Text>
-        <View style={styles.headerSpacer} />
-      </View>
-
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.container}
@@ -68,7 +60,7 @@ export default function ProfileScreen() {
             <View style={styles.fieldGroup}>
               <View style={styles.field}>
                 <Text style={styles.fieldLabel}>E-MAIL</Text>
-                <Text style={styles.fieldValue}>{user.email ?? "—"}</Text>
+                <Text style={styles.fieldValue}>{user.email ?? "ï¿½"}</Text>
               </View>
 
               {user.phoneNumber && (
@@ -121,26 +113,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#FFFFFF",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    backgroundColor: "#FFFFFF",
-    borderBottomWidth: 1,
-    borderBottomColor: "#F0EDE8",
-  },
-  headerSpacer: {
-    width: 40,
-  },
-  headerTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    textAlign: "center",
-    color: "#1A1A1A",
-    flex: 1,
   },
   scrollView: {
     flex: 1,
