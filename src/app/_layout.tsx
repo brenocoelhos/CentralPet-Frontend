@@ -55,7 +55,19 @@ function AppStack() {
         }}
       />
       <Stack.Screen name="busca" options={{ title: "Busca" }} />
-      <Stack.Screen name="cadastro-pet" options={{ title: "Cadastro de Pet" }} />
+      <Stack.Screen
+        name="cadastro-pet"
+        options={{
+          headerTitle: () => (
+            <Text>
+              <Text style={styles.logoBold}>Cadastro</Text>
+              <Text style={styles.logoAccent}>Pet</Text>
+            </Text>
+          ),
+          headerLeft: () => null,
+          headerRight: () => null,
+        }}
+      />
       <Stack.Screen name="perfil" options={{ title: "Perfil" }} />
     </Stack>
   );
