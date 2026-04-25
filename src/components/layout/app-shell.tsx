@@ -4,7 +4,7 @@ import { StyleSheet, View } from "react-native";
 
 import AppFooter from "@/components/layout/app-footer";
 
-const ROUTES_WITHOUT_FOOTER = new Set(["/login", "/cadastro-usuario"]);
+const ROUTES_WITHOUT_FOOTER = new Set(["/cadastro-usuario"]);
 
 export default function AppShell({ children }: PropsWithChildren) {
   const pathname = usePathname();

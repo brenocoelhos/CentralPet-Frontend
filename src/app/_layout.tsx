@@ -33,6 +33,7 @@ function AppStack() {
         options={{ headerBackVisible: false, headerLeft: () => null }}
       />
       <Stack.Screen name="cadastro-pet" options={{ title: "Cadastrar Animal" }} />
+      <Stack.Screen name="perfil" options={{ headerShown: false }} />
     </Stack>
   );
 }
