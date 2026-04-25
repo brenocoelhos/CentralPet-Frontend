@@ -1,4 +1,5 @@
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
     ScrollView,
@@ -213,6 +214,7 @@ const UrgentBanner = ({ onPress }: { onPress: () => void }) => (
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function HomeScreen() {
+  const router = useRouter();
   const [activeFilter, setActiveFilter] = useState<Filter>("Todos");
 
   const filtered: Occurrence[] =
@@ -253,7 +255,11 @@ export default function HomeScreen() {
       </ScrollView>
 
       <View style={styles.fabContainer}>
-        <TouchableOpacity style={styles.fab} activeOpacity={0.88}>
+        <TouchableOpacity
+          style={styles.fab}
+          activeOpacity={0.88}
+          onPress={() => router.push("/cadastro-pet")}
+        >
           <Text style={styles.fabText}>Registrar ocorrência</Text>
         </TouchableOpacity>
       </View>

@@ -3,14 +3,14 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  Alert,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  View,
+    Alert,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    View,
 } from "react-native";
 import { ThemedText as Text } from "../themed-text";
 import { ThemedTextInput } from "../themed-text-input";
@@ -68,11 +68,24 @@ export default function PetSignupScreen() {
   const [size, setSize] = useState("Médio");
   const [disappearanceDate, setDisappearanceDate] = useState("");
   const [location, setLocation] = useState("");
-  const [description, setDescription] = useState("");
+  const [descriptionChips, setDescriptionChips] = useState<string[]>([]);
+  const [descriptionInput, setDescriptionInput] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [ownerName, setOwnerName] = useState("");
   const [phone, setPhone] = useState("");
+
+  const addDescriptionChip = () => {
+    const trimmed = descriptionInput.trim();
+    if (trimmed) {
+      setDescriptionChips((prev) => [...prev, trimmed]);
+      setDescriptionInput("");
+    }
+  };
+
+  const removeDescriptionChip = (index: number) => {
+    setDescriptionChips((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const addTag = () => {
     const trimmed = tagInput.trim();
@@ -191,14 +204,25 @@ export default function PetSignupScreen() {
         <View>
           <Text style={styles.label}>Descrição</Text>
           <ThemedTextInput
-            placeholder="Adicione informações"
-            value={description}
-            onChangeText={setDescription}
-            style={[styles.input, styles.textarea]}
-            multiline
-            numberOfLines={3}
+            placeholder="Digite e pressione Enter"
+            value={descriptionInput}
+            onChangeText={setDescriptionInput}
+            onSubmitEditing={addDescriptionChip}
+            blurOnSubmit={false}
+            returnKeyType="done"
+            style={styles.input}
             placeholderTextColor="#B0A89A"
           />
+          {descriptionChips.length > 0 && (
+            <View style={styles.chipsContainer}>
+              {descriptionChips.map((chip, i) => (
+                <Pressable key={i} style={styles.chip} onPress={() => removeDescriptionChip(i)}>
+                  <Text style={styles.chipText}>{chip}</Text>
+                  <Text style={styles.chipRemove}>✕</Text>
+                </Pressable>
+              ))}
+            </View>
+          )}
         </View>
         <View style={styles.row}>
           <View style={styles.half}>
@@ -268,22 +292,36 @@ const styles = StyleSheet.create({
     borderColor: "#DDD5CA",
     borderRadius: 10,
     paddingHorizontal: 12,
-    paddingVertical: 9,
+    height: 40,
     backgroundColor: "#FFFFFF",
     fontSize: 13,
     color: "#3D3228",
+    textAlignVertical: "center",
   },
-  textarea: {
-    minHeight: 72,
-    textAlignVertical: "top",
+  chipsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6,
+    marginTop: 8,
   },
+  chip: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#EDE5D8",
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    gap: 6,
+  },
+  chipText: { fontSize: 12, color: "#5A4F44" },
+  chipRemove: { fontSize: 11, color: "#8A7B6B" },
 
   select: {
     borderWidth: 1,
     borderColor: "#DDD5CA",
     borderRadius: 10,
     paddingHorizontal: 12,
-    paddingVertical: 9,
+    height: 40,
     backgroundColor: "#FFFFFF",
     flexDirection: "row",
     justifyContent: "space-between",

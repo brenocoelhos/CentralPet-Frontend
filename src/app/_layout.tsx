@@ -22,13 +22,16 @@ function AppStack() {
         contentStyle: { backgroundColor: "#f4f7fb" },
       }}
     >
-      <Stack.Screen name="login" options={{ headerShown: false }} />
-      <Stack.Screen name="cadastro-usuario" options={{ headerShown: false }} />
-      <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen name="login" options={{ title: "Login" }} />
+      <Stack.Screen
+        name="cadastro-usuario"
+        options={{ title: "Cadastro de Usuario" }}
+      />
+      <Stack.Screen name="index" options={{ title: "Inicio" }} />
       <Stack.Screen name="dashboard" options={{ headerShown: false }} />
-      <Stack.Screen name="busca" options={{ headerShown: false }} />
-      <Stack.Screen name="cadastro-pet" options={{ headerShown: false }} />
-      <Stack.Screen name="perfil" options={{ headerShown: false }} />
+      <Stack.Screen name="busca" options={{ title: "Busca" }} />
+      <Stack.Screen name="cadastro-pet" options={{ title: "Cadastro de Pet" }} />
+      <Stack.Screen name="perfil" options={{ title: "Perfil" }} />
     </Stack>
   );
 }
