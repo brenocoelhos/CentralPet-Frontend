@@ -90,18 +90,29 @@ export default function LoginScreen() {
           returnKeyType="done"
         />
 
-        <TouchableOpacity
-          style={styles.primaryButton}
-          onPress={handleLogin}
-          activeOpacity={0.85}
-          disabled={loading || googleLoading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#FFFFFF" />
-          ) : (
-            <Text style={styles.primaryButtonText}>Entrar</Text>
-          )}
-        </TouchableOpacity>
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            style={[styles.primaryButton, styles.splitButton]}
+            onPress={handleLogin}
+            activeOpacity={0.85}
+            disabled={loading || googleLoading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text style={styles.primaryButtonText}>Entrar</Text>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.secondaryButton, styles.splitButton, styles.splitButtonRight]}
+            onPress={() => router.push("/cadastro-usuario")}
+            activeOpacity={0.85}
+            disabled={loading || googleLoading}
+          >
+            <Text style={styles.secondaryButtonText}>Criar conta</Text>
+          </TouchableOpacity>
+        </View>
 
         <TouchableOpacity
           style={styles.googleButton}
@@ -112,16 +123,11 @@ export default function LoginScreen() {
           {googleLoading ? (
             <ActivityIndicator color="#D97757" />
           ) : (
-            <Text style={styles.googleButtonText}>Continuar com Google</Text>
+            <View style={styles.googleButtonContent}>
+              <Ionicons name="logo-google" size={18} color="#D97757" />
+              <Text style={styles.googleButtonText}>Continuar com Google</Text>
+            </View>
           )}
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.secondaryButton}
-          onPress={() => router.push("/cadastro-usuario")}
-          activeOpacity={0.85}
-        >
-          <Text style={styles.secondaryButtonText}>Criar conta</Text>
         </TouchableOpacity>
       </KeyboardAwareScrollView>
     </View>
@@ -184,6 +190,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 12,
   },
+  buttonRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 12,
+  },
+  splitButton: {
+    flex: 1,
+    marginTop: 0,
+  },
+  splitButtonRight: {
+    marginLeft: 10,
+  },
   primaryButtonText: {
     fontSize: 15,
     color: "#FFFFFF",
@@ -198,10 +216,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 10,
   },
+  googleButtonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
   googleButtonText: {
     fontSize: 15,
     color: "#D97757",
     fontWeight: "bold",
+    marginLeft: 8,
   },
   secondaryButton: {
     borderWidth: 1,
