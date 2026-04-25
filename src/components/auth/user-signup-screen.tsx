@@ -2,25 +2,24 @@ import { useAuth } from "@/context/auth-context";
 import { auth } from "@/lib/firebase";
 import { getFirebaseAuthErrorMessage } from "@/utils/firebase-auth-errors";
 import {
-  maskCPF,
-  maskDate,
-  maskPhone,
-  validaCPF,
-  validaData,
+    maskCPF,
+    maskDate,
+    maskPhone,
+    validaCPF,
+    validaData,
 } from "@/utils/validators";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import React, { useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  StyleSheet,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    StyleSheet,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ThemedText as Text } from "../themed-text";
 import { ThemedTextInput } from "../themed-text-input";
 
@@ -37,7 +36,6 @@ interface SignupFormState {
 
 export default function UserSignupScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const { hasFirebaseConfig, missingConfigKeys } = useAuth();
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -119,26 +117,8 @@ export default function UserSignupScreen() {
     }
   };
 
-  const handleBack = () => {
-    if (router.canGoBack()) {
-      router.back();
-    }
-  };
-
   return (
     <View style={styles.root}>
-      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <TouchableOpacity
-          onPress={handleBack}
-          style={styles.headerButton}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="arrow-back" size={24} color="#1A1A1A" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Cadastrar usuário</Text>
-        <View style={styles.headerButton} />
-      </View>
-
       <KeyboardAwareScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.container}
@@ -277,29 +257,6 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: "#FFFFFF",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    backgroundColor: "#FFFFFF",
-    borderBottomWidth: 1,
-    borderBottomColor: "#F0EDE8",
-  },
-  headerButton: {
-    width: 40,
-    height: 40,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  headerTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#1A1A1A",
-    flex: 1,
-    textAlign: "center",
   },
   scrollView: {
     flex: 1,

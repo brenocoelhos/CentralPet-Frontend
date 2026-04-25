@@ -7,20 +7,18 @@ import { useRouter } from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  StyleSheet,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    StyleSheet,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ThemedText as Text } from "../themed-text";
 import { ThemedTextInput } from "../themed-text-input";
 
 export default function LoginScreen() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const { hasFirebaseConfig, missingConfigKeys } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -54,12 +52,6 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.root}>
-      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-        <View style={styles.headerButton} />
-        <Text style={styles.headerTitle}>Entrar</Text>
-        <View style={styles.headerButton} />
-      </View>
-
       <KeyboardAwareScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.container}
@@ -140,29 +132,6 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: "#FFFFFF",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#F0EDE8",
-  },
-  headerButton: {
-    width: 40,
-    height: 40,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  headerTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    textAlign: "center",
-    color: "#1A1A1A",
-    flex: 1,
   },
   scrollView: {
     flex: 1,

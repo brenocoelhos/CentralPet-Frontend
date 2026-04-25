@@ -8,7 +8,20 @@ import {
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import { useEffect } from "react";
-import { Text, TextInput } from "react-native";
+import { StyleSheet, Text, TextInput } from "react-native";
+
+const styles = StyleSheet.create({
+  logoBold: {
+    fontFamily: "Lexend_700Bold",
+    fontSize: 22,
+    color: "#1A1A1A",
+  },
+  logoAccent: {
+    fontFamily: "Lexend_700Bold",
+    fontSize: 22,
+    color: "#D97757",
+  },
+});
 
 function AppStack() {
   return (
@@ -28,7 +41,19 @@ function AppStack() {
         options={{ title: "Cadastro de Usuario" }}
       />
       <Stack.Screen name="index" options={{ title: "Inicio" }} />
-      <Stack.Screen name="dashboard" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="dashboard"
+        options={{
+          headerTitle: () => (
+            <Text>
+              <Text style={styles.logoBold}>Central</Text>
+              <Text style={styles.logoAccent}>Pet</Text>
+            </Text>
+          ),
+          headerLeft: () => null,
+          headerRight: () => null,
+        }}
+      />
       <Stack.Screen name="busca" options={{ title: "Busca" }} />
       <Stack.Screen name="cadastro-pet" options={{ title: "Cadastro de Pet" }} />
       <Stack.Screen name="perfil" options={{ title: "Perfil" }} />
