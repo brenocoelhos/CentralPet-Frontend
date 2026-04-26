@@ -2,22 +2,22 @@ import { useAuth } from "@/context/auth-context";
 import { auth } from "@/lib/firebase";
 import { getFirebaseAuthErrorMessage } from "@/utils/firebase-auth-errors";
 import {
-    maskCPF,
-    maskDate,
-    maskPhone,
-    validaCPF,
-    validaData,
+  maskCPF,
+  maskDate,
+  maskPhone,
+  validaCPF,
+  validaData,
 } from "@/utils/validators";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import React, { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    StyleSheet,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { ThemedText as Text } from "../themed-text";
@@ -38,6 +38,8 @@ export default function UserSignupScreen() {
   const router = useRouter();
   const { hasFirebaseConfig, missingConfigKeys } = useAuth();
   const [loading, setLoading] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [form, setForm] = useState<SignupFormState>({
     nome: "",
@@ -212,27 +214,55 @@ export default function UserSignupScreen() {
         <View style={styles.row}>
           <View style={styles.halfGroup}>
             <Text style={styles.label}>Senha</Text>
-            <ThemedTextInput
-              style={styles.input}
-              placeholder="••••••••"
-              placeholderTextColor="#B0A898"
-              value={form.senha}
-              onChangeText={(v) => handleChange("senha", v)}
-              secureTextEntry
-              returnKeyType="next"
-            />
+            <View style={styles.passwordInputWrapper}>
+              <ThemedTextInput
+                style={styles.passwordInput}
+                placeholder="••••••••"
+                placeholderTextColor="#B0A898"
+                value={form.senha}
+                onChangeText={(v) => handleChange("senha", v)}
+                secureTextEntry={!showPassword}
+                returnKeyType="next"
+              />
+              <TouchableOpacity
+                onPress={() => setShowPassword((prev) => !prev)}
+                activeOpacity={0.8}
+                style={styles.passwordIconButton}
+                disabled={loading}
+              >
+                <Ionicons
+                  name={showPassword ? "eye-off-outline" : "eye-outline"}
+                  size={18}
+                  color="#8A816F"
+                />
+              </TouchableOpacity>
+            </View>
           </View>
           <View style={styles.halfGroup}>
             <Text style={styles.label}>Confirmar senha</Text>
-            <ThemedTextInput
-              style={styles.input}
-              placeholder="••••••••"
-              placeholderTextColor="#B0A898"
-              value={form.confirmarSenha}
-              onChangeText={(v) => handleChange("confirmarSenha", v)}
-              secureTextEntry
-              returnKeyType="done"
-            />
+            <View style={styles.passwordInputWrapper}>
+              <ThemedTextInput
+                style={styles.passwordInput}
+                placeholder="••••••••"
+                placeholderTextColor="#B0A898"
+                value={form.confirmarSenha}
+                onChangeText={(v) => handleChange("confirmarSenha", v)}
+                secureTextEntry={!showConfirmPassword}
+                returnKeyType="done"
+              />
+              <TouchableOpacity
+                onPress={() => setShowConfirmPassword((prev) => !prev)}
+                activeOpacity={0.8}
+                style={styles.passwordIconButton}
+                disabled={loading}
+              >
+                <Ionicons
+                  name={showConfirmPassword ? "eye-off-outline" : "eye-outline"}
+                  size={18}
+                  color="#8A816F"
+                />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
 
@@ -305,6 +335,30 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     gap: 10,
+  },
+  passwordInputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#E0DBD0",
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    backgroundColor: "#FFFFFF",
+    marginBottom: 12,
+  },
+  passwordInput: {
+    flex: 1,
+    fontSize: 13,
+    color: "#1A1A1A",
+    borderWidth: 0,
+    paddingHorizontal: 0,
+    paddingVertical: 13,
+    backgroundColor: "#FFFFFF",
+    marginBottom: 0,
+  },
+  passwordIconButton: {
+    paddingLeft: 8,
+    paddingVertical: 4,
   },
   halfGroup: {
     flex: 1,

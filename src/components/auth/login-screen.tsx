@@ -22,6 +22,7 @@ export default function LoginScreen() {
   const { hasFirebaseConfig, missingConfigKeys } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { handleGoogleLogin, loading: googleLoading } = useGoogleLogin();
 
@@ -60,59 +61,69 @@ export default function LoginScreen() {
         enableOnAndroid={true}
         extraScrollHeight={95}
       >
-        <View style={styles.avatarWrapper}>
-          <View style={styles.avatarCircle}>
-            <Ionicons name="paw-outline" size={30} color="rgba(0,0,0,0.5)" />
-          </View>
-          <Text style={styles.avatarLabel}>Bem-vindo de volta</Text>
+        <View style={styles.headerWrapper}>
+          <Text style={styles.title}>Bem-vindo de volta</Text>
+          <Text style={styles.subtitle}>Entre com seu email e senha</Text>
         </View>
 
         <Text style={styles.label}>E-mail</Text>
-        <ThemedTextInput
-          style={styles.input}
-          placeholder="exemplo@gmail.com"
-          placeholderTextColor="#B0A898"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          value={email}
-          onChangeText={setEmail}
-          returnKeyType="next"
-        />
+        <View style={styles.inputWrapper}>
+          <Ionicons name="mail-outline" size={18} color="#8A816F" />
+          <ThemedTextInput
+            style={styles.input}
+            placeholder="exemplo@gmail.com"
+            placeholderTextColor="#B0A898"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            value={email}
+            onChangeText={setEmail}
+            returnKeyType="next"
+          />
+        </View>
 
         <Text style={styles.label}>Senha</Text>
-        <ThemedTextInput
-          style={styles.input}
-          placeholder="••••••••"
-          placeholderTextColor="#B0A898"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-          returnKeyType="done"
-        />
-
-        <View style={styles.buttonRow}>
+        <View style={styles.inputWrapper}>
+          <Ionicons name="lock-closed-outline" size={18} color="#8A816F" />
+          <ThemedTextInput
+            style={styles.input}
+            placeholder="••••••••"
+            placeholderTextColor="#B0A898"
+            secureTextEntry={!showPassword}
+            value={password}
+            onChangeText={setPassword}
+            returnKeyType="done"
+          />
           <TouchableOpacity
-            style={[styles.primaryButton, styles.splitButton]}
-            onPress={handleLogin}
-            activeOpacity={0.85}
+            onPress={() => setShowPassword((prev) => !prev)}
+            activeOpacity={0.8}
+            style={styles.inputIconButton}
             disabled={loading || googleLoading}
           >
-            {loading ? (
-              <ActivityIndicator color="#FFFFFF" />
-            ) : (
-              <Text style={styles.primaryButtonText}>Entrar na conta</Text>
-            )}
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.secondaryButton, styles.splitButton, styles.splitButtonRight]}
-            onPress={() => router.push("/cadastro-usuario")}
-            activeOpacity={0.85}
-            disabled={loading || googleLoading}
-          >
-            <Text style={styles.secondaryButtonText}>Criar conta</Text>
+            <Ionicons
+              name={showPassword ? "eye-off-outline" : "eye-outline"}
+              size={18}
+              color="#8A816F"
+            />
           </TouchableOpacity>
         </View>
+
+        <TouchableOpacity
+          style={styles.primaryButton}
+          onPress={handleLogin}
+          activeOpacity={0.85}
+          disabled={loading || googleLoading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#FFFFFF" />
+          ) : (
+            <View style={styles.primaryButtonContent}>
+              <Ionicons name="log-in-outline" size={18} color="#FFFFFF" />
+              <Text style={styles.primaryButtonText}>Entrar na conta</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+
+        <Text style={styles.separatorText}>- ou continue com -</Text>
 
         <TouchableOpacity
           style={styles.googleButton}
@@ -129,6 +140,17 @@ export default function LoginScreen() {
             </View>
           )}
         </TouchableOpacity>
+
+        <View style={styles.signupTextRow}>
+          <Text style={styles.signupText}>Nao tem uma conta? </Text>
+          <TouchableOpacity
+            onPress={() => router.push("/cadastro-usuario")}
+            activeOpacity={0.8}
+            disabled={loading || googleLoading}
+          >
+            <Text style={styles.signupLink}>Criar conta gratuita</Text>
+          </TouchableOpacity>
+        </View>
       </KeyboardAwareScrollView>
     </View>
   );
@@ -146,25 +168,22 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     paddingHorizontal: 20,
-    paddingTop: 28,
+    paddingTop: 36,
     paddingBottom: 48,
   },
-  avatarWrapper: {
+  headerWrapper: {
     alignItems: "center",
-    marginBottom: 28,
+    marginBottom: 24,
   },
-  avatarCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "#F0EBE0",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  avatarLabel: {
-    fontSize: 13,
+  title: {
+    fontSize: 24,
+    fontWeight: "700",
     color: "#1A1A1A",
+  },
+  subtitle: {
+    fontSize: 13,
+    color: "#6F6758",
+    marginTop: 6,
   },
   label: {
     fontSize: 13,
@@ -172,16 +191,28 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     marginTop: 2,
   },
-  input: {
-    fontSize: 13,
-    color: "#1A1A1A",
+  inputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
     borderWidth: 1,
     borderColor: "#E0DBD0",
     borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 13,
+    paddingHorizontal: 12,
     backgroundColor: "#FFFFFF",
     marginBottom: 12,
+  },
+  input: {
+    flex: 1,
+    fontSize: 13,
+    color: "#1A1A1A",
+    borderWidth: 0,
+    paddingHorizontal: 10,
+    paddingVertical: 13,
+    backgroundColor: "#FFFFFF",
+  },
+  inputIconButton: {
+    paddingLeft: 4,
+    paddingVertical: 4,
   },
   primaryButton: {
     backgroundColor: "#D97757",
@@ -190,22 +221,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 12,
   },
-  buttonRow: {
+  primaryButtonContent: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 12,
-  },
-  splitButton: {
-    flex: 1,
-    marginTop: 0,
-  },
-  splitButtonRight: {
-    marginLeft: 10,
   },
   primaryButtonText: {
     fontSize: 15,
     color: "#FFFFFF",
     fontWeight: "bold",
+    marginLeft: 8,
+  },
+  separatorText: {
+    marginTop: 14,
+    textAlign: "center",
+    fontSize: 12,
+    color: "#7D7568",
   },
   googleButton: {
     backgroundColor: "#FFFFFF",
@@ -226,17 +256,19 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginLeft: 8,
   },
-  secondaryButton: {
-    borderWidth: 1,
-    borderColor: "#D97757",
-    borderRadius: 50,
-    paddingVertical: 16,
+  signupTextRow: {
+    flexDirection: "row",
+    justifyContent: "center",
     alignItems: "center",
-    marginTop: 10,
+    marginTop: 16,
   },
-  secondaryButtonText: {
-    fontSize: 15,
+  signupText: {
+    fontSize: 12,
+    color: "#7D7568",
+  },
+  signupLink: {
+    fontSize: 12,
     color: "#D97757",
-    fontWeight: "bold",
+    fontWeight: "700",
   },
 });
