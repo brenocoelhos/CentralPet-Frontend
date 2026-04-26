@@ -7,11 +7,11 @@ import { useRouter } from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    StyleSheet,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { ThemedText as Text } from "../themed-text";
@@ -100,7 +100,7 @@ export default function LoginScreen() {
             {loading ? (
               <ActivityIndicator color="#FFFFFF" />
             ) : (
-              <Text style={styles.primaryButtonText}>Entrar</Text>
+              <Text style={styles.primaryButtonText}>Entrar na conta</Text>
             )}
           </TouchableOpacity>
 
@@ -125,7 +125,7 @@ export default function LoginScreen() {
           ) : (
             <View style={styles.googleButtonContent}>
               <Ionicons name="logo-google" size={18} color="#D97757" />
-              <Text style={styles.googleButtonText}>Continuar com Google</Text>
+              <Text style={styles.googleButtonText}>Google</Text>
             </View>
           )}
         </TouchableOpacity>
