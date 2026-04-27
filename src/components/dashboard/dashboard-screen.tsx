@@ -1,13 +1,14 @@
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useRouter } from "expo-router";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import React, { useState } from "react";
 import {
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -76,7 +77,7 @@ const BG = "#FAF7F5";
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 const PawIcon = ({ size = 28 }: { size?: number }) => (
-  <MaterialIcons name="pets" size={size} color="#555" />
+  <Ionicons name="paw" size={size} color="#555" />
 );
 
 const ChatIcon = ({ active }: { active: boolean }) => (
@@ -86,8 +87,8 @@ const ChatIcon = ({ active }: { active: boolean }) => (
       { backgroundColor: active ? "#4CAF50" : "#E8E0DC" },
     ]}
   >
-    <MaterialIcons
-      name="chat-bubble"
+    <Ionicons
+      name={active ? "chatbubble" : "chatbubble-outline"}
       size={18}
       color={active ? "#fff" : "#555"}
     />
@@ -198,7 +199,7 @@ const FilterBar = ({
 const UrgentBanner = ({ onPress }: { onPress: () => void }) => (
   <TouchableOpacity style={styles.banner} onPress={onPress} activeOpacity={0.9}>
     <View style={styles.bannerIcon}>
-      <MaterialIcons name="priority-high" size={18} color="#fff" />
+      <Ionicons name="alert" size={18} color="#fff" />
     </View>
 
     <View style={styles.bannerContent}>
@@ -214,7 +215,6 @@ const UrgentBanner = ({ onPress }: { onPress: () => void }) => (
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function HomeScreen() {
-  const router = useRouter();
   const [activeFilter, setActiveFilter] = useState<Filter>("Todos");
 
   const filtered: Occurrence[] =
@@ -229,8 +229,19 @@ export default function HomeScreen() {
             : OCCURRENCES;
 
   return (
-    <View style={styles.safe}>
+    <SafeAreaView style={styles.safe}>
       <StatusBar barStyle="dark-content" backgroundColor={BG} />
+
+      <View style={styles.header}>
+        <Text>
+          <Text style={styles.logoBold}>Central</Text>
+          <Text style={styles.logoAccent}>Pet</Text>
+        </Text>
+
+        <TouchableOpacity hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+          <Ionicons name="notifications" size={24} color="#1a1a1a" />
+        </TouchableOpacity>
+      </View>
 
       <ScrollView
         style={styles.scroll}
@@ -255,21 +266,39 @@ export default function HomeScreen() {
       </ScrollView>
 
       <View style={styles.fabContainer}>
-        <TouchableOpacity
-          style={styles.fab}
-          activeOpacity={0.88}
-          onPress={() => router.push("/cadastro-pet")}
-        >
+        <TouchableOpacity style={styles.fab} activeOpacity={0.88}>
           <Text style={styles.fabText}>Registrar ocorrência</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: BG },
+
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === "android" ? 12 : 4,
+    paddingBottom: 12,
+    backgroundColor: BG,
+  },
+
+  logoBold: {
+    fontFamily: "Lexend_700Bold",
+    color: "#1a1a1a",
+    fontSize: 24,
+  },
+
+  logoAccent: {
+    fontFamily: "Lexend_700Bold",
+    color: ORANGE,
+    fontSize: 24,
+  },
 
   scroll: { flex: 1 },
 
