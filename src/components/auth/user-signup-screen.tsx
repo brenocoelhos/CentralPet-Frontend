@@ -7,6 +7,7 @@ import {
   maskPhone,
   validaCPF,
   validaData,
+  validaTelefone,
 } from "@/utils/validators";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -52,16 +53,85 @@ export default function UserSignupScreen() {
     confirmarSenha: "",
   });
 
+  const [errors, setErrors] = useState({
+    cpf: "",
+    dataNascimento: "",
+    telefone: "",
+    email: "",
+    senha: "",
+    confirmarSenha: "",
+  });
+
   const handleChange = (field: keyof SignupFormState, value: string) => {
     let formatted = value;
+
     if (field === "cpf") formatted = maskCPF(value);
     if (field === "dataNascimento") formatted = maskDate(value);
     if (field === "telefone") formatted = maskPhone(value);
+
     setForm((prev) => ({ ...prev, [field]: formatted }));
+
+    setErrors((prev) => {
+      const newErrors = { ...prev };
+
+      if (field === "cpf") {
+        newErrors.cpf =
+          formatted.length === 14 && !validaCPF(formatted)
+            ? "CPF inválido"
+            : "";
+      }
+
+      if (field === "dataNascimento") {
+        newErrors.dataNascimento =
+          formatted.length === 10 && !validaData(formatted)
+            ? "Data inválida"
+            : "";
+      }
+
+      if (field === "telefone") {
+        newErrors.telefone =
+          formatted.length >= 14 && !validaTelefone(formatted)
+            ? "Telefone inválido"
+            : "";
+      }
+
+      if (field === "email") {
+        newErrors.email = formatted.includes("@") ? "" : "Email inválido";
+      }
+
+      if (field === "confirmarSenha") {
+        newErrors.confirmarSenha =
+          formatted !== form.senha ? "As senhas não coincidem" : "";
+      }
+
+      if (field === "senha") {
+        newErrors.senha =
+          formatted.length > 0 && formatted.length < 6
+            ? "Mínimo de 6 caracteres"
+            : "";
+
+        if (form.confirmarSenha) {
+          newErrors.confirmarSenha =
+            form.confirmarSenha !== formatted
+              ? "As senhas não coincidem"
+              : "";
+        }
+      }
+
+      return newErrors;
+    });
   };
 
   const handleCadastro = async () => {
-    const { nome, email, senha, confirmarSenha, cpf, dataNascimento } = form;
+    const {
+      nome,
+      email,
+      senha,
+      confirmarSenha,
+      cpf,
+      dataNascimento,
+      telefone,
+    } = form;
 
     if (
       !nome ||
@@ -69,26 +139,41 @@ export default function UserSignupScreen() {
       !senha ||
       !confirmarSenha ||
       !cpf ||
-      !dataNascimento
+      !dataNascimento ||
+      !telefone
     ) {
       Alert.alert("Atenção", "Por favor, preencha todos os campos.");
       return;
     }
+
     if (!validaCPF(cpf)) {
       Alert.alert("Erro no Formulário", "O CPF informado é inválido.");
       return;
     }
+
     if (!validaData(dataNascimento)) {
       Alert.alert(
         "Erro no Formulário",
-        "A data de nascimento é inválida ou está no futuro.",
+        "A data de nascimento é inválida ou está no futuro."
       );
       return;
     }
+
+    if (!validaTelefone(telefone)) {
+      Alert.alert("Erro no Formulário", "O telefone informado é inválido.");
+      return;
+    }
+
+    if (!email.includes("@")) {
+      Alert.alert("Erro no Formulário", "O email informado é inválido.");
+      return;
+    }
+
     if (senha !== confirmarSenha) {
       Alert.alert("Erro", "As senhas não coincidem.");
       return;
     }
+
     if (senha.length < 6) {
       Alert.alert("Erro", "A senha deve ter no mínimo 6 caracteres.");
       return;
@@ -97,19 +182,24 @@ export default function UserSignupScreen() {
     if (!hasFirebaseConfig || !auth) {
       Alert.alert(
         "Firebase nao configurado",
-        `Defina as variaveis ${missingConfigKeys.join(", ")} para habilitar o cadastro.`,
+        `Defina as variaveis ${missingConfigKeys.join(", ")} para habilitar o cadastro.`
       );
       return;
     }
 
     try {
       setLoading(true);
+
       const credentials = await createUserWithEmailAndPassword(
         auth,
         email.trim(),
-        senha,
+        senha
       );
-      await updateProfile(credentials.user, { displayName: nome.trim() });
+
+      await updateProfile(credentials.user, {
+        displayName: nome.trim(),
+      });
+
       Alert.alert("Sucesso!", "Cadastro realizado com sucesso.");
       router.replace("/dashboard");
     } catch (error) {
@@ -150,8 +240,12 @@ export default function UserSignupScreen() {
         <View style={styles.row}>
           <View style={styles.halfGroup}>
             <Text style={styles.label}>CPF</Text>
+
             <ThemedTextInput
-              style={styles.input}
+              style={[
+                styles.input,
+                errors.cpf ? { borderColor: "red" } : null
+              ]}
               placeholder="000.000.000-00"
               placeholderTextColor="#B0A898"
               value={form.cpf}
@@ -160,11 +254,18 @@ export default function UserSignupScreen() {
               maxLength={14}
               returnKeyType="next"
             />
+
+            {errors.cpf ? (
+              <Text style={styles.errorText}>{errors.cpf}</Text>
+            ) : null}
           </View>
           <View style={styles.halfGroup}>
             <Text style={styles.label}>Data do nascimento</Text>
             <ThemedTextInput
-              style={styles.input}
+              style={[
+                styles.input,
+                errors.dataNascimento ? { borderColor: "red" } : null
+              ]}
               placeholder="00/00/0000"
               placeholderTextColor="#B0A898"
               value={form.dataNascimento}
@@ -173,12 +274,18 @@ export default function UserSignupScreen() {
               maxLength={10}
               returnKeyType="next"
             />
+            {errors.dataNascimento ? (
+              <Text style={styles.errorText}>{errors.dataNascimento}</Text>
+            ) : null}
           </View>
         </View>
 
         <Text style={styles.label}>E-mail</Text>
         <ThemedTextInput
-          style={styles.input}
+          style={[
+            styles.input,
+            errors.email ? { borderColor: "red" } : null
+          ]}
           placeholder="exemplo@gmail.com"
           placeholderTextColor="#B0A898"
           value={form.email}
@@ -187,10 +294,14 @@ export default function UserSignupScreen() {
           autoCapitalize="none"
           returnKeyType="next"
         />
+        {errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
 
         <Text style={styles.label}>Telefone</Text>
         <ThemedTextInput
-          style={styles.input}
+          style={[
+            styles.input,
+            errors.telefone ? { borderColor: "red" } : null
+          ]}
           placeholder="(00) 00000-0000"
           placeholderTextColor="#B0A898"
           value={form.telefone}
@@ -199,6 +310,9 @@ export default function UserSignupScreen() {
           maxLength={15}
           returnKeyType="next"
         />
+        {errors.telefone ? (
+          <Text style={styles.errorText}>{errors.telefone}</Text>
+        ) : null}
 
         <Text style={styles.label}>Endereço</Text>
         <ThemedTextInput
@@ -214,7 +328,13 @@ export default function UserSignupScreen() {
         <View style={styles.row}>
           <View style={styles.halfGroup}>
             <Text style={styles.label}>Senha</Text>
-            <View style={styles.passwordInputWrapper}>
+
+            <View
+              style={[
+                styles.passwordInputWrapper,
+                errors.senha ? { borderColor: "red" } : null
+              ]}
+            >
               <ThemedTextInput
                 style={styles.passwordInput}
                 placeholder="••••••••"
@@ -224,6 +344,7 @@ export default function UserSignupScreen() {
                 secureTextEntry={!showPassword}
                 returnKeyType="next"
               />
+
               <TouchableOpacity
                 onPress={() => setShowPassword((prev) => !prev)}
                 activeOpacity={0.8}
@@ -237,10 +358,21 @@ export default function UserSignupScreen() {
                 />
               </TouchableOpacity>
             </View>
+
+            {errors.senha ? (
+              <Text style={styles.errorText}>{errors.senha}</Text>
+            ) : null}
           </View>
+
           <View style={styles.halfGroup}>
             <Text style={styles.label}>Confirmar senha</Text>
-            <View style={styles.passwordInputWrapper}>
+
+            <View
+              style={[
+                styles.passwordInputWrapper,
+                errors.confirmarSenha ? { borderColor: "red" } : null
+              ]}
+            >
               <ThemedTextInput
                 style={styles.passwordInput}
                 placeholder="••••••••"
@@ -250,6 +382,7 @@ export default function UserSignupScreen() {
                 secureTextEntry={!showConfirmPassword}
                 returnKeyType="done"
               />
+
               <TouchableOpacity
                 onPress={() => setShowConfirmPassword((prev) => !prev)}
                 activeOpacity={0.8}
@@ -263,6 +396,10 @@ export default function UserSignupScreen() {
                 />
               </TouchableOpacity>
             </View>
+
+            {errors.confirmarSenha ? (
+              <Text style={styles.errorText}>{errors.confirmarSenha}</Text>
+            ) : null}
           </View>
         </View>
 
@@ -362,6 +499,7 @@ const styles = StyleSheet.create({
   },
   halfGroup: {
     flex: 1,
+    flexDirection: "column",
   },
   button: {
     backgroundColor: "#D97757",
@@ -374,5 +512,12 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: "#FFFFFF",
     fontWeight: "bold",
+  },
+
+  errorText: {
+    fontSize: 12,
+    color: "red",
+    marginTop: 1,
+    marginBottom: 8,
   },
 });
