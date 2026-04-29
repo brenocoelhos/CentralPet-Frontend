@@ -1,16 +1,16 @@
 import { maskDate, maskPhone } from "@/utils/validators";
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
 } from "react-native";
 import { ThemedText as Text } from "../themed-text";
 import { ThemedTextInput } from "../themed-text-input";
@@ -70,8 +70,6 @@ export default function PetSignupScreen() {
   const [location, setLocation] = useState("");
   const [descriptionChips, setDescriptionChips] = useState<string[]>([]);
   const [descriptionInput, setDescriptionInput] = useState("");
-  const [tags, setTags] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState("");
   const [ownerName, setOwnerName] = useState("");
   const [phone, setPhone] = useState("");
 
@@ -85,18 +83,6 @@ export default function PetSignupScreen() {
 
   const removeDescriptionChip = (index: number) => {
     setDescriptionChips((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const addTag = () => {
-    const trimmed = tagInput.trim();
-    if (trimmed) {
-      setTags((prev) => [...prev, trimmed]);
-      setTagInput("");
-    }
-  };
-
-  const removeTag = (index: number) => {
-    setTags((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = () => {
@@ -122,7 +108,7 @@ export default function PetSignupScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <Pressable style={styles.photoBox}>
-          <MaterialIcons name="add-a-photo" size={24} color="rgba(0,0,0,0.5)" />
+          <Ionicons name="camera-outline" size={24} color="rgba(0,0,0,0.5)" />
           <Text style={styles.photoLabel}>Adicionar foto</Text>
         </Pressable>
 
@@ -145,7 +131,6 @@ export default function PetSignupScreen() {
           />
         </View>
 
-        {/* Raça + Cor */}
         <View style={styles.row}>
           <View style={styles.half}>
             <Text style={styles.label}>Raça</Text>
@@ -216,7 +201,11 @@ export default function PetSignupScreen() {
           {descriptionChips.length > 0 && (
             <View style={styles.chipsContainer}>
               {descriptionChips.map((chip, i) => (
-                <Pressable key={i} style={styles.chip} onPress={() => removeDescriptionChip(i)}>
+                <Pressable
+                  key={i}
+                  style={styles.chip}
+                  onPress={() => removeDescriptionChip(i)}
+                >
                   <Text style={styles.chipText}>{chip}</Text>
                   <Text style={styles.chipRemove}>✕</Text>
                 </Pressable>
@@ -224,6 +213,7 @@ export default function PetSignupScreen() {
             </View>
           )}
         </View>
+
         <View style={styles.row}>
           <View style={styles.half}>
             <Text style={styles.label}>Seu nome</Text>
@@ -274,7 +264,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginBottom: 4,
   },
-  cameraIcon: { fontSize: 28 },
   photoLabel: { fontSize: 12, color: "#8A7B6B", marginTop: 6 },
 
   row: { flexDirection: "row", gap: 10 },
@@ -298,6 +287,7 @@ const styles = StyleSheet.create({
     color: "#3D3228",
     textAlignVertical: "center",
   },
+
   chipsContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -354,15 +344,6 @@ const styles = StyleSheet.create({
     borderBottomColor: "#F0EBE3",
   },
   modalOptionText: { fontSize: 14, color: "#3D3228" },
-
-  tagsContainer: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
-  tag: {
-    backgroundColor: "#EDE5D8",
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-  },
-  tagText: { fontSize: 12, color: "#5A4F44" },
 
   submitButton: {
     backgroundColor: "#D4735A",

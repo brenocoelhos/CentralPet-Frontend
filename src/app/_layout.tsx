@@ -41,6 +41,7 @@ function AppStack() {
         options={{ title: "Cadastro de Usuario" }}
       />
       <Stack.Screen name="index" options={{ title: "Inicio" }} />
+
       <Stack.Screen
         name="dashboard"
         options={{
@@ -54,7 +55,9 @@ function AppStack() {
           headerRight: () => null,
         }}
       />
+
       <Stack.Screen name="busca" options={{ title: "Busca" }} />
+
       <Stack.Screen
         name="cadastro-pet"
         options={{
@@ -68,6 +71,14 @@ function AppStack() {
           headerRight: () => null,
         }}
       />
+
+      <Stack.Screen
+        name="pet-detail"
+        options={{
+          headerShown: false,
+        }}
+      />
+
       <Stack.Screen name="perfil" options={{ title: "Perfil" }} />
     </Stack>
   );
