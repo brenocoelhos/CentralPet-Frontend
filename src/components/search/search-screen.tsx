@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
   },
   listContent: {
-    paddingBottom: 110,
+    paddingBottom: 20,
     gap: 10,
   },
   cardRow: {
