@@ -56,7 +56,14 @@ function AppStack() {
         }}
       />
 
-      <Stack.Screen name="busca" options={{ title: "Busca" }} />
+      <Stack.Screen name="busca" options={{ 
+        headerTitle: () => (
+          <Text>
+            <Text style={styles.logoBold}>Busca</Text>
+            <Text style={styles.logoAccent}>Pet</Text>
+          </Text>
+        ),
+       }} />
 
       <Stack.Screen
         name="cadastro-pet"

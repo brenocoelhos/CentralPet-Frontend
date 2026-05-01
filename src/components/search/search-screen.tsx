@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import {
   FlatList,
+  Image,
   Platform,
   Pressable,
   SafeAreaView,
@@ -18,12 +19,10 @@ type PetItem = {
   name: string;
   species: "Cachorro" | "Gato";
   breed: string;
-  coat: string;
-  size: string;
   location: string;
+  imageUrl: string;
   daysAgo: number;
   status: "Perdido" | "Encontrado";
-  tags: string[];
 };
 
 const MOCK_PETS: PetItem[] = [
@@ -32,48 +31,44 @@ const MOCK_PETS: PetItem[] = [
     name: "Rex",
     species: "Cachorro",
     breed: "Labrador",
-    coat: "Caramelo",
-    size: "Porte Grande",
     location: "Vila Madalena, SP",
+    imageUrl:
+      "https://images.unsplash.com/photo-1558788353-f76d92427f16?auto=format&fit=crop&w=900&q=80",
     daysAgo: 2,
     status: "Perdido",
-    tags: ["Pelagem dourada", "Coleira azul"],
   },
   {
     id: "2",
     name: "Mimi",
     species: "Gato",
     breed: "Siames",
-    coat: "Branco",
-    size: "Porte Medio",
     location: "Pinheiros, SP",
+    imageUrl:
+      "https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?auto=format&fit=crop&w=900&q=80",
     daysAgo: 1,
     status: "Encontrado",
-    tags: ["Olhos azuis", "Sem coleira"],
   },
   {
     id: "3",
     name: "Thor",
     species: "Cachorro",
     breed: "Bulldog",
-    coat: "Cinza",
-    size: "Porte Medio",
     location: "Moema, SP",
+    imageUrl:
+      "https://images.unsplash.com/photo-1561037404-61cd46aa615b?auto=format&fit=crop&w=900&q=80",
     daysAgo: 5,
     status: "Perdido",
-    tags: ["Focinho branco", "Porte medio"],
   },
   {
     id: "4",
     name: "Luna",
     species: "Gato",
     breed: "Persa",
-    coat: "Preto",
-    size: "Porte Pequeno",
     location: "Perdizes, SP",
+    imageUrl:
+      "https://images.unsplash.com/photo-1495360010541-f48722b34f7d?auto=format&fit=crop&w=900&q=80",
     daysAgo: 3,
     status: "Encontrado",
-    tags: ["Mansa", "Pelagem longa"],
   },
 ];
 
@@ -100,7 +95,7 @@ export default function SearchScreen() {
     const byQuery = byFilter.filter((pet) => {
       if (!term) return true;
 
-      return [pet.name, pet.species, pet.breed, pet.coat, pet.location, ...pet.tags]
+      return [pet.name, pet.species, pet.breed, pet.location]
         .join(" ")
         .toLowerCase()
         .includes(term);
@@ -116,53 +111,18 @@ export default function SearchScreen() {
   }, [activeFilter, query, sortByRecent]);
 
   const renderPetCard = ({ item }: { item: PetItem }) => {
-    const statusFound = item.status === "Encontrado";
-
     return (
       <View style={styles.itemCard}>
-        <View style={styles.avatarBlock}>
-          <Ionicons
-            name={item.species === "Cachorro" ? "paw" : "logo-octocat"}
-            size={35}
-            color="#5E4A3F"
-          />
-        </View>
+        <Image source={{ uri: item.imageUrl }} style={styles.petImage} resizeMode="cover" />
 
         <View style={styles.itemContent}>
-          <View style={styles.itemHeadLine}>
-            <Text style={styles.itemName}>{item.name}</Text>
-            <View
-              style={[
-                styles.statusBadge,
-                statusFound ? styles.statusBadgeFound : styles.statusBadgeLost,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.statusText,
-                  statusFound ? styles.statusTextFound : styles.statusTextLost,
-                ]}
-              >
-                {item.status}
-              </Text>
-            </View>
-          </View>
+          <Text style={styles.itemName} numberOfLines={1}>{item.name}</Text>
 
-          <Text style={styles.itemMeta}>
-            {item.breed} · {item.coat} · {item.size}
+          <Text style={styles.itemBreed} numberOfLines={1}>
+            {item.breed}
           </Text>
 
-          <View style={styles.tagsRow}>
-            {item.tags.map((tag) => (
-              <View key={tag} style={styles.tagPill}>
-                <Text style={styles.tagText}>{tag}</Text>
-              </View>
-            ))}
-          </View>
-
-          <Text style={styles.itemLocation}>
-            <Ionicons name="location-outline" size={12} color="#B5B0A3" /> {item.location}, {item.daysAgo} dias atras
-          </Text>
+          <Text style={styles.itemLocation} numberOfLines={2}>{item.location}</Text>
         </View>
       </View>
     );
@@ -177,7 +137,7 @@ export default function SearchScreen() {
       <View style={styles.searchContainer}>
         <Ionicons name="search" size={16} color="#9D988D" />
         <ThemedTextInput
-          placeholder="Nome, raca, bairro..."
+          placeholder="Nome, raça, bairro..."
           placeholderTextColor="#9D988D"
           value={query}
           onChangeText={setQuery}
@@ -225,6 +185,8 @@ export default function SearchScreen() {
       <FlatList
         style={styles.container}
         data={filteredPets}
+        numColumns={2}
+        columnWrapperStyle={styles.cardRow}
         keyExtractor={(item) => item.id}
         renderItem={renderPetCard}
         ListHeaderComponent={listHeader}
@@ -232,10 +194,6 @@ export default function SearchScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
       />
-
-      <Pressable style={styles.backButton} onPress={() => router.push("/dashboard")}>
-        <Text style={styles.backButtonText}>Voltar ao dashboard</Text>
-      </Pressable>
     </SafeAreaView>
   );
 }
@@ -251,6 +209,9 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingBottom: 110,
+    gap: 10,
+  },
+  cardRow: {
     gap: 10,
   },
   headerBlock: {
@@ -345,85 +306,41 @@ const styles = StyleSheet.create({
     fontFamily: "Lexend_600SemiBold",
   },
   itemCard: {
-    flexDirection: "row",
-    gap: 10,
+    flex: 1,
+    height: 272,
     borderWidth: 1,
     borderColor: "#E6DED2",
-    borderRadius: 12,
-    padding: 10,
+    borderRadius: 14,
+    overflow: "hidden",
     backgroundColor: "#FFFFFF",
   },
-  avatarBlock: {
-    width: 66,
-    height: 66,
-    borderRadius: 10,
-    backgroundColor: "#F7E8E0",
-    alignItems: "center",
-    justifyContent: "center",
+  petImage: {
+    width: "100%",
+    height: 180,
+    alignSelf: "center",
+    backgroundColor: "#EFE7DE",
   },
   itemContent: {
     flex: 1,
-    gap: 4,
-  },
-  itemHeadLine: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    paddingHorizontal: 10,
+    paddingVertical: 10,
   },
   itemName: {
-    fontSize: 21,
+    fontSize: 22,
     color: "#2A2621",
-    fontFamily: "Lexend_700Bold",
-    lineHeight: 25,
-  },
-  statusBadge: {
-    borderRadius: 999,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-  },
-  statusBadgeLost: {
-    backgroundColor: "#F8E9E0",
-  },
-  statusBadgeFound: {
-    backgroundColor: "#EEF7D9",
-  },
-  statusText: {
-    fontSize: 11,
     fontFamily: "Lexend_600SemiBold",
+    lineHeight: 26,
   },
-  statusTextLost: {
-    color: "#9A562F",
-  },
-  statusTextFound: {
-    color: "#4E7A22",
-  },
-  itemMeta: {
-    fontSize: 14,
-    color: "#6B6154",
-    fontFamily: "Lexend_600SemiBold",
-  },
-  tagsRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 5,
-  },
-  tagPill: {
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: "#E2DBD0",
-    backgroundColor: "#F7F4EF",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-  },
-  tagText: {
-    color: "#6C6256",
-    fontSize: 11,
+  itemBreed: {
+    fontSize: 13,
+    color: "#6F665A",
     fontFamily: "Lexend_500Medium",
   },
   itemLocation: {
-    fontSize: 12,
-    color: "#94897A",
+    fontSize: 11,
+    color: "#7A7268",
     fontFamily: "Lexend_400Regular",
+    minHeight: 30,
   },
   emptyText: {
     textAlign: "center",
