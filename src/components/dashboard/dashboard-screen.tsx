@@ -1,13 +1,15 @@
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useRouter } from "expo-router";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -76,7 +78,7 @@ const BG = "#FAF7F5";
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 const PawIcon = ({ size = 28 }: { size?: number }) => (
-  <MaterialIcons name="pets" size={size} color="#555" />
+  <Ionicons name="paw" size={size} color="#555" />
 );
 
 const ChatIcon = ({ active }: { active: boolean }) => (
@@ -86,8 +88,8 @@ const ChatIcon = ({ active }: { active: boolean }) => (
       { backgroundColor: active ? "#4CAF50" : "#E8E0DC" },
     ]}
   >
-    <MaterialIcons
-      name="chat-bubble"
+    <Ionicons
+      name={active ? "chatbubble" : "chatbubble-outline"}
       size={18}
       color={active ? "#fff" : "#555"}
     />
@@ -97,7 +99,6 @@ const ChatIcon = ({ active }: { active: boolean }) => (
 // ─── Sub-components ───────────────────────────────────────────────────────────
 const StatusBadge = ({ status }: { status: "PERDIDO" | "ENCONTRADO" }) => {
   const isFound = status === "ENCONTRADO";
-
   return (
     <View
       style={[
@@ -120,16 +121,15 @@ const TagChip = ({ label }: { label: string }) => (
   </View>
 );
 
-const OccurrenceCard = ({
-  item,
-  onPress,
-}: {
-  item: Occurrence;
-  onPress: (item: Occurrence) => void;
-}) => (
+const OccurrenceCard = ({ item }: { item: Occurrence }) => (
   <TouchableOpacity
     style={styles.card}
-    onPress={() => onPress(item)}
+    onPress={() =>
+      router.push({
+        pathname: "/pet-detail",
+        params: { id: item.id },
+      })
+    }
     activeOpacity={0.85}
   >
     <View style={styles.cardRow}>
@@ -198,7 +198,7 @@ const FilterBar = ({
 const UrgentBanner = ({ onPress }: { onPress: () => void }) => (
   <TouchableOpacity style={styles.banner} onPress={onPress} activeOpacity={0.9}>
     <View style={styles.bannerIcon}>
-      <MaterialIcons name="priority-high" size={18} color="#fff" />
+      <Ionicons name="alert" size={18} color="#fff" />
     </View>
 
     <View style={styles.bannerContent}>
@@ -213,8 +213,7 @@ const UrgentBanner = ({ onPress }: { onPress: () => void }) => (
 );
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
-export default function HomeScreen() {
-  const router = useRouter();
+export default function DashboardScreen() {
   const [activeFilter, setActiveFilter] = useState<Filter>("Todos");
 
   const filtered: Occurrence[] =
@@ -229,8 +228,19 @@ export default function HomeScreen() {
             : OCCURRENCES;
 
   return (
-    <View style={styles.safe}>
+    <SafeAreaView style={styles.safe}>
       <StatusBar barStyle="dark-content" backgroundColor={BG} />
+
+      <View style={styles.header}>
+        <Text>
+          <Text style={styles.logoBold}>Central</Text>
+          <Text style={styles.logoAccent}>Pet</Text>
+        </Text>
+
+        <TouchableOpacity hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+          <Ionicons name="notifications" size={24} color="#1a1a1a" />
+        </TouchableOpacity>
+      </View>
 
       <ScrollView
         style={styles.scroll}
@@ -248,22 +258,18 @@ export default function HomeScreen() {
         </View>
 
         {filtered.map((item) => (
-          <OccurrenceCard key={item.id} item={item} onPress={() => {}} />
+          <OccurrenceCard key={item.id} item={item} />
         ))}
 
         <View style={{ height: 100 }} />
       </ScrollView>
 
       <View style={styles.fabContainer}>
-        <TouchableOpacity
-          style={styles.fab}
-          activeOpacity={0.88}
-          onPress={() => router.push("/cadastro-pet")}
-        >
+        <TouchableOpacity style={styles.fab} activeOpacity={0.88}>
           <Text style={styles.fabText}>Registrar ocorrência</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -271,13 +277,31 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: BG },
 
-  scroll: { flex: 1 },
-
-  scrollContent: {
-    paddingHorizontal: 16,
-    paddingTop: 4,
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === "android" ? 12 : 4,
+    paddingBottom: 12,
+    backgroundColor: BG,
   },
 
+  logoBold: {
+    fontFamily: "Lexend_700Bold",
+    color: "#1a1a1a",
+    fontSize: 24,
+  },
+  logoAccent: {
+    fontFamily: "Lexend_700Bold",
+    color: ORANGE,
+    fontSize: 24,
+  },
+
+  scroll: { flex: 1 },
+  scrollContent: { paddingHorizontal: 16, paddingTop: 4 },
+
+  // Banner
   banner: {
     backgroundColor: ORANGE,
     borderRadius: 14,
@@ -286,13 +310,8 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 14,
     marginBottom: 20,
-    shadowColor: ORANGE,
-    shadowOpacity: 0.35,
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 10,
     elevation: 5,
   },
-
   bannerIcon: {
     width: 32,
     height: 32,
@@ -302,9 +321,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginRight: 12,
   },
-
   bannerContent: { flex: 1 },
-
   bannerLabel: {
     fontFamily: "Lexend_700Bold",
     fontSize: 10,
@@ -312,14 +329,12 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     marginBottom: 2,
   },
-
   bannerTitle: {
     fontFamily: "Lexend_700Bold",
     fontSize: 13,
     color: "#fff",
     lineHeight: 20,
   },
-
   bannerCta: {
     fontFamily: "Lexend_700Bold",
     fontSize: 13,
@@ -327,12 +342,8 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
 
-  filterContainer: {
-    flexDirection: "row",
-    paddingBottom: 16,
-    gap: 8,
-  },
-
+  // Filters
+  filterContainer: { flexDirection: "row", paddingBottom: 16, gap: 8 },
   filterBtn: {
     paddingHorizontal: 18,
     paddingVertical: 8,
@@ -341,43 +352,40 @@ const styles = StyleSheet.create({
     borderColor: "#D9D3CF",
     backgroundColor: BG,
   },
-
   filterBtnActive: {
     backgroundColor: "#1a1a1a",
     borderColor: "#1a1a1a",
   },
-
   filterText: {
     fontFamily: "Lexend_500Medium",
     fontSize: 14,
     color: "#555",
   },
-
   filterTextActive: {
     fontFamily: "Lexend_600SemiBold",
     color: "#fff",
   },
 
+  // Section header
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 12,
   },
-
   sectionTitle: {
     fontFamily: "Lexend_700Bold",
     fontSize: 11,
     color: "#888",
     letterSpacing: 0.8,
   },
-
   sectionLink: {
     fontFamily: "Lexend_600SemiBold",
     fontSize: 13,
     color: ORANGE,
   },
 
+  // Card
   card: {
     backgroundColor: "#F5F2EC",
     borderRadius: 16,
@@ -389,12 +397,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 2,
   },
-
-  cardRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-  },
-
+  cardRow: { flexDirection: "row", alignItems: "flex-start" },
   avatar: {
     width: 48,
     height: 48,
@@ -405,9 +408,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
     marginTop: 2,
   },
-
   cardContent: { flex: 1 },
-
   cardHeader: {
     flexDirection: "row",
     alignItems: "center",
@@ -420,26 +421,22 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 6,
   },
-
   badgeText: {
     fontFamily: "Lexend_700Bold",
     fontSize: 10,
     letterSpacing: 0.4,
   },
-
   timeText: {
     fontFamily: "Lexend_400Regular",
     fontSize: 11,
     color: "#999",
   },
-
   petName: {
     fontFamily: "Lexend_700Bold",
     fontSize: 17,
     color: "#1a1a1a",
     marginBottom: 2,
   },
-
   petInfo: {
     fontFamily: "Lexend_400Regular",
     fontSize: 13,
@@ -453,14 +450,12 @@ const styles = StyleSheet.create({
     gap: 6,
     marginBottom: 8,
   },
-
   chip: {
     backgroundColor: "#E8E4DF",
     borderRadius: 8,
     paddingHorizontal: 9,
     paddingVertical: 3,
   },
-
   chipText: {
     fontFamily: "Lexend_500Medium",
     fontSize: 11,
@@ -472,7 +467,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#888",
   },
-
   distanceBold: {
     fontFamily: "Lexend_700Bold",
     color: "#444",
@@ -488,13 +482,13 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 
+  // FAB
   fabContainer: {
     position: "absolute",
     bottom: 24,
     left: 16,
     right: 16,
   },
-
   fab: {
     backgroundColor: ORANGE,
     borderRadius: 30,
@@ -506,7 +500,6 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 6,
   },
-
   fabText: {
     fontFamily: "Lexend_700Bold",
     color: "#fff",
