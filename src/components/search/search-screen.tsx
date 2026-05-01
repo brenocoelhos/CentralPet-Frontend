@@ -70,6 +70,28 @@ const MOCK_PETS: PetItem[] = [
     daysAgo: 3,
     status: "Encontrado",
   },
+  {
+    id: "5",
+    name: "Thor",
+    species: "Cachorro",
+    breed: "Bulldog",
+    location: "Moema, SP",
+    imageUrl:
+      "https://images.unsplash.com/photo-1561037404-61cd46aa615b?auto=format&fit=crop&w=900&q=80",
+    daysAgo: 5,
+    status: "Perdido",
+  },
+  {
+    id: "6",
+    name: "Luna",
+    species: "Gato",
+    breed: "Persa",
+    location: "Perdizes, SP",
+    imageUrl:
+      "https://images.unsplash.com/photo-1495360010541-f48722b34f7d?auto=format&fit=crop&w=900&q=80",
+    daysAgo: 3,
+    status: "Encontrado",
+  },
 ];
 
 const FILTER_OPTIONS = ["Todos", "Perdidos", "Encontrados", "Cachorro", "Gato"] as const;
@@ -312,7 +334,7 @@ const styles = StyleSheet.create({
     borderColor: "#E6DED2",
     borderRadius: 14,
     overflow: "hidden",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FAF8F4",
   },
   petImage: {
     width: "100%",
