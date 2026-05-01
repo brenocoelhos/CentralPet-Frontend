@@ -1,10 +1,6 @@
-import AppShell from "@/components/layout/app-shell";
-import SearchScreen from "@/components/search/search-screen";
+// Esta rota é um alias de /busca. Redireciona para evitar duplicata.
+import { Redirect } from "expo-router";
 
 export default function ExploreScreen() {
-  return (
-    <AppShell>
-      <SearchScreen />
-    </AppShell>
-  );
+  return <Redirect href="/busca" />;
 }
