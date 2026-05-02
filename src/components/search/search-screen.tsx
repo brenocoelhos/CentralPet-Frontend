@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import {
   FlatList,
@@ -99,7 +98,6 @@ const FILTER_OPTIONS = ["Todos", "Perdidos", "Encontrados", "Cachorro", "Gato"] 
 type FilterOption = (typeof FILTER_OPTIONS)[number];
 
 export default function SearchScreen() {
-  const router = useRouter();
   const [query, setQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<FilterOption>("Todos");
   const [sortByRecent, setSortByRecent] = useState(true);
@@ -152,10 +150,6 @@ export default function SearchScreen() {
 
   const listHeader = (
     <View style={styles.headerBlock}>
-      <View style={styles.topBar}>
-
-      </View>
-
       <View style={styles.searchContainer}>
         <Ionicons name="search" size={16} color="#9D988D" />
         <ThemedTextInput
@@ -240,26 +234,6 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingTop: 8,
     paddingBottom: 8,
-  },
-  topBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  title: {
-    fontSize: 25,
-    fontFamily: "Lexend_700Bold",
-    color: "#292722",
-  },
-  notificationButton: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    borderWidth: 1,
-    borderColor: "#E5DDD1",
-    backgroundColor: "#FAF8F4",
-    alignItems: "center",
-    justifyContent: "center",
   },
   searchContainer: {
     flexDirection: "row",
@@ -369,23 +343,5 @@ const styles = StyleSheet.create({
     color: "#8A8174",
     paddingVertical: 24,
     fontFamily: "Lexend_500Medium",
-  },
-  backButton: {
-    position: "absolute",
-    left: 14,
-    right: 14,
-    bottom: 20,
-    borderRadius: 10,
-    backgroundColor: "#E57639",
-    paddingVertical: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "#EC8E58",
-  },
-  backButtonText: {
-    color: "#FFFFFF",
-    fontFamily: "Lexend_700Bold",
-    fontSize: 14,
   },
 });
