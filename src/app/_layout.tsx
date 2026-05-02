@@ -74,7 +74,7 @@ function AppStack() {
               <Text style={styles.logoAccent}>Pet</Text>
             </Text>
           ),
-          headerLeft: () => null,
+          headerBackVisible: true,
           headerRight: () => null,
         }}
       />

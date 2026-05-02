@@ -1,5 +1,8 @@
+import { useAuth } from "@/context/auth-context";
 import { maskDate, maskPhone } from "@/utils/validators";
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
+import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -23,16 +26,18 @@ function SelectField({
   value,
   options,
   onChange,
+  required,
 }: {
   label: string;
   value: string;
   options: string[];
   onChange: (v: string) => void;
+  required?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   return (
     <View style={styles.half}>
-      <Text style={styles.label}>{label}</Text>
+      <Text style={styles.label}>{label}{required && <Text style={styles.requiredMark}> *</Text>}</Text>
       <Pressable style={styles.select} onPress={() => setOpen(true)}>
         <Text style={styles.selectText}>{value}</Text>
         <Text style={styles.chevron}>▾</Text>
@@ -61,6 +66,7 @@ function SelectField({
 
 export default function PetSignupScreen() {
   const router = useRouter();
+  const { user } = useAuth();
   const [name, setName] = useState("");
   const [species, setSpecies] = useState("Cachorro");
   const [breed, setBreed] = useState("");
@@ -72,6 +78,32 @@ export default function PetSignupScreen() {
   const [descriptionInput, setDescriptionInput] = useState("");
   const [ownerName, setOwnerName] = useState("");
   const [phone, setPhone] = useState("");
+  const [castrated, setCastrated] = useState(false);
+  const [vaccinated, setVaccinated] = useState(false);
+  const [hasReward, setHasReward] = useState(false);
+  const [photos, setPhotos] = useState<string[]>([]);
+
+  const pickPhoto = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permissão necessária", "Precisamos de acesso à sua galeria para adicionar fotos.");
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsMultipleSelection: true,
+      quality: 0.8,
+      selectionLimit: 6,
+    });
+    if (!result.canceled) {
+      const uris = result.assets.map((a) => a.uri);
+      setPhotos((prev) => [...prev, ...uris].slice(0, 6));
+    }
+  };
+
+  const removePhoto = (index: number) => {
+    setPhotos((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const addDescriptionChip = () => {
     const trimmed = descriptionInput.trim();
@@ -86,10 +118,25 @@ export default function PetSignupScreen() {
   };
 
   const handleSubmit = () => {
-    if (!name || !ownerName || !phone) {
+    if (!user) {
+      Alert.alert(
+        "Login obrigatório",
+        "Você precisa estar logado para cadastrar um animal.",
+        [{ text: "Ir para login", onPress: () => router.replace("/login") }],
+      );
+      return;
+    }
+    if (photos.length < 2) {
+      Alert.alert(
+        "Fotos obrigatórias",
+        "Adicione pelo menos 2 fotos do animal.",
+      );
+      return;
+    }
+    if (!name || !breed || !disappearanceDate || !location || !ownerName || !phone) {
       Alert.alert(
         "Campos obrigatórios",
-        "Preencha ao menos Nome do pet, Seu nome e Telefone.",
+        "Preencha todos os campos obrigatórios marcados com *.",
       );
       return;
     }
@@ -107,14 +154,35 @@ export default function PetSignupScreen() {
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
-        <Pressable style={styles.photoBox}>
-          <Ionicons name="camera-outline" size={24} color="rgba(0,0,0,0.5)" />
-          <Text style={styles.photoLabel}>Adicionar foto</Text>
-        </Pressable>
+        <View>
+          <Text style={styles.label}>Fotos ({photos.length}/6)</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.photoCarousel}
+          >
+            {photos.map((uri, i) => (
+              <View key={i} style={styles.photoThumb}>
+                <Image source={{ uri }} style={styles.photoThumbImg} contentFit="cover" />
+                <Pressable style={styles.photoRemove} onPress={() => removePhoto(i)}>
+                  <Ionicons name="close-circle" size={20} color="#FFF" />
+                </Pressable>
+              </View>
+            ))}
+            {photos.length < 6 && (
+              <Pressable style={styles.photoAdd} onPress={pickPhoto}>
+                <Ionicons name="camera-outline" size={26} color="rgba(0,0,0,0.4)" />
+                <Text style={styles.photoAddLabel}>
+                  {photos.length === 0 ? "Adicionar fotos" : "Mais fotos"}
+                </Text>
+              </Pressable>
+            )}
+          </ScrollView>
+        </View>
 
         <View style={styles.row}>
           <View style={styles.half}>
-            <Text style={styles.label}>Nome:</Text>
+            <Text style={styles.label}>Nome <Text style={styles.requiredMark}>*</Text></Text>
             <ThemedTextInput
               placeholder="Ex: Rex"
               value={name}
@@ -128,12 +196,13 @@ export default function PetSignupScreen() {
             value={species}
             options={SPECIES_OPTIONS}
             onChange={setSpecies}
+            required
           />
         </View>
 
         <View style={styles.row}>
           <View style={styles.half}>
-            <Text style={styles.label}>Raça</Text>
+            <Text style={styles.label}>Raça <Text style={styles.requiredMark}>*</Text></Text>
             <ThemedTextInput
               placeholder="Ex: Labrador"
               value={breed}
@@ -162,7 +231,7 @@ export default function PetSignupScreen() {
             onChange={setSize}
           />
           <View style={styles.half}>
-            <Text style={styles.label}>Data do desaparecimento</Text>
+            <Text style={styles.label}>Data do desaparecimento <Text style={styles.requiredMark}>*</Text></Text>
             <ThemedTextInput
               placeholder="dd/mm/aaaa"
               value={disappearanceDate}
@@ -175,8 +244,41 @@ export default function PetSignupScreen() {
           </View>
         </View>
 
+        <View style={styles.checkboxRow}>
+          <Pressable
+            style={styles.checkboxItem}
+            onPress={() => setCastrated((v) => !v)}
+          >
+            <View style={[styles.checkbox, castrated && styles.checkboxChecked]}>
+              {castrated && <Ionicons name="checkmark" size={12} color="#FFF" />}
+            </View>
+            <Text style={styles.checkboxLabel}>Castrado</Text>
+          </Pressable>
+
+          <Pressable
+            style={styles.checkboxItem}
+            onPress={() => setVaccinated((v) => !v)}
+          >
+            <View style={[styles.checkbox, vaccinated && styles.checkboxChecked]}>
+              {vaccinated && <Ionicons name="checkmark" size={12} color="#FFF" />}
+            </View>
+            <Text style={styles.checkboxLabel}>Vacinado</Text>
+          </Pressable>
+
+          <Pressable
+            style={styles.checkboxItem}
+            onPress={() => setHasReward((v) => !v)}
+          >
+            <View style={[styles.checkbox, hasReward && styles.checkboxChecked]}>
+              {hasReward && <Ionicons name="checkmark" size={12} color="#FFF" />}
+            </View>
+            <Text style={styles.checkboxLabel}>Tem recompensa</Text>
+          </Pressable>
+        </View>
+
+
         <View>
-          <Text style={styles.label}>Local do desaparecimento</Text>
+          <Text style={styles.label}>Local do desaparecimento <Text style={styles.requiredMark}>*</Text></Text>
           <ThemedTextInput
             placeholder="Bairro, cidade"
             value={location}
@@ -216,7 +318,7 @@ export default function PetSignupScreen() {
 
         <View style={styles.row}>
           <View style={styles.half}>
-            <Text style={styles.label}>Seu nome</Text>
+            <Text style={styles.label}>Seu nome <Text style={styles.requiredMark}>*</Text></Text>
             <ThemedTextInput
               placeholder="Nome completo"
               value={ownerName}
@@ -226,7 +328,7 @@ export default function PetSignupScreen() {
             />
           </View>
           <View style={styles.half}>
-            <Text style={styles.label}>Telefone</Text>
+            <Text style={styles.label}>Telefone <Text style={styles.requiredMark}>*</Text></Text>
             <ThemedTextInput
               placeholder="(00) 00000-0000"
               value={phone}
@@ -251,20 +353,39 @@ const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: "#FFFFFF" },
   content: { padding: 16, paddingBottom: 40, gap: 14 },
 
-  photoBox: {
-    alignSelf: "center",
-    width: 130,
-    height: 108,
-    borderRadius: 16,
+  photoCarousel: {
+    flexDirection: "row",
+    gap: 10,
+    paddingVertical: 4,
+  },
+  photoThumb: {
+    width: 90,
+    height: 90,
+    borderRadius: 12,
+    overflow: "hidden",
+  },
+  photoThumbImg: {
+    width: 90,
+    height: 90,
+  },
+  photoRemove: {
+    position: "absolute",
+    top: 4,
+    right: 4,
+  },
+  photoAdd: {
+    width: 90,
+    height: 90,
+    borderRadius: 12,
     borderWidth: 2,
     borderColor: "#D4C9B8",
     borderStyle: "dashed",
     backgroundColor: "#F0E9DF",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 4,
+    gap: 4,
   },
-  photoLabel: { fontSize: 12, color: "#8A7B6B", marginTop: 6 },
+  photoAddLabel: { fontSize: 11, color: "#8A7B6B", textAlign: "center" },
 
   row: { flexDirection: "row", gap: 10 },
   half: { flex: 1 },
@@ -274,6 +395,10 @@ const styles = StyleSheet.create({
     color: "#5A4F44",
     marginBottom: 4,
     fontWeight: "500",
+  },
+  requiredMark: {
+    color: "#D94F4F",
+    fontWeight: "600",
   },
 
   input: {
@@ -344,6 +469,37 @@ const styles = StyleSheet.create({
     borderBottomColor: "#F0EBE3",
   },
   modalOptionText: { fontSize: 14, color: "#3D3228" },
+
+  checkboxRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 20,
+    paddingLeft: 5,
+  },
+  checkboxItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 5,
+    borderWidth: 1.5,
+    borderColor: "#C0B8AE",
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkboxChecked: {
+    backgroundColor: "#D4735A",
+    borderColor: "#D4735A",
+  },
+  checkboxLabel: {
+    fontSize: 12,
+    color: "#5A4F44",
+    fontWeight: "500",
+  },  
 
   submitButton: {
     backgroundColor: "#D4735A",
