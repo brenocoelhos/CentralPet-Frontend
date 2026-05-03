@@ -1,10 +1,7 @@
-import { useAuth } from "@/context/auth-context";
 import { useGoogleLogin } from "@/hooks/use-google-login";
-import { auth } from "@/lib/firebase";
-import { getFirebaseAuthErrorMessage } from "@/utils/firebase-auth-errors";
+import { ApiError, api } from "@/services/api";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { signInWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -20,7 +17,6 @@ import AuthPasswordField from "./auth-password-field";
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { hasFirebaseConfig, missingConfigKeys } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -32,20 +28,21 @@ export default function LoginScreen() {
       return;
     }
 
-    if (!hasFirebaseConfig || !auth) {
-      Alert.alert(
-        "Firebase nao configurado",
-        `Defina as variaveis ${missingConfigKeys.join(", ")} para habilitar o login.`,
-      );
-      return;
-    }
-
     try {
       setLoading(true);
-      await signInWithEmailAndPassword(auth, email.trim(), password);
+      await api.auth.login({
+        email: email.trim(),
+        senha: password,
+      });
       router.replace("/dashboard");
     } catch (error) {
-      Alert.alert("Falha no login", getFirebaseAuthErrorMessage(error));
+      if (error instanceof ApiError && typeof error.data === "object" && error.data) {
+        const data = error.data as { erro?: string; erros?: string[] };
+        const message = data.erro ?? data.erros?.[0] ?? "Nao foi possivel realizar o login.";
+        Alert.alert("Falha no login", message);
+      } else {
+        Alert.alert("Falha no login", "Nao foi possivel realizar o login.");
+      }
     } finally {
       setLoading(false);
     }

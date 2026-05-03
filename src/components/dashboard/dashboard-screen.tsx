@@ -1,8 +1,11 @@
 import PetCard from "@/components/pet/pet-card";
+import { ApiError, api } from "@/services/api";
+import type { PetDashboardDto } from "@/services/api/modules/pets.api";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
+    ActivityIndicator,
     Dimensions,
     Platform,
     SafeAreaView,
@@ -29,70 +32,6 @@ type Occurrence = {
   hasNewMessage: boolean;
   photo?: string;
 };
-
-// ─── Mock Data ────────────────────────────────────────────────────────────────
-const OCCURRENCES: Occurrence[] = [
-  {
-    id: "1",
-    status: "PERDIDO",
-    time: "há 2h",
-    name: "Bolt",
-    type: "Cão",
-    breed: "Golden Retriever",
-    size: "Porte grande",
-    tags: ["Pelagem dourada", "Coleira azul", "Sem chip"],
-    neighborhood: "Parque Ibirapuera",
-    distance: "0,8 km de você",
-    hasNewMessage: false,
-    photo:
-      "https://images.unsplash.com/photo-1552053831-71594a27632d?w=400&q=80",
-  },
-  {
-    id: "2",
-    status: "ENCONTRADO",
-    time: "há 5h",
-    name: "Gata laranja",
-    type: "Gato",
-    breed: "SRD",
-    size: "Porte pequeno",
-    tags: ["Pelagem laranja", "Sem coleira", "Dócil"],
-    neighborhood: "Vila Madalena",
-    distance: "1,4 km de você",
-    hasNewMessage: true,
-    photo:
-      "https://images.unsplash.com/photo-1574144611937-0df059b5ef3e?w=400&q=80",
-  },
-  {
-    id: "3",
-    status: "PERDIDO",
-    time: "há 1 dia",
-    name: "Max",
-    type: "Cão",
-    breed: "Labrador preto",
-    size: "Porte grande",
-    tags: ["Pelagem preta", "Coleira vermelha"],
-    neighborhood: "Pinheiros",
-    distance: "2,1 km de você",
-    hasNewMessage: false,
-    photo:
-      "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&q=80",
-  },
-  {
-    id: "4",
-    status: "PERDIDO",
-    time: "há 3h",
-    name: "Luna",
-    type: "Cão",
-    breed: "Shih Tzu",
-    size: "Porte pequeno",
-    tags: ["Pelagem branca", "Sem coleira"],
-    neighborhood: "Moema",
-    distance: "3,2 km de você",
-    hasNewMessage: false,
-    photo:
-      "https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?w=400&q=80",
-  },
-];
 
 const FILTERS = ["Todos", "Perdidos", "Encontrados", "Cães", "Gatos"] as const;
 type Filter = (typeof FILTERS)[number];
@@ -139,19 +78,47 @@ const FilterBar = ({
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function DashboardScreen() {
   const [activeFilter, setActiveFilter] = useState<Filter>("Todos");
+  const [occurrences, setOccurrences] = useState<Occurrence[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const filtered: Occurrence[] =
-    activeFilter === "Todos"
-      ? OCCURRENCES
-      : activeFilter === "Perdidos"
-        ? OCCURRENCES.filter((o) => o.status === "PERDIDO")
-        : activeFilter === "Encontrados"
-          ? OCCURRENCES.filter((o) => o.status === "ENCONTRADO")
-          : activeFilter === "Cães"
-            ? OCCURRENCES.filter((o) => o.type === "Cão")
-            : activeFilter === "Gatos"
-              ? OCCURRENCES.filter((o) => o.type === "Gato")
-              : OCCURRENCES;
+  useEffect(() => {
+    const loadDashboard = async () => {
+      try {
+        setLoading(true);
+        setErrorMessage(null);
+        const result = await api.pets.buscaPets();
+        setOccurrences(result.map(mapPetToOccurrence));
+      } catch (error) {
+        if (error instanceof ApiError && typeof error.data === "object" && error.data) {
+          const data = error.data as { erro?: string; erros?: string[] };
+          setErrorMessage(data.erro ?? data.erros?.[0] ?? "Nao foi possivel carregar o dashboard.");
+        } else {
+          setErrorMessage("Nao foi possivel carregar o dashboard.");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void loadDashboard();
+  }, []);
+
+  const filtered: Occurrence[] = useMemo(
+    () =>
+      activeFilter === "Todos"
+        ? occurrences
+        : activeFilter === "Perdidos"
+          ? occurrences.filter((o) => o.status === "PERDIDO")
+          : activeFilter === "Encontrados"
+            ? occurrences.filter((o) => o.status === "ENCONTRADO")
+            : activeFilter === "Cães"
+              ? occurrences.filter((o) => o.type.toLowerCase().includes("cão") || o.type.toLowerCase().includes("cach"))
+              : activeFilter === "Gatos"
+                ? occurrences.filter((o) => o.type.toLowerCase().includes("gato"))
+                : occurrences,
+    [activeFilter, occurrences],
+  );
 
   const rows: Occurrence[][] = [];
   for (let i = 0; i < filtered.length; i += 2) {
@@ -178,8 +145,18 @@ export default function DashboardScreen() {
           </TouchableOpacity>
         </View>
 
+        {loading ? (
+          <View style={styles.loadingWrap}>
+            <ActivityIndicator color={ORANGE} />
+          </View>
+        ) : null}
+
+        {!loading && errorMessage ? (
+          <Text style={styles.errorText}>{errorMessage}</Text>
+        ) : null}
+
         {/* ── Grid ── */}
-        {rows.map((row, i) => (
+        {!loading && !errorMessage && rows.map((row, i) => (
           <View key={i} style={styles.gridRow}>
             {row.map((item) => (
               <PetCard
@@ -313,6 +290,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#bbb",
   },
+  loadingWrap: {
+    paddingVertical: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  errorText: {
+    color: "#D94F4F",
+    textAlign: "center",
+    fontSize: 13,
+    marginBottom: 12,
+  },
 
   // FAB
   fabContainer: {
@@ -341,3 +329,24 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
 });
+
+function mapPetToOccurrence(item: PetDashboardDto): Occurrence {
+  const hasFoundKeyword = item.descricao.some((chip) =>
+    chip.toLowerCase().includes("encontr"),
+  );
+
+  return {
+    id: item.id,
+    status: hasFoundKeyword ? "ENCONTRADO" : "PERDIDO",
+    time: item.dataDesaparecimento,
+    name: item.nome,
+    type: item.especie,
+    breed: item.raca ?? "Sem raca",
+    size: item.porte ?? "Nao informado",
+    tags: item.descricao,
+    neighborhood: item.localDesaparecimento,
+    distance: "",
+    hasNewMessage: false,
+    photo: item.fotoUrl,
+  };
+}

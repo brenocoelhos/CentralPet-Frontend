@@ -1,4 +1,5 @@
 import { useAuth } from "@/context/auth-context";
+import { ApiError, api } from "@/services/api";
 import { maskDate, maskPhone } from "@/utils/validators";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
@@ -6,14 +7,14 @@ import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-  Alert,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  View,
+    Alert,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    View,
 } from "react-native";
 import { ThemedText as Text } from "../themed-text";
 import { ThemedTextInput } from "../themed-text-input";
@@ -82,6 +83,7 @@ export default function PetSignupScreen() {
   const [vaccinated, setVaccinated] = useState(false);
   const [hasReward, setHasReward] = useState(false);
   const [photos, setPhotos] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const pickPhoto = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -117,7 +119,7 @@ export default function PetSignupScreen() {
     setDescriptionChips((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!user) {
       Alert.alert(
         "Login obrigatório",
@@ -140,8 +142,42 @@ export default function PetSignupScreen() {
       );
       return;
     }
-    Alert.alert("Animal cadastrado", "Cadastro realizado com sucesso.");
-    router.replace("/dashboard");
+
+    try {
+      setLoading(true);
+      await api.pets.cadastroPet({
+        usuarioId: user.uid,
+        nome: name.trim(),
+        especie: species,
+        raca: breed.trim() || undefined,
+        cor: color.trim() || undefined,
+        porte: size || undefined,
+        dataDesaparecimento: toApiDate(disappearanceDate),
+        localDesaparecimento: location.trim(),
+        descricao: [
+          ...descriptionChips,
+          castrated ? "Castrado" : "Nao castrado",
+          vaccinated ? "Vacinado" : "Nao vacinado",
+          ...(hasReward ? ["Tem recompensa"] : []),
+        ],
+        fotoUrl: photos[0],
+        nomeTutor: ownerName.trim(),
+        telefoneTutor: phone,
+      });
+
+      Alert.alert("Animal cadastrado", "Cadastro realizado com sucesso.");
+      router.replace("/dashboard");
+    } catch (error) {
+      if (error instanceof ApiError && typeof error.data === "object" && error.data) {
+        const data = error.data as { erro?: string; erros?: string[] };
+        const message = data.erro ?? data.erros?.[0] ?? "Nao foi possivel cadastrar o pet.";
+        Alert.alert("Erro no cadastro", message);
+      } else {
+        Alert.alert("Erro no cadastro", "Nao foi possivel cadastrar o pet.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -341,8 +377,12 @@ export default function PetSignupScreen() {
           </View>
         </View>
 
-        <Pressable style={styles.submitButton} onPress={handleSubmit}>
-          <Text style={styles.submitButtonText}>Cadastrar</Text>
+        <Pressable
+          style={[styles.submitButton, loading && styles.submitButtonDisabled]}
+          onPress={handleSubmit}
+          disabled={loading}
+        >
+          <Text style={styles.submitButtonText}>{loading ? "Enviando..." : "Cadastrar"}</Text>
         </Pressable>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -508,6 +548,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 6,
   },
+  submitButtonDisabled: {
+    opacity: 0.7,
+  },
   submitButtonText: {
     color: "#FFFFFF",
     fontSize: 16,
@@ -515,3 +558,8 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
 });
+
+function toApiDate(maskedDate: string) {
+  const [day, month, year] = maskedDate.split("/");
+  return `${year}-${month}-${day}`;
+}

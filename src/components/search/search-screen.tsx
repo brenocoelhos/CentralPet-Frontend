@@ -1,7 +1,10 @@
 import PetCard from "@/components/pet/pet-card";
+import { ApiError, api } from "@/services/api";
+import type { PetDashboardDto } from "@/services/api/modules/pets.api";
 import { Ionicons } from "@expo/vector-icons";
 import { useMemo, useState } from "react";
 import {
+  ActivityIndicator,
   FlatList,
   Platform,
   Pressable,
@@ -12,119 +15,64 @@ import {
 import { ThemedText as Text } from "../themed-text";
 import { ThemedTextInput } from "../themed-text-input";
 
-type PetItem = {
-  id: string;
-  name: string;
-  species: "Cachorro" | "Gato";
-  breed: string;
-  location: string;
-  imageUrl: string;
-  daysAgo: number;
-  status: "Perdido" | "Encontrado";
-};
-
-const MOCK_PETS: PetItem[] = [
-  {
-    id: "1",
-    name: "Rex",
-    species: "Cachorro",
-    breed: "Labrador",
-    location: "Vila Madalena, SP",
-    imageUrl:
-      "https://images.unsplash.com/photo-1558788353-f76d92427f16?auto=format&fit=crop&w=900&q=80",
-    daysAgo: 2,
-    status: "Perdido",
-  },
-  {
-    id: "2",
-    name: "Mimi",
-    species: "Gato",
-    breed: "Siames",
-    location: "Pinheiros, SP",
-    imageUrl:
-      "https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?auto=format&fit=crop&w=900&q=80",
-    daysAgo: 1,
-    status: "Encontrado",
-  },
-  {
-    id: "3",
-    name: "Thor",
-    species: "Cachorro",
-    breed: "Bulldog",
-    location: "Moema, SP",
-    imageUrl:
-      "https://images.unsplash.com/photo-1561037404-61cd46aa615b?auto=format&fit=crop&w=900&q=80",
-    daysAgo: 5,
-    status: "Perdido",
-  },
-  {
-    id: "4",
-    name: "Luna",
-    species: "Gato",
-    breed: "Persa",
-    location: "Perdizes, SP",
-    imageUrl:
-      "https://images.unsplash.com/photo-1495360010541-f48722b34f7d?auto=format&fit=crop&w=900&q=80",
-    daysAgo: 3,
-    status: "Encontrado",
-  },
-  {
-    id: "5",
-    name: "Thor",
-    species: "Cachorro",
-    breed: "Bulldog",
-    location: "Moema, SP",
-    imageUrl:
-      "https://images.unsplash.com/photo-1561037404-61cd46aa615b?auto=format&fit=crop&w=900&q=80",
-    daysAgo: 5,
-    status: "Perdido",
-  },
-  {
-    id: "6",
-    name: "Luna",
-    species: "Gato",
-    breed: "Persa",
-    location: "Perdizes, SP",
-    imageUrl:
-      "https://images.unsplash.com/photo-1495360010541-f48722b34f7d?auto=format&fit=crop&w=900&q=80",
-    daysAgo: 3,
-    status: "Encontrado",
-  },
-];
-
 export default function SearchScreen() {
   const [query, setQuery] = useState("");
   const [sortByRecent, setSortByRecent] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [pets, setPets] = useState<PetDashboardDto[]>([]);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const filteredPets = useMemo(() => {
-    const term = query.trim().toLowerCase();
+  const shouldSearch = query.trim().length > 0;
 
-    const byQuery = MOCK_PETS.filter((pet) => {
-      if (!term) return true;
+  const sortedPets = useMemo(() => {
+    return [...pets].sort((left, right) => {
+      const leftTime = new Date(left.dataDesaparecimento).getTime();
+      const rightTime = new Date(right.dataDesaparecimento).getTime();
 
-      return [pet.name, pet.species, pet.breed, pet.location]
-        .join(" ")
-        .toLowerCase()
-        .includes(term);
-    });
-
-    return [...byQuery].sort((left, right) => {
       if (sortByRecent) {
-        return left.daysAgo - right.daysAgo;
+        return rightTime - leftTime;
       }
 
-      return right.daysAgo - left.daysAgo;
+      return leftTime - rightTime;
     });
-  }, [query, sortByRecent]);
+  }, [pets, sortByRecent]);
 
-  const renderPetCard = ({ item }: { item: PetItem }) => {
+  const handleSearch = async (value: string) => {
+    setQuery(value);
+
+    const term = value.trim();
+    if (!term) {
+      setPets([]);
+      setErrorMessage(null);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setErrorMessage(null);
+      const result = await api.pets.buscaPets({ nome: term });
+      setPets(result);
+    } catch (error) {
+      setPets([]);
+      if (error instanceof ApiError && typeof error.data === "object" && error.data) {
+        const data = error.data as { erro?: string; erros?: string[] };
+        setErrorMessage(data.erro ?? data.erros?.[0] ?? "Erro ao buscar pets.");
+      } else {
+        setErrorMessage("Erro ao buscar pets.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renderPetCard = ({ item }: { item: PetDashboardDto }) => {
     return (
       <PetCard
         variant="search"
-        name={item.name}
-        breed={item.breed}
-        location={item.location}
-        imageUrl={item.imageUrl}
+        name={item.nome}
+        breed={item.raca ?? item.especie}
+        location={item.localDesaparecimento}
+        imageUrl={item.fotoUrl}
         imageHeight={180}
         cardStyle={styles.itemCard}
       />
@@ -139,22 +87,33 @@ export default function SearchScreen() {
           placeholder="Nome, raça, bairro..."
           placeholderTextColor="#9D988D"
           value={query}
-          onChangeText={setQuery}
+          onChangeText={handleSearch}
           style={styles.input}
         />
       </View>
 
       <View style={styles.resultsRow}>
-        <Text style={styles.resultsLabel}>{filteredPets.length} animais encontrados</Text>
+        <Text style={styles.resultsLabel}>
+          {shouldSearch ? `${sortedPets.length} animais encontrados` : "Digite para buscar"}
+        </Text>
         <Pressable
           style={styles.sortButton}
           onPress={() => setSortByRecent((current) => !current)}
+          disabled={!shouldSearch}
         >
           <Text style={styles.sortButtonText}>
             {sortByRecent ? "Mais recentes" : "Mais antigos"}
           </Text>
         </Pressable>
       </View>
+
+      {loading ? (
+        <View style={styles.loadingRow}>
+          <ActivityIndicator color="#D97757" />
+        </View>
+      ) : null}
+
+      {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
     </View>
   );
 
@@ -162,13 +121,15 @@ export default function SearchScreen() {
     <SafeAreaView style={styles.page}>
       <FlatList
         style={styles.container}
-        data={filteredPets}
+        data={shouldSearch ? sortedPets : []}
         numColumns={2}
         columnWrapperStyle={styles.cardRow}
         keyExtractor={(item) => item.id}
         renderItem={renderPetCard}
         ListHeaderComponent={listHeader}
-        ListEmptyComponent={<Text style={styles.emptyText}>Nenhum animal encontrado.</Text>}
+        ListEmptyComponent={
+          shouldSearch ? <Text style={styles.emptyText}>Nenhum animal encontrado.</Text> : null
+        }
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
       />
@@ -237,6 +198,16 @@ const styles = StyleSheet.create({
     color: "#4B443A",
     fontSize: 12,
     fontFamily: "Lexend_600SemiBold",
+  },
+  loadingRow: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 2,
+  },
+  errorText: {
+    color: "#D94F4F",
+    fontSize: 12,
+    marginTop: 2,
   },
   itemCard: {
     flex: 1,

@@ -1,6 +1,4 @@
-import { useAuth } from "@/context/auth-context";
-import { auth } from "@/lib/firebase";
-import { getFirebaseAuthErrorMessage } from "@/utils/firebase-auth-errors";
+import { ApiError, api } from "@/services/api";
 import {
     maskCPF,
     maskDate,
@@ -11,7 +9,6 @@ import {
 } from "@/utils/validators";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { useState } from "react";
 import {
     ActivityIndicator,
@@ -38,7 +35,6 @@ interface SignupFormState {
 
 export default function UserSignupScreen() {
   const router = useRouter();
-  const { hasFirebaseConfig, missingConfigKeys } = useAuth();
   const [loading, setLoading] = useState<boolean>(false);
 
   const [form, setForm] = useState<SignupFormState>({
@@ -178,31 +174,29 @@ export default function UserSignupScreen() {
       return;
     }
 
-    if (!hasFirebaseConfig || !auth) {
-      Alert.alert(
-        "Firebase nao configurado",
-        `Defina as variaveis ${missingConfigKeys.join(", ")} para habilitar o cadastro.`
-      );
-      return;
-    }
-
     try {
       setLoading(true);
 
-      const credentials = await createUserWithEmailAndPassword(
-        auth,
-        email.trim(),
-        senha
-      );
-
-      await updateProfile(credentials.user, {
-        displayName: nome.trim(),
+      await api.auth.cadastro({
+        nome: nome.trim(),
+        cpf,
+        dataNascimento: toApiDate(dataNascimento),
+        email: email.trim(),
+        senha,
+        telefone,
+        endereco: form.endereco.trim() || undefined,
       });
 
       Alert.alert("Sucesso!", "Cadastro realizado com sucesso.");
       router.replace("/dashboard");
     } catch (error) {
-      Alert.alert("Falha no cadastro", getFirebaseAuthErrorMessage(error));
+      if (error instanceof ApiError && typeof error.data === "object" && error.data) {
+        const data = error.data as { erro?: string; erros?: string[] };
+        const message = data.erro ?? data.erros?.[0] ?? "Nao foi possivel concluir o cadastro.";
+        Alert.alert("Falha no cadastro", message);
+      } else {
+        Alert.alert("Falha no cadastro", "Nao foi possivel concluir o cadastro.");
+      }
     } finally {
       setLoading(false);
     }
@@ -386,3 +380,8 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 });
+
+function toApiDate(maskedDate: string) {
+  const [day, month, year] = maskedDate.split("/");
+  return `${year}-${month}-${day}`;
+}
