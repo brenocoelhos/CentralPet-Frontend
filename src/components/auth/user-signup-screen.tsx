@@ -1,22 +1,22 @@
 import { api } from "@/services/api";
 import { showApiErrorAlert } from "@/utils/api-error-alert";
 import {
-    maskCPF,
-    maskDate,
-    maskPhone,
-    validaCPF,
-    validaData,
-    validaTelefone,
+  maskCPF,
+  maskDate,
+  maskPhone,
+  validaCPF,
+  validaData,
+  validaTelefone,
 } from "@/utils/validators";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    StyleSheet,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { ThemedText as Text } from "../themed-text";
@@ -180,11 +180,11 @@ export default function UserSignupScreen() {
 
       await api.auth.cadastro({
         nome: nome.trim(),
-        cpf,
+        cpf: cpf.replace(/\D/g, ""),
         dataNascimento: toApiDate(dataNascimento),
         email: email.trim(),
         senha,
-        telefone,
+        telefone: telefone.replace(/\D/g, ""),
         endereco: form.endereco.trim() || undefined,
       });
 
@@ -336,6 +336,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 28,
     paddingBottom: 48,
+    justifyContent: "center",
   },
   avatarWrapper: {
     alignItems: "center",

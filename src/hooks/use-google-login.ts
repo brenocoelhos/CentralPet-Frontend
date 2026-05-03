@@ -3,9 +3,9 @@ import { makeRedirectUri } from "expo-auth-session";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
 import {
-    GoogleAuthProvider,
-    signInWithCredential,
-    signInWithPopup,
+  GoogleAuthProvider,
+  signInWithCredential,
+  signInWithPopup,
 } from "firebase/auth";
 import { useMemo, useState } from "react";
 import { Alert, Platform } from "react-native";
@@ -26,7 +26,7 @@ function getRedirectUri() {
   });
 }
 
-export function useGoogleLogin() {
+export function useGoogleLogin(onSuccess?: () => void) {
   const [loading, setLoading] = useState(false);
   const redirectUri = getRedirectUri();
 
@@ -100,6 +100,7 @@ export function useGoogleLogin() {
         setLoading(true);
         const provider = new GoogleAuthProvider();
         await signInWithPopup(auth, provider);
+        onSuccess?.();
       } catch {
         Alert.alert(
           "Falha no login",
@@ -149,6 +150,7 @@ export function useGoogleLogin() {
 
       const credential = GoogleAuthProvider.credential(idToken);
       await signInWithCredential(auth, credential);
+      onSuccess?.();
     } catch {
       Alert.alert("Falha no login", "Nao foi possivel entrar com Google.");
     } finally {

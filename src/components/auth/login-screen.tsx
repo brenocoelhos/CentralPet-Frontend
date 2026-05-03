@@ -6,11 +6,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  StyleSheet,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    StyleSheet,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { ThemedText as Text } from "../themed-text";
@@ -22,7 +22,7 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const { handleGoogleLogin, loading: googleLoading } = useGoogleLogin();
+  const { handleGoogleLogin, loading: googleLoading } = useGoogleLogin(() => router.replace("/dashboard"));
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -145,6 +145,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 36,
     paddingBottom: 48,
+    justifyContent: "center",
   },
   headerWrapper: {
     alignItems: "center",

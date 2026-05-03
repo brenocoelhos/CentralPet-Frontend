@@ -6,7 +6,6 @@ import { signOut } from "firebase/auth";
 import {
   ActivityIndicator,
   Alert,
-  ScrollView,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -42,88 +41,89 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.root}>
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.container}
-        showsVerticalScrollIndicator={false}
-      >
+      <View style={styles.topSection}>
         <View style={styles.avatarWrapper}>
           <View style={styles.avatarCircle}>
             <Ionicons name="person-outline" size={36} color="#8A7060" />
           </View>
           <Text style={styles.avatarName}>{user ? profileName : "Visitante"}</Text>
+          {user?.email && <Text style={styles.avatarEmail}>{user.email}</Text>}
         </View>
 
+        {!user && (
+          <TouchableOpacity
+            style={styles.authButton}
+            onPress={() => router.push("/login")}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.authButtonText}>Entrar ou criar conta</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+
+      <View style={styles.menuContainer}>
         <TouchableOpacity
-          style={styles.authButton}
-          onPress={() => router.push("/login")}
-          activeOpacity={0.85}
+          style={[styles.menuItem, !user && styles.menuItemDisabled]}
+          activeOpacity={user ? 0.85 : 1}
+          onPress={() => user && router.push("/meus-registros")}
+          disabled={!user}
         >
-          <Text style={styles.authButtonText}>Entrar ou criar conta</Text>
+          <View style={[styles.menuIconWrap, !user && styles.menuIconWrapDisabled]}>
+            <Ionicons name="document-text-outline" size={20} color={user ? "#8A7060" : "#B8B8B8"} />
+          </View>
+          <View style={styles.menuTextWrap}>
+            <Text style={[styles.menuTitle, !user && styles.menuTextDisabled]}>Meus registros</Text>
+            <Text style={[styles.menuDescription, !user && styles.menuTextDisabled]}>Veja seu historico e atividades</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={user ? "#B7AE9F" : "#D0D0D0"} />
         </TouchableOpacity>
 
-        <View style={styles.menuContainer}>
-          <TouchableOpacity
-            style={styles.menuItem}
-            activeOpacity={0.85}
-            onPress={() => router.push("/meus-registros")}
-          >
-            <View style={styles.menuIconWrap}>
-              <Ionicons name="document-text-outline" size={20} color="#8A7060" />
-            </View>
-            <View style={styles.menuTextWrap}>
-              <Text style={styles.menuTitle}>Meus registros</Text>
-              <Text style={styles.menuDescription}>Veja seu historico e atividades</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color="#B7AE9F" />
-          </TouchableOpacity>
+        <View style={styles.menuDivider} />
 
-          <View style={styles.menuDivider} />
+        <TouchableOpacity
+          style={[styles.menuItem, !user && styles.menuItemDisabled]}
+          activeOpacity={user ? 0.85 : 1}
+          onPress={() => user && router.push("/configuracoes")}
+          disabled={!user}
+        >
+          <View style={[styles.menuIconWrap, !user && styles.menuIconWrapDisabled]}>
+            <Ionicons name="settings-outline" size={20} color={user ? "#8A7060" : "#B8B8B8"} />
+          </View>
+          <View style={styles.menuTextWrap}>
+            <Text style={[styles.menuTitle, !user && styles.menuTextDisabled]}>Configuracoes</Text>
+            <Text style={[styles.menuDescription, !user && styles.menuTextDisabled]}>Ajuste preferencias da sua conta</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={user ? "#B7AE9F" : "#D0D0D0"} />
+        </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.menuItem}
-            activeOpacity={0.85}
-            onPress={() => router.push("/configuracoes")}
-          >
-            <View style={styles.menuIconWrap}>
-              <Ionicons name="settings-outline" size={20} color="#8A7060" />
-            </View>
-            <View style={styles.menuTextWrap}>
-              <Text style={styles.menuTitle}>Configuracoes</Text>
-              <Text style={styles.menuDescription}>Ajuste preferencias da sua conta</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color="#B7AE9F" />
-          </TouchableOpacity>
+        <View style={styles.menuDivider} />
 
-          <View style={styles.menuDivider} />
-
-          <TouchableOpacity
-            style={[styles.menuItem, !user && styles.menuItemDisabled]}
-            activeOpacity={user ? 0.85 : 1}
-            onPress={handleLogout}
-            disabled={!user}
-          >
-            <View style={[styles.menuIconWrap, !user && styles.menuIconWrapDisabled]}>
-              <Ionicons
-                name="log-out-outline"
-                size={20}
-                color={user ? "#8A7060" : "#B8B8B8"}
-              />
-            </View>
-            <View style={styles.menuTextWrap}>
-              <Text style={[styles.menuTitle, !user && styles.menuTextDisabled]}>Sair</Text>
-              <Text style={[styles.menuDescription, !user && styles.menuTextDisabled]}>
-                Encerrar sessao da conta atual
-              </Text>
-            </View>
+        <TouchableOpacity
+          style={[styles.menuItem, !user && styles.menuItemDisabled]}
+          activeOpacity={user ? 0.85 : 1}
+          onPress={handleLogout}
+          disabled={!user}
+        >
+          <View style={[styles.menuIconWrap, !user && styles.menuIconWrapDisabled]}>
             <Ionicons
-              name="chevron-forward"
-              size={18}
-              color={user ? "#B7AE9F" : "#D0D0D0"}
+              name="log-out-outline"
+              size={20}
+              color={user ? "#8A7060" : "#B8B8B8"}
             />
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+          </View>
+          <View style={styles.menuTextWrap}>
+            <Text style={[styles.menuTitle, !user && styles.menuTextDisabled]}>Sair</Text>
+            <Text style={[styles.menuDescription, !user && styles.menuTextDisabled]}>
+              Encerrar sessao da conta atual
+            </Text>
+          </View>
+          <Ionicons
+            name="chevron-forward"
+            size={18}
+            color={user ? "#B7AE9F" : "#D0D0D0"}
+          />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -132,6 +132,7 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: "#FFFFFF",
+    justifyContent: "space-between",
   },
   centered: {
     flex: 1,
@@ -139,15 +140,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#FFFFFF",
   },
-  scrollView: {
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-  },
-  container: {
-    flexGrow: 1,
+  topSection: {
     paddingHorizontal: 20,
     paddingTop: 0,
-    paddingBottom: 48,
   },
   avatarWrapper: {
     alignItems: "center",
@@ -168,6 +163,11 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#1A1A1A",
     marginBottom: 2,
+  },
+  avatarEmail: {
+    fontSize: 13,
+    color: "#8E8476",
+    marginTop: 2,
   },
   authButton: {
     backgroundColor: "#D97757",
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
   },
   menuTitle: {
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: "400",
     color: "#1F1F1F",
   },
   menuDescription: {
