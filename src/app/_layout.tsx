@@ -107,7 +107,17 @@ function AppStack() {
         }}
       />
 
-      <Stack.Screen name="perfil" options={{ title: "Perfil" }} />
+      <Stack.Screen
+        name="perfil"
+        options={{
+          title: "Perfil",
+          headerTitleStyle: {
+            fontFamily: "Lexend_700Bold",
+            fontSize: 22,
+            color: "#1A1A1A",
+          },
+        }}
+      />
       <Stack.Screen
         name="meus-registros"
         options={{ title: "Meus registros" }}

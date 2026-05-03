@@ -1,5 +1,5 @@
-import { Alert } from "react-native";
 import { ApiError } from "@/services/api";
+import { Alert } from "react-native";
 
 /**
  * Extrai a mensagem de um erro da API e exibe um Alert padronizado.

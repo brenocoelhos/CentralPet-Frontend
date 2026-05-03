@@ -51,20 +51,21 @@ export default function AuthInputField({
 
 const styles = StyleSheet.create({
   label: {
-    fontSize: 13,
-    color: "#1A1A1A",
-    marginBottom: 6,
-    marginTop: 2,
+    fontSize: 12,
+    color: "#5A4F44",
+    marginBottom: 4,
+    fontWeight: "500",
   },
   field: {
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#E0DBD0",
-    borderRadius: 12,
+    borderColor: "#DDD5CA",
+    borderRadius: 10,
     paddingHorizontal: 12,
+    minHeight: 40,
     backgroundColor: "#FFFFFF",
-    marginBottom: 12,
+    marginBottom: 10,
   },
   fieldError: {
     borderColor: "red",
@@ -72,11 +73,12 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 13,
-    color: "#1A1A1A",
+    color: "#3D3228",
     borderWidth: 0,
-    paddingHorizontal: 10,
-    paddingVertical: 13,
+    paddingHorizontal: 0,
+    paddingVertical: 10,
     backgroundColor: "#FFFFFF",
+    textAlignVertical: "center",
   },
   errorText: {
     fontSize: 12,

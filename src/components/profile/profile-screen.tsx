@@ -4,12 +4,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { signOut } from "firebase/auth";
 import {
-    ActivityIndicator,
-    Alert,
-    ScrollView,
-    StyleSheet,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { ThemedText as Text } from "../themed-text";
 
@@ -151,6 +151,7 @@ const styles = StyleSheet.create({
   },
   avatarWrapper: {
     alignItems: "center",
+    marginTop: 16,
     marginBottom: 22,
   },
   avatarCircle: {
