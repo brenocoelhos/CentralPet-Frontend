@@ -92,7 +92,12 @@ export default function SearchScreen() {
         imageUrl={item.fotoUrl}
         imageHeight={CARD_IMAGE_HEIGHT}
         cardStyle={styles.itemCard}
-        onPress={() => router.push({ pathname: "/pet-detail", params: { id: item.id } })}
+        onPress={() =>
+          router.push({
+            pathname: "/pet-detail",
+            params: { pet: encodeURIComponent(JSON.stringify(item)) },
+          })
+        }
       />
     );
   };

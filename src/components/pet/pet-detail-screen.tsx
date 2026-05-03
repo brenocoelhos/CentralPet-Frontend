@@ -100,6 +100,50 @@ const SectionTitle = ({ title }: { title: string }) => (
   <Text style={styles.sectionTitle}>{title}</Text>
 );
 
+function formatDisplayDate(value?: string): string {
+  if (!value) {
+    return "";
+  }
+
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(value)) {
+    return value;
+  }
+
+  const isoMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (isoMatch) {
+    const [, year, month, day] = isoMatch;
+    return `${day}/${month}/${year}`;
+  }
+
+  const date = new Date(value);
+  if (!Number.isNaN(date.getTime())) {
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = String(date.getFullYear());
+    return `${day}/${month}/${year}`;
+  }
+
+  return value;
+}
+
+function formatDisplayDateTime(value?: string): string {
+  if (!value) {
+    return "";
+  }
+
+  const date = new Date(value);
+  if (!Number.isNaN(date.getTime())) {
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = String(date.getFullYear());
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    return `${day}/${month}/${year} às ${hours}:${minutes}`;
+  }
+
+  return formatDisplayDate(value);
+}
+
 // ─── Photo Carousel ───────────────────────────────────────────────────────────
 const PhotoCarousel = ({
   photos,
@@ -204,7 +248,7 @@ export default function PetDetailScreen({ item }: PetDetailScreenProps) {
               <Text style={styles.metaText}>{item.neighborhood}</Text>
             </View>
             <View style={styles.metaDot} />
-            <Text style={styles.metaTime}>Publicado {item.time}</Text>
+            <Text style={styles.metaTime}>Publicado {formatDisplayDateTime(item.time)}</Text>
           </View>
         </View>
 
@@ -265,7 +309,7 @@ export default function PetDetailScreen({ item }: PetDetailScreenProps) {
             <InfoRow
               icon="calendar-outline"
               label="Data"
-              value={item.lastSeenDate ?? "Não informado"}
+              value={item.lastSeenDate ? formatDisplayDate(item.lastSeenDate) : "Não informado"}
             />
             <View style={styles.infoSeparator} />
             <InfoRow

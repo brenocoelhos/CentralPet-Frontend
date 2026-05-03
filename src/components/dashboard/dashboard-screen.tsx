@@ -32,6 +32,7 @@ type Occurrence = {
   distance: string;
   hasNewMessage: boolean;
   photo?: string;
+  raw: PetDashboardDto;
 };
 
 const FILTERS = ["Todos", "Perdidos", "Encontrados", "Cães", "Gatos"] as const;
@@ -173,7 +174,10 @@ export default function DashboardScreen() {
                 imageHeight={CARD_IMAGE_HEIGHT}
                 cardStyle={styles.petCard}
                 onPress={() =>
-                  router.push({ pathname: "/pet-detail", params: { id: item.id } })
+                  router.push({
+                    pathname: "/pet-detail",
+                    params: { pet: encodeURIComponent(JSON.stringify(item.raw)) },
+                  })
                 }
               />
             ))}
@@ -350,5 +354,6 @@ function mapPetToOccurrence(item: PetDashboardDto): Occurrence {
     distance: "",
     hasNewMessage: false,
     photo: item.fotoUrl,
+    raw: item,
   };
 }

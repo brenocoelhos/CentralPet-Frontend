@@ -1,71 +1,84 @@
 import AppShell from "@/components/layout/app-shell";
 import PetDetailScreen from "@/components/pet/pet-detail-screen";
+import type { PetDashboardDto } from "@/services/api/modules/pets.api";
 import { useLocalSearchParams } from "expo-router";
 
-// 🔹 MOCK (use o mesmo do dashboard)
-const MOCK_DATA = [
-  {
-    id: "1",
-    status: "PERDIDO",
-    time: "há 2h",
-    name: "Bolt",
-    type: "Cão",
-    breed: "Golden Retriever",
-    size: "Porte grande",
-    tags: ["Pelagem dourada", "Coleira azul", "Sem chip"],
-    neighborhood: "Parque Ibirapuera",
-    distance: "0,8 km de você",
-    hasNewMessage: false,
-    description: "Muito dócil, atende pelo nome.",
-    ownerName: "João",
-    ownerPhone: "11999999999",
-    reward: true,
-    lastSeenDate: "20/04/2026",
-    lastSeenAddress: "Parque Ibirapuera",
-    color: "Dourado",
-    age: "3 anos",
-    weight: "28kg",
-    castrated: true,
-    vaccinated: true,
-  },
-  {
-    id: "2",
-    status: "ENCONTRADO",
-    time: "há 5h",
-    name: "Gata laranja",
-    type: "Gato",
-    breed: "SRD",
-    size: "Porte pequeno",
-    tags: ["Pelagem laranja", "Sem coleira", "Dócil"],
-    neighborhood: "Vila Mada",
-    distance: "1,4 km de você",
-    hasNewMessage: true,
-    description: "Aparenta estar perdida.",
-    ownerName: "Maria",
-    ownerPhone: "11988888888",
-    lastSeenDate: "21/04/2026",
-    lastSeenAddress: "Vila Madalena",
-    color: "Laranja",
-    age: "2 anos",
-    weight: "4kg",
-    castrated: false,
-    vaccinated: false,
-  },
-];
+type DetailItem = {
+  id: string;
+  status: "PERDIDO" | "ENCONTRADO";
+  time: string;
+  name: string;
+  type: string;
+  breed: string;
+  size: string;
+  tags: string[];
+  neighborhood: string;
+  distance: string;
+  hasNewMessage: boolean;
+  photos?: string[];
+  ownerName?: string;
+  ownerPhone?: string;
+  reward?: boolean;
+  lastSeenDate?: string;
+  lastSeenAddress?: string;
+  color?: string;
+  castrated?: boolean;
+  vaccinated?: boolean;
+};
 
 export default function PetDetailRoute() {
-  const { id } = useLocalSearchParams();
+  const { pet } = useLocalSearchParams<{ pet?: string }>();
 
-  const item = MOCK_DATA.find((o) => o.id === id);
-
-  // 🔹 fallback simples (evita crash)
-  if (!item) {
+  if (!pet) {
     return null;
   }
+
+  let parsedPet: PetDashboardDto | null = null;
+
+  try {
+    parsedPet = JSON.parse(decodeURIComponent(pet));
+  } catch {
+    parsedPet = null;
+  }
+
+  if (!parsedPet) {
+    return null;
+  }
+
+  const item = mapPetToDetailItem(parsedPet);
 
   return (
     <AppShell>
       <PetDetailScreen item={item} />
     </AppShell>
   );
+}
+
+function mapPetToDetailItem(item: PetDashboardDto): DetailItem {
+  const hasFoundKeyword = item.descricao.some((chip) =>
+    chip.toLowerCase().includes("encontr"),
+  );
+
+  return {
+    id: item.id,
+    status: hasFoundKeyword ? "ENCONTRADO" : "PERDIDO",
+    time: item.dataCadastro ?? item.dataDesaparecimento,
+    name: item.nome,
+    type: item.especie,
+    breed: item.raca ?? "Sem raca",
+    size: item.porte ?? "Nao informado",
+    tags: item.descricao,
+    neighborhood: item.localDesaparecimento,
+    distance: "",
+    hasNewMessage: false,
+    photos: item.fotoUrl ? [item.fotoUrl] : undefined,
+    ownerName: item.nomeTutor,
+    ownerPhone: item.telefoneTutor,
+    reward: item.descricao.some((chip) => chip.toLowerCase().includes("recompensa")),
+    lastSeenDate: item.dataDesaparecimento,
+    lastSeenAddress: item.localDesaparecimento,
+    color: item.cor,
+    castrated: item.descricao.some((chip) => chip.toLowerCase().includes("castrad")),
+    vaccinated: item.descricao.some((chip) => chip.toLowerCase().includes("vacinad")),
+  };
 }

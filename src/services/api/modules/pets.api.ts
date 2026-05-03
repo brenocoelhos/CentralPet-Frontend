@@ -10,6 +10,7 @@ export type PetDashboardDto = {
   cor?: string;
   porte?: string;
   dataDesaparecimento: string;
+  dataCadastro?: string;
   localDesaparecimento: string;
   descricao: string[];
   fotoUrl?: string;
