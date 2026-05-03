@@ -1,9 +1,9 @@
 import { AuthProvider } from "@/context/auth-context";
 import {
-  Lexend_400Regular,
-  Lexend_500Medium,
-  Lexend_600SemiBold,
-  Lexend_700Bold,
+    Lexend_400Regular,
+    Lexend_500Medium,
+    Lexend_600SemiBold,
+    Lexend_700Bold,
 } from "@expo-google-fonts/lexend";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
@@ -87,6 +87,14 @@ function AppStack() {
       />
 
       <Stack.Screen name="perfil" options={{ title: "Perfil" }} />
+      <Stack.Screen
+        name="meus-registros"
+        options={{ title: "Meus registros" }}
+      />
+      <Stack.Screen
+        name="configuracoes"
+        options={{ title: "Configuracoes" }}
+      />
     </Stack>
   );
 }

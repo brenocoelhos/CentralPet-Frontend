@@ -16,8 +16,14 @@ import { ThemedText as Text } from "../themed-text";
 export default function ProfileScreen() {
   const router = useRouter();
   const { user, initializing } = useAuth();
+  const profileName =
+    user?.displayName?.trim() || user?.email?.split("@")[0] || "Usuario";
 
   const handleLogout = async () => {
+    if (!user) {
+      return;
+    }
+
     try {
       if (auth) await signOut(auth);
       router.replace("/login");
@@ -45,59 +51,78 @@ export default function ProfileScreen() {
           <View style={styles.avatarCircle}>
             <Ionicons name="person-outline" size={36} color="#8A7060" />
           </View>
-          <Text style={styles.avatarName}>
-            {user ? (user.displayName ?? "Usuario") : "Visitante"}
-          </Text>
-          {!user && (
-            <Text style={styles.avatarSubtitle}>
-              Entre ou cadastre-se para acessar seu perfil
-            </Text>
-          )}
+          <Text style={styles.avatarName}>{user ? profileName : "Visitante"}</Text>
         </View>
 
-        {user ? (
-          <>
-            <View style={styles.fieldGroup}>
-              <View style={styles.field}>
-                <Text style={styles.fieldLabel}>E-MAIL</Text>
-                <Text style={styles.fieldValue}>{user.email ?? "�"}</Text>
-              </View>
+        <TouchableOpacity
+          style={styles.authButton}
+          onPress={() => router.push("/login")}
+          activeOpacity={0.85}
+        >
+          <Text style={styles.authButtonText}>Entrar ou criar conta</Text>
+        </TouchableOpacity>
 
-              {user.phoneNumber && (
-                <View style={[styles.field, styles.fieldBorderTop]}>
-                  <Text style={styles.fieldLabel}>TELEFONE</Text>
-                  <Text style={styles.fieldValue}>{user.phoneNumber}</Text>
-                </View>
-              )}
+        <View style={styles.menuContainer}>
+          <TouchableOpacity
+            style={styles.menuItem}
+            activeOpacity={0.85}
+            onPress={() => router.push("/meus-registros")}
+          >
+            <View style={styles.menuIconWrap}>
+              <Ionicons name="document-text-outline" size={20} color="#8A7060" />
             </View>
+            <View style={styles.menuTextWrap}>
+              <Text style={styles.menuTitle}>Meus registros</Text>
+              <Text style={styles.menuDescription}>Veja seu historico e atividades</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color="#B7AE9F" />
+          </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.dangerButton}
-              onPress={handleLogout}
-              activeOpacity={0.85}
-            >
-              <Text style={styles.dangerButtonText}>Sair da conta</Text>
-            </TouchableOpacity>
-          </>
-        ) : (
-          <>
-            <TouchableOpacity
-              style={styles.primaryButton}
-              onPress={() => router.push("/login")}
-              activeOpacity={0.85}
-            >
-              <Text style={styles.primaryButtonText}>Entrar</Text>
-            </TouchableOpacity>
+          <View style={styles.menuDivider} />
 
-            <TouchableOpacity
-              style={styles.secondaryButton}
-              onPress={() => router.push("/cadastro-usuario")}
-              activeOpacity={0.85}
-            >
-              <Text style={styles.secondaryButtonText}>Criar conta</Text>
-            </TouchableOpacity>
-          </>
-        )}
+          <TouchableOpacity
+            style={styles.menuItem}
+            activeOpacity={0.85}
+            onPress={() => router.push("/configuracoes")}
+          >
+            <View style={styles.menuIconWrap}>
+              <Ionicons name="settings-outline" size={20} color="#8A7060" />
+            </View>
+            <View style={styles.menuTextWrap}>
+              <Text style={styles.menuTitle}>Configuracoes</Text>
+              <Text style={styles.menuDescription}>Ajuste preferencias da sua conta</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color="#B7AE9F" />
+          </TouchableOpacity>
+
+          <View style={styles.menuDivider} />
+
+          <TouchableOpacity
+            style={[styles.menuItem, !user && styles.menuItemDisabled]}
+            activeOpacity={user ? 0.85 : 1}
+            onPress={handleLogout}
+            disabled={!user}
+          >
+            <View style={[styles.menuIconWrap, !user && styles.menuIconWrapDisabled]}>
+              <Ionicons
+                name="log-out-outline"
+                size={20}
+                color={user ? "#8A7060" : "#B8B8B8"}
+              />
+            </View>
+            <View style={styles.menuTextWrap}>
+              <Text style={[styles.menuTitle, !user && styles.menuTextDisabled]}>Sair</Text>
+              <Text style={[styles.menuDescription, !user && styles.menuTextDisabled]}>
+                Encerrar sessao da conta atual
+              </Text>
+            </View>
+            <Ionicons
+              name="chevron-forward"
+              size={18}
+              color={user ? "#B7AE9F" : "#D0D0D0"}
+            />
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </View>
   );
@@ -121,12 +146,12 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     paddingHorizontal: 20,
-    paddingTop: 32,
+    paddingTop: 0,
     paddingBottom: 48,
   },
   avatarWrapper: {
     alignItems: "center",
-    marginBottom: 32,
+    marginBottom: 22,
   },
   avatarCircle: {
     width: 88,
@@ -141,74 +166,65 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "700",
     color: "#1A1A1A",
-    marginBottom: 4,
+    marginBottom: 2,
   },
-  avatarSubtitle: {
-    fontSize: 13,
-    color: "#B0A898",
-    textAlign: "center",
-  },
-  fieldGroup: {
-    borderWidth: 1,
-    borderColor: "#E0DBD0",
-    borderRadius: 14,
-    overflow: "hidden",
-    marginBottom: 20,
-  },
-  field: {
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    backgroundColor: "#FFFFFF",
-    gap: 3,
-  },
-  fieldBorderTop: {
-    borderTopWidth: 1,
-    borderTopColor: "#E0DBD0",
-  },
-  fieldLabel: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: "#B0A898",
-    letterSpacing: 0.5,
-  },
-  fieldValue: {
-    fontSize: 15,
-    color: "#1A1A1A",
-  },
-  primaryButton: {
+  authButton: {
     backgroundColor: "#D97757",
-    borderRadius: 50,
+    borderRadius: 16,
     paddingVertical: 16,
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 22,
   },
-  primaryButtonText: {
+  authButtonText: {
     fontSize: 15,
     color: "#FFFFFF",
     fontWeight: "bold",
   },
-  secondaryButton: {
-    borderWidth: 1,
-    borderColor: "#D97757",
-    borderRadius: 50,
-    paddingVertical: 16,
+  menuContainer: {
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: "#EAE5DA",
+  },
+  menuItem: {
+    flexDirection: "row",
     alignItems: "center",
+    gap: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    backgroundColor: "#FFFFFF",
   },
-  secondaryButtonText: {
-    fontSize: 15,
-    color: "#D97757",
-    fontWeight: "bold",
+  menuItemDisabled: {
+    backgroundColor: "#F8F8F8",
   },
-  dangerButton: {
-    borderWidth: 1,
-    borderColor: "#D97757",
-    borderRadius: 50,
-    paddingVertical: 16,
+  menuIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#F0EBE0",
   },
-  dangerButtonText: {
+  menuIconWrapDisabled: {
+    backgroundColor: "#EEEEEE",
+  },
+  menuTextWrap: {
+    flex: 1,
+    gap: 2,
+  },
+  menuTitle: {
     fontSize: 15,
-    color: "#D97757",
-    fontWeight: "bold",
+    fontWeight: "700",
+    color: "#1F1F1F",
+  },
+  menuDescription: {
+    fontSize: 12,
+    color: "#8E8476",
+  },
+  menuTextDisabled: {
+    color: "#B8B8B8",
+  },
+  menuDivider: {
+    height: 1,
+    backgroundColor: "#EAE5DA",
   },
 });
