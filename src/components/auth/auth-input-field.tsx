@@ -32,7 +32,12 @@ export default function AuthInputField({
 
       <View style={[styles.field, fieldStyle, !!errorText && styles.fieldError]}>
         {leftIconName ? (
-          <Ionicons name={leftIconName} size={18} color="#8A816F" />
+          <Ionicons
+            name={leftIconName}
+            size={18}
+            color="#8A816F"
+            style={styles.leftIcon}
+          />
         ) : null}
 
         <ThemedTextInput
@@ -69,6 +74,9 @@ const styles = StyleSheet.create({
   },
   fieldError: {
     borderColor: "red",
+  },
+  leftIcon: {
+    marginRight: 10,
   },
   input: {
     flex: 1,

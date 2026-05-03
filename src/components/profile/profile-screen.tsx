@@ -1,8 +1,6 @@
 import { useAuth } from "@/context/auth-context";
-import { auth } from "@/lib/firebase";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { signOut } from "firebase/auth";
 import {
   ActivityIndicator,
   Alert,
@@ -14,7 +12,7 @@ import { ThemedText as Text } from "../themed-text";
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { user, initializing } = useAuth();
+  const { user, initializing, logout } = useAuth();
   const profileName =
     user?.displayName?.trim() || user?.email?.split("@")[0] || "Usuario";
 
@@ -24,7 +22,7 @@ export default function ProfileScreen() {
     }
 
     try {
-      if (auth) await signOut(auth);
+      await logout();
       router.replace("/login");
     } catch {
       Alert.alert("Erro", "Nao foi possivel sair. Tente novamente.");

@@ -6,6 +6,10 @@ export type LoginPayload = {
   senha: string;
 };
 
+export type GoogleLoginPayload = {
+  idToken: string;
+};
+
 export type CadastroPayload = {
   nome: string;
   cpf: string;
@@ -16,7 +20,28 @@ export type CadastroPayload = {
   endereco?: string;
 };
 
+export type LoginResponse =
+  | string
+  | {
+      token: string;
+      tipo?: string;
+      expiraEmMs?: number;
+      nome?: string;
+      email?: string;
+    };
+
 export type AuthMessageResponse = string;
+
+export type MeResponse = {
+  id?: string;
+  usuarioId?: string;
+  uid?: string;
+  nome?: string;
+  name?: string;
+  displayName?: string;
+  email?: string;
+  [key: string]: unknown;
+};
 
 export type ApiValidationError = {
   status: number;
@@ -31,10 +56,19 @@ export type ApiBusinessError = {
 export function createAuthApi(http: HttpClient, routes: AuthRoutes) {
   return {
     login(payload: LoginPayload) {
-      return http.post<AuthMessageResponse>(routes.login, payload);
+      return http.post<LoginResponse>(routes.login, payload);
+    },
+    google(payload: GoogleLoginPayload) {
+      return http.post<LoginResponse>(routes.google, payload);
     },
     cadastro(payload: CadastroPayload) {
       return http.post<AuthMessageResponse>(routes.cadastro, payload);
+    },
+    me() {
+      return http.get<MeResponse>(routes.me);
+    },
+    logout() {
+      return http.post<AuthMessageResponse>(routes.logout);
     },
   };
 }

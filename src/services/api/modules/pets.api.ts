@@ -29,8 +29,8 @@ export type CadastroPetPayload = {
   localDesaparecimento: string;
   descricao: string[];
   fotoUrl?: string;
-  nomeTutor: string;
-  telefoneTutor: string;
+  nomeTutor?: string;
+  telefoneTutor?: string;
 };
 
 export type BuscaPetsParams = {

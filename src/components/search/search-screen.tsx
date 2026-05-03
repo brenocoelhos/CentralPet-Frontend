@@ -1,5 +1,6 @@
 import PetCard from "@/components/pet/pet-card";
-import { ApiError, api } from "@/services/api";
+import { useAuth } from "@/context/auth-context";
+import { ApiError } from "@/services/api";
 import type { PetDashboardDto } from "@/services/api/modules/pets.api";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -25,6 +26,7 @@ const CARD_HEIGHT = 272;
 const CARD_IMAGE_HEIGHT = 180;
 
 export default function SearchScreen() {
+  const { getApi } = useAuth();
   const [query, setQuery] = useState("");
   const [sortByRecent, setSortByRecent] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -56,7 +58,7 @@ export default function SearchScreen() {
     try {
       setLoading(true);
       setErrorMessage(null);
-      const result = await api.pets.buscaPets({ nome: term });
+      const result = await getApi().pets.buscaPets({ nome: term });
       setPets(result);
     } catch (error) {
       setPets([]);

@@ -1,5 +1,6 @@
 import PetCard from "@/components/pet/pet-card";
-import { ApiError, api } from "@/services/api";
+import { useAuth } from "@/context/auth-context";
+import { ApiError } from "@/services/api";
 import type { PetDashboardDto } from "@/services/api/modules/pets.api";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { router } from "expo-router";
@@ -77,6 +78,7 @@ const FilterBar = ({
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function DashboardScreen() {
+  const { getApi } = useAuth();
   const [activeFilter, setActiveFilter] = useState<Filter>("Todos");
   const [occurrences, setOccurrences] = useState<Occurrence[]>([]);
   const [loading, setLoading] = useState(false);
@@ -87,7 +89,7 @@ export default function DashboardScreen() {
       try {
         setLoading(true);
         setErrorMessage(null);
-        const result = await api.pets.buscaPets();
+        const result = await getApi().pets.buscaPets();
         setOccurrences(result.map(mapPetToOccurrence));
       } catch (error) {
         if (error instanceof ApiError && typeof error.data === "object" && error.data) {
@@ -102,7 +104,7 @@ export default function DashboardScreen() {
     };
 
     void loadDashboard();
-  }, []);
+  }, [getApi]);
 
   const filtered: Occurrence[] = useMemo(
     () =>

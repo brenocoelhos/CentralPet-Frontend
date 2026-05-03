@@ -1,8 +1,8 @@
+import { useAuth } from "@/context/auth-context";
 import { useGoogleLogin } from "@/hooks/use-google-login";
 import { api } from "@/services/api";
 import { showApiErrorAlert } from "@/utils/api-error-alert";
 import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -19,6 +19,7 @@ import AuthPasswordField from "./auth-password-field";
 
 export default function LoginScreen() {
   const router = useRouter();
+  const { signInWithToken } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -32,13 +33,18 @@ export default function LoginScreen() {
 
     try {
       setLoading(true);
-      const userId = await api.auth.login({
+      const response = await api.auth.login({
         email: email.trim(),
         senha: password,
       });
-      if (userId) {
-        await AsyncStorage.setItem("@centralpet:userId", userId);
+
+      const token = typeof response === "string" ? response : response.token;
+
+      if (!token) {
+        throw new Error("Token nao retornado pelo backend");
       }
+
+      await signInWithToken(token, response);
       router.replace("/dashboard");
     } catch (error) {
       showApiErrorAlert("Falha no login", error, "Nao foi possivel realizar o login.");

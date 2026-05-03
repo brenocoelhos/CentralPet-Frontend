@@ -1,5 +1,5 @@
 import { useAuth } from "@/context/auth-context";
-import { api } from "@/services/api";
+import { createApi } from "@/services/api";
 import { showApiErrorAlert } from "@/utils/api-error-alert";
 import { maskDate, maskPhone } from "@/utils/validators";
 import { Ionicons } from "@expo/vector-icons";
@@ -8,14 +8,14 @@ import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
 } from "react-native";
 import { ThemedText as Text } from "../themed-text";
 import { ThemedTextInput } from "../themed-text-input";
@@ -68,7 +68,7 @@ function SelectField({
 
 export default function PetSignupScreen() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [name, setName] = useState("");
   const [species, setSpecies] = useState("Cachorro");
   const [breed, setBreed] = useState("");
@@ -78,7 +78,6 @@ export default function PetSignupScreen() {
   const [location, setLocation] = useState("");
   const [descriptionChips, setDescriptionChips] = useState<string[]>([]);
   const [descriptionInput, setDescriptionInput] = useState("");
-  const [ownerName, setOwnerName] = useState("");
   const [phone, setPhone] = useState("");
   const [castrated, setCastrated] = useState(false);
   const [vaccinated, setVaccinated] = useState(false);
@@ -129,6 +128,14 @@ export default function PetSignupScreen() {
       );
       return;
     }
+    if (!token) {
+      Alert.alert(
+        "Sessao expirada",
+        "Entre novamente para cadastrar um animal.",
+        [{ text: "Ir para login", onPress: () => router.replace("/login") }],
+      );
+      return;
+    }
     if (photos.length < 2) {
       Alert.alert(
         "Fotos obrigatórias",
@@ -136,7 +143,7 @@ export default function PetSignupScreen() {
       );
       return;
     }
-    if (!name || !breed || !disappearanceDate || !location || !ownerName || !phone) {
+    if (!name || !breed || !disappearanceDate || !location || !phone) {
       Alert.alert(
         "Campos obrigatórios",
         "Preencha todos os campos obrigatórios marcados com *.",
@@ -146,8 +153,17 @@ export default function PetSignupScreen() {
 
     try {
       setLoading(true);
-      await api.pets.cadastroPet({
-        usuarioId: user.uid,
+      const apiClient = createApi({ token });
+      const me = await apiClient.auth.me();
+      const usuarioId =
+        (typeof me.usuarioId === "string" && me.usuarioId.trim()) ||
+        (typeof me.id === "string" && me.id.trim()) ||
+        (typeof me.uid === "string" && me.uid.trim()) ||
+        user.uid;
+      const tutorName = user.displayName?.trim() || user.email?.split("@")[0] || user.uid;
+
+      await apiClient.pets.cadastroPet({
+        usuarioId,
         nome: name.trim(),
         especie: species,
         raca: breed.trim() || undefined,
@@ -162,8 +178,8 @@ export default function PetSignupScreen() {
           ...(hasReward ? ["Tem recompensa"] : []),
         ],
         fotoUrl: photos[0],
-        nomeTutor: ownerName.trim(),
-        telefoneTutor: phone,
+        nomeTutor: tutorName,
+        telefoneTutor: phone.replace(/\D/g, ""),
       });
 
       Alert.alert("Animal cadastrado", "Cadastro realizado com sucesso.");
@@ -347,29 +363,17 @@ export default function PetSignupScreen() {
           )}
         </View>
 
-        <View style={styles.row}>
-          <View style={styles.half}>
-            <Text style={styles.label}>Seu nome <Text style={styles.requiredMark}>*</Text></Text>
-            <ThemedTextInput
-              placeholder="Nome completo"
-              value={ownerName}
-              onChangeText={setOwnerName}
-              style={styles.input}
-              placeholderTextColor="#B0A89A"
-            />
-          </View>
-          <View style={styles.half}>
-            <Text style={styles.label}>Telefone <Text style={styles.requiredMark}>*</Text></Text>
-            <ThemedTextInput
-              placeholder="(00) 00000-0000"
-              value={phone}
-              onChangeText={(value) => setPhone(maskPhone(value))}
-              style={styles.input}
-              keyboardType="phone-pad"
-              maxLength={15}
-              placeholderTextColor="#B0A89A"
-            />
-          </View>
+        <View>
+          <Text style={styles.label}>Telefone <Text style={styles.requiredMark}>*</Text></Text>
+          <ThemedTextInput
+            placeholder="(00) 00000-0000"
+            value={phone}
+            onChangeText={(value) => setPhone(maskPhone(value))}
+            style={styles.input}
+            keyboardType="phone-pad"
+            maxLength={15}
+            placeholderTextColor="#B0A89A"
+          />
         </View>
 
         <Pressable

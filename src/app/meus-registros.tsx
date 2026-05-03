@@ -1,10 +1,10 @@
 import AppShell from "@/components/layout/app-shell";
 import PetCard from "@/components/pet/pet-card";
 import { ThemedText as Text } from "@/components/themed-text";
-import { ApiError, api } from "@/services/api";
+import { useAuth } from "@/context/auth-context";
+import { ApiError, createApi } from "@/services/api";
 import type { PetDashboardDto } from "@/services/api/modules/pets.api";
 import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
@@ -14,6 +14,7 @@ import {
 } from "react-native";
 
 export default function MeusRegistrosRoute() {
+  const { user, token } = useAuth();
   const [pets, setPets] = useState<PetDashboardDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -23,12 +24,13 @@ export default function MeusRegistrosRoute() {
       try {
         setLoading(true);
         setErrorMessage(null);
-        const userId = await AsyncStorage.getItem("@centralpet:userId");
-        if (!userId) {
+
+        if (!user?.uid || !token) {
           setErrorMessage("Você precisa estar logado para ver seus registros.");
           return;
         }
-        const result = await api.pets.buscaPets({ usuarioId: userId });
+
+        const result = await createApi({ token }).pets.buscaPets({ usuarioId: user.uid });
         setPets(result);
       } catch (error) {
         if (error instanceof ApiError && typeof error.data === "object" && error.data) {
@@ -43,7 +45,7 @@ export default function MeusRegistrosRoute() {
     }
 
     loadPets();
-  }, []);
+  }, [token, user?.uid]);
 
   const renderPetCard = ({ item }: { item: PetDashboardDto }) => (
     <PetCard

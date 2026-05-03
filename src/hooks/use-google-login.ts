@@ -1,12 +1,8 @@
-import { auth } from "@/lib/firebase";
+import { useAuth } from "@/context/auth-context";
+import { api } from "@/services/api";
 import { makeRedirectUri } from "expo-auth-session";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
-import {
-  GoogleAuthProvider,
-  signInWithCredential,
-  signInWithPopup,
-} from "firebase/auth";
 import { useMemo, useState } from "react";
 import { Alert, Platform } from "react-native";
 
@@ -28,6 +24,7 @@ function getRedirectUri() {
 
 export function useGoogleLogin(onSuccess?: () => void) {
   const [loading, setLoading] = useState(false);
+  const { signInWithToken } = useAuth();
   const redirectUri = getRedirectUri();
 
   const missingGoogleConfigKeys = useMemo(() => {
@@ -63,17 +60,11 @@ export function useGoogleLogin(onSuccess?: () => void) {
   const [request, , promptAsync] = Google.useAuthRequest({
     ...googleClientConfig,
     redirectUri,
+    scopes: ["openid", "profile", "email"],
+    responseType: "id_token",
   });
 
   const handleGoogleLogin = async () => {
-    if (!auth) {
-      Alert.alert(
-        "Firebase nao configurado",
-        "Preencha as variaveis EXPO_PUBLIC_FIREBASE_* antes de usar login Google.",
-      );
-      return;
-    }
-
     if (missingGoogleConfigKeys.length > 0) {
       Alert.alert(
         "Google Login nao configurado",
@@ -92,24 +83,6 @@ export function useGoogleLogin(onSuccess?: () => void) {
         "Google Login invalido na web",
         "O webClientId esta igual ao iOS Client ID. Crie um OAuth Client do tipo Web e use no EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID.",
       );
-      return;
-    }
-
-    if (Platform.OS === "web") {
-      try {
-        setLoading(true);
-        const provider = new GoogleAuthProvider();
-        await signInWithPopup(auth, provider);
-        onSuccess?.();
-      } catch {
-        Alert.alert(
-          "Falha no login",
-          "Nao foi possivel entrar com Google no navegador.",
-        );
-      } finally {
-        setLoading(false);
-      }
-
       return;
     }
 
@@ -148,8 +121,15 @@ export function useGoogleLogin(onSuccess?: () => void) {
         return;
       }
 
-      const credential = GoogleAuthProvider.credential(idToken);
-      await signInWithCredential(auth, credential);
+      const response = await api.auth.google({ idToken });
+      const token = typeof response === "string" ? response : response.token;
+
+      if (!token) {
+        Alert.alert("Falha no login", "Token JWT nao recebido do backend.");
+        return;
+      }
+
+      await signInWithToken(token);
       onSuccess?.();
     } catch {
       Alert.alert("Falha no login", "Nao foi possivel entrar com Google.");
