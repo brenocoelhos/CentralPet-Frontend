@@ -1,5 +1,6 @@
 import { useAuth } from "@/context/auth-context";
-import { ApiError, api } from "@/services/api";
+import { api } from "@/services/api";
+import { showApiErrorAlert } from "@/utils/api-error-alert";
 import { maskDate, maskPhone } from "@/utils/validators";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
@@ -168,13 +169,7 @@ export default function PetSignupScreen() {
       Alert.alert("Animal cadastrado", "Cadastro realizado com sucesso.");
       router.replace("/dashboard");
     } catch (error) {
-      if (error instanceof ApiError && typeof error.data === "object" && error.data) {
-        const data = error.data as { erro?: string; erros?: string[] };
-        const message = data.erro ?? data.erros?.[0] ?? "Nao foi possivel cadastrar o pet.";
-        Alert.alert("Erro no cadastro", message);
-      } else {
-        Alert.alert("Erro no cadastro", "Nao foi possivel cadastrar o pet.");
-      }
+      showApiErrorAlert("Erro no cadastro", error, "Nao foi possivel cadastrar o pet.");
     } finally {
       setLoading(false);
     }

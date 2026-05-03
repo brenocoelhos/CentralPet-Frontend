@@ -43,8 +43,8 @@ const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const CAROUSEL_SIDE_PADDING = 16;
 const PHOTO_GAP = 10;
 const PHOTO_WIDTH =
-  (SCREEN_WIDTH - CAROUSEL_SIDE_PADDING * 2 - PHOTO_GAP * 2) / 2.5;
-const PHOTO_HEIGHT = PHOTO_WIDTH * 1.15;
+  (SCREEN_WIDTH - CAROUSEL_SIDE_PADDING * 2 - PHOTO_GAP) / 1.5;
+const PHOTO_HEIGHT = PHOTO_WIDTH * 1.3;
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 type PetDetailScreenProps = {

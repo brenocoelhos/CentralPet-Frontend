@@ -191,14 +191,14 @@ export default function DashboardScreen() {
 
       {/* ── FAB ── */}
       <View style={styles.fabContainer}>
-        <TouchableOpacity style={styles.fab} activeOpacity={0.88}>
+        <TouchableOpacity style={styles.fab} activeOpacity={0.88} onPress={() => router.push("/cadastro-pet")}>
           <Ionicons
             name="add-circle-outline"
             size={20}
             color="#fff"
             style={{ marginRight: 8 }}
           />
-          <Text style={styles.fabText}>Registrar ocorrência</Text>
+          <Text style={styles.fabText}>Realizar cadastro</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

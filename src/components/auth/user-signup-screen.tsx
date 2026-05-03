@@ -1,4 +1,5 @@
-import { ApiError, api } from "@/services/api";
+import { api } from "@/services/api";
+import { showApiErrorAlert } from "@/utils/api-error-alert";
 import {
     maskCPF,
     maskDate,
@@ -190,13 +191,7 @@ export default function UserSignupScreen() {
       Alert.alert("Sucesso!", "Cadastro realizado com sucesso.");
       router.replace("/dashboard");
     } catch (error) {
-      if (error instanceof ApiError && typeof error.data === "object" && error.data) {
-        const data = error.data as { erro?: string; erros?: string[] };
-        const message = data.erro ?? data.erros?.[0] ?? "Nao foi possivel concluir o cadastro.";
-        Alert.alert("Falha no cadastro", message);
-      } else {
-        Alert.alert("Falha no cadastro", "Nao foi possivel concluir o cadastro.");
-      }
+      showApiErrorAlert("Falha no cadastro", error, "Nao foi possivel concluir o cadastro.");
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,8 @@
 import { useGoogleLogin } from "@/hooks/use-google-login";
-import { ApiError, api } from "@/services/api";
+import { api } from "@/services/api";
+import { showApiErrorAlert } from "@/utils/api-error-alert";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -30,19 +32,16 @@ export default function LoginScreen() {
 
     try {
       setLoading(true);
-      await api.auth.login({
+      const userId = await api.auth.login({
         email: email.trim(),
         senha: password,
       });
+      if (userId) {
+        await AsyncStorage.setItem("@centralpet:userId", userId);
+      }
       router.replace("/dashboard");
     } catch (error) {
-      if (error instanceof ApiError && typeof error.data === "object" && error.data) {
-        const data = error.data as { erro?: string; erros?: string[] };
-        const message = data.erro ?? data.erros?.[0] ?? "Nao foi possivel realizar o login.";
-        Alert.alert("Falha no login", message);
-      } else {
-        Alert.alert("Falha no login", "Nao foi possivel realizar o login.");
-      }
+      showApiErrorAlert("Falha no login", error, "Nao foi possivel realizar o login.");
     } finally {
       setLoading(false);
     }
