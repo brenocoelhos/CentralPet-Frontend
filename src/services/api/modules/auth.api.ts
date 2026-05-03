@@ -3,37 +3,38 @@ import type { AuthRoutes } from "../routes";
 
 export type LoginPayload = {
   email: string;
-  password: string;
+  senha: string;
 };
 
-export type RegisterPayload = {
-  name: string;
+export type CadastroPayload = {
+  nome: string;
+  cpf: string;
+  dataNascimento: string;
   email: string;
-  password: string;
+  senha: string;
+  telefone: string;
+  endereco?: string;
 };
 
-export type AuthUser = {
-  id: string;
-  name: string;
-  email: string;
+export type AuthMessageResponse = string;
+
+export type ApiValidationError = {
+  status: number;
+  erros: string[];
 };
 
-export type AuthTokenResponse = {
-  accessToken: string;
-  refreshToken?: string;
-  user: AuthUser;
+export type ApiBusinessError = {
+  status: number;
+  erro: string;
 };
 
 export function createAuthApi(http: HttpClient, routes: AuthRoutes) {
   return {
     login(payload: LoginPayload) {
-      return http.post<AuthTokenResponse>(routes.login, payload);
+      return http.post<AuthMessageResponse>(routes.login, payload);
     },
-    register(payload: RegisterPayload) {
-      return http.post<AuthTokenResponse>(routes.register, payload);
-    },
-    me() {
-      return http.get<AuthUser>(routes.me);
+    cadastro(payload: CadastroPayload) {
+      return http.post<AuthMessageResponse>(routes.cadastro, payload);
     },
   };
 }

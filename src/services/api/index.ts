@@ -1,11 +1,9 @@
 import { createHttpClient } from "./http-client";
 import { createAuthApi } from "./modules/auth.api";
-import { createOccurrencesApi } from "./modules/occurrences.api";
 import { createPetsApi } from "./modules/pets.api";
-import { createProfileApi } from "./modules/profile.api";
 import { apiRoutes, type ApiRoutes } from "./routes";
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL ?? "http://localhost:3000";
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 
 export function createApi(options?: {
   baseUrl?: string;
@@ -47,8 +45,6 @@ export function createApi(options?: {
   return {
     auth: createAuthApi(authHttp, routes.auth),
     pets: createPetsApi(authHttp, routes.pets),
-    occurrences: createOccurrencesApi(authHttp, routes.occurrences),
-    profile: createProfileApi(authHttp, routes.profile),
   };
 }
 

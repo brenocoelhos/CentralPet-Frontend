@@ -1,40 +1,72 @@
 import type { HttpClient } from "../http-client";
 import type { PetsRoutes } from "../routes";
 
-export type Pet = {
+export type PetDashboardDto = {
   id: string;
   name: string;
-  species: string;
-  breed: string;
-  location: string;
-  imageUrl?: string;
-  status?: "Perdido" | "Encontrado";
+  nome: string;
+  especie: string;
+  raca?: string;
+  cor?: string;
+  porte?: string;
+  dataDesaparecimento: string;
+  localDesaparecimento: string;
+  descricao: string[];
+  fotoUrl?: string;
+  nomeTutor: string;
+  telefoneTutor: string;
+  usuarioId: string;
 };
 
-export type CreatePetPayload = {
-  name: string;
-  species: string;
-  breed: string;
-  location: string;
-  status?: "Perdido" | "Encontrado";
+export type CadastroPetPayload = {
+  usuarioId: string;
+  nome: string;
+  especie: string;
+  raca?: string;
+  cor?: string;
+  porte?: string;
+  dataDesaparecimento: string;
+  localDesaparecimento: string;
+  descricao: string[];
+  fotoUrl?: string;
+  nomeTutor: string;
+  telefoneTutor: string;
 };
+
+export type BuscaPetsParams = {
+  nome?: string;
+  especie?: string;
+  cor?: string;
+  porte?: string;
+  usuarioId?: string;
+};
+
+export type CadastroPetResponse = string;
+
+function toBuscaPetsQuery(params?: Partial<BuscaPetsParams>) {
+  if (!params) {
+    return "";
+  }
+
+  const searchParams = new URLSearchParams();
+
+  if (params.nome) searchParams.set("nome", params.nome);
+  if (params.especie) searchParams.set("especie", params.especie);
+  if (params.cor) searchParams.set("cor", params.cor);
+  if (params.porte) searchParams.set("porte", params.porte);
+  if (params.usuarioId) searchParams.set("usuarioId", params.usuarioId);
+
+  const queryString = searchParams.toString();
+  return queryString ? `?${queryString}` : "";
+}
 
 export function createPetsApi(http: HttpClient, routes: PetsRoutes) {
   return {
-    list() {
-      return http.get<Pet[]>(routes.list);
+    cadastroPet(payload: CadastroPetPayload) {
+      return http.post<CadastroPetResponse>(routes.cadastroPet, payload);
     },
-    detail(id: string) {
-      return http.get<Pet>(routes.detail(id));
-    },
-    create(payload: CreatePetPayload) {
-      return http.post<Pet>(routes.create, payload);
-    },
-    update(id: string, payload: Partial<CreatePetPayload>) {
-      return http.put<Pet>(routes.update(id), payload);
-    },
-    remove(id: string) {
-      return http.delete<void>(routes.remove(id));
+    buscaPets(params?: Partial<BuscaPetsParams>) {
+      return http.get<PetDashboardDto[]>(`${routes.buscaPets}${toBuscaPetsQuery(params)}`);
     },
   };
 }
