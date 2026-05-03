@@ -14,15 +14,15 @@ import {
   View,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import AuthInputField from "./auth-input-field";
+import AuthPasswordField from "./auth-password-field";
 import { ThemedText as Text } from "../themed-text";
-import { ThemedTextInput } from "../themed-text-input";
 
 export default function LoginScreen() {
   const router = useRouter();
   const { hasFirebaseConfig, missingConfigKeys } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { handleGoogleLogin, loading: googleLoading } = useGoogleLogin();
 
@@ -66,46 +66,25 @@ export default function LoginScreen() {
           <Text style={styles.subtitle}>Entre com seu email e senha</Text>
         </View>
 
-        <Text style={styles.label}>E-mail</Text>
-        <View style={styles.inputWrapper}>
-          <Ionicons name="mail-outline" size={18} color="#8A816F" />
-          <ThemedTextInput
-            style={styles.input}
-            placeholder="exemplo@gmail.com"
-            placeholderTextColor="#B0A898"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            value={email}
-            onChangeText={setEmail}
-            returnKeyType="next"
-          />
-        </View>
+        <AuthInputField
+          label="E-mail"
+          leftIconName="mail-outline"
+          placeholder="exemplo@gmail.com"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          value={email}
+          onChangeText={setEmail}
+          returnKeyType="next"
+        />
 
-        <Text style={styles.label}>Senha</Text>
-        <View style={styles.inputWrapper}>
-          <Ionicons name="lock-closed-outline" size={18} color="#8A816F" />
-          <ThemedTextInput
-            style={styles.input}
-            placeholder="••••••••"
-            placeholderTextColor="#B0A898"
-            secureTextEntry={!showPassword}
-            value={password}
-            onChangeText={setPassword}
-            returnKeyType="done"
-          />
-          <TouchableOpacity
-            onPress={() => setShowPassword((prev) => !prev)}
-            activeOpacity={0.8}
-            style={styles.inputIconButton}
-            disabled={loading || googleLoading}
-          >
-            <Ionicons
-              name={showPassword ? "eye-off-outline" : "eye-outline"}
-              size={18}
-              color="#8A816F"
-            />
-          </TouchableOpacity>
-        </View>
+        <AuthPasswordField
+          label="Senha"
+          leftIconName="lock-closed-outline"
+          value={password}
+          onChangeText={setPassword}
+          returnKeyType="done"
+          disabled={loading || googleLoading}
+        />
 
         <TouchableOpacity
           style={styles.primaryButton}
@@ -184,35 +163,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#6F6758",
     marginTop: 6,
-  },
-  label: {
-    fontSize: 13,
-    color: "#1A1A1A",
-    marginBottom: 6,
-    marginTop: 2,
-  },
-  inputWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#E0DBD0",
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    backgroundColor: "#FFFFFF",
-    marginBottom: 12,
-  },
-  input: {
-    flex: 1,
-    fontSize: 13,
-    color: "#1A1A1A",
-    borderWidth: 0,
-    paddingHorizontal: 10,
-    paddingVertical: 13,
-    backgroundColor: "#FFFFFF",
-  },
-  inputIconButton: {
-    paddingLeft: 4,
-    paddingVertical: 4,
   },
   primaryButton: {
     backgroundColor: "#D97757",

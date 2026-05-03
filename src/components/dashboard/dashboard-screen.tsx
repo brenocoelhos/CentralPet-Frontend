@@ -1,9 +1,9 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
+import PetCard from "@/components/pet/pet-card";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
     Dimensions,
-    Image,
     Platform,
     SafeAreaView,
     ScrollView,
@@ -106,67 +106,6 @@ const CARD_WIDTH = (SCREEN_WIDTH - HORIZONTAL_PADDING * 2 - CARD_GAP) / 2;
 const CARD_HEIGHT = 272;
 const CARD_IMAGE_HEIGHT = 180;
 
-// ─── Pet Card ─────────────────────────────────────────────────────────────────
-const PetCard = ({ item }: { item: Occurrence }) => {
-  const isFound = item.status === "ENCONTRADO";
-
-  return (
-    <TouchableOpacity
-      style={styles.petCard}
-      activeOpacity={0.88}
-      onPress={() =>
-        router.push({ pathname: "/pet-detail", params: { id: item.id } })
-      }
-    >
-      <View style={styles.photoWrapper}>
-        {item.photo ? (
-          <Image
-            source={{ uri: item.photo }}
-            style={styles.photo}
-            resizeMode="cover"
-          />
-        ) : (
-          <View style={styles.photoPlaceholder}>
-            <Ionicons name="paw" size={36} color="#ccc" />
-          </View>
-        )}
-
-        <View style={styles.photoOverlay} />
-
-        <View
-          style={[
-            styles.photoBadge,
-            { backgroundColor: isFound ? "#2E7D32" : ORANGE },
-          ]}
-        >
-          <Text style={styles.photoBadgeText}>{item.status}</Text>
-        </View>
-
-        {item.hasNewMessage && (
-          <View style={styles.chatDot}>
-            <Ionicons name="chatbubble" size={11} color="#fff" />
-          </View>
-        )}
-      </View>
-
-      <View style={styles.petInfoBox}>
-        <Text style={styles.petName} numberOfLines={1}>
-          {item.name}
-        </Text>
-        <Text style={styles.petBreed} numberOfLines={1}>
-          {item.breed}
-        </Text>
-        <View style={styles.petLocationRow}>
-          <Ionicons name="location-outline" size={11} color={ORANGE} />
-          <Text style={styles.petLocation} numberOfLines={1}>
-            {item.neighborhood}
-          </Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
-};
-
 // ─── Filter Bar ───────────────────────────────────────────────────────────────
 const FilterBar = ({
   active,
@@ -243,7 +182,21 @@ export default function DashboardScreen() {
         {rows.map((row, i) => (
           <View key={i} style={styles.gridRow}>
             {row.map((item) => (
-              <PetCard key={item.id} item={item} />
+              <PetCard
+                key={item.id}
+                variant="dashboard"
+                name={item.name}
+                breed={item.breed}
+                location={item.neighborhood}
+                imageUrl={item.photo}
+                status={item.status}
+                hasNewMessage={item.hasNewMessage}
+                imageHeight={CARD_IMAGE_HEIGHT}
+                cardStyle={styles.petCard}
+                onPress={() =>
+                  router.push({ pathname: "/pet-detail", params: { id: item.id } })
+                }
+              />
             ))}
             {row.length === 1 && <View style={{ width: CARD_WIDTH }} />}
           </View>
@@ -348,83 +301,6 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
   },
-  photoWrapper: {
-    width: "100%",
-    height: CARD_IMAGE_HEIGHT,
-    backgroundColor: "#E8E4DF",
-  },
-  photo: {
-    width: "100%",
-    height: "100%",
-  },
-  photoPlaceholder: {
-    width: "100%",
-    height: "100%",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  photoOverlay: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 40,
-    backgroundColor: "rgba(0,0,0,0.18)",
-  },
-  photoBadge: {
-    position: "absolute",
-    top: 8,
-    left: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
-  },
-  photoBadgeText: {
-    fontFamily: "Lexend_700Bold",
-    fontSize: 9,
-    color: "#fff",
-    letterSpacing: 0.3,
-  },
-  chatDot: {
-    position: "absolute",
-    top: 8,
-    right: 8,
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    backgroundColor: "#4CAF50",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  // Info below photo
-  petInfoBox: {
-    padding: 10,
-    gap: 2,
-  },
-  petName: {
-    fontFamily: "Lexend_700Bold",
-    fontSize: 15,
-    color: "#1a1a1a",
-  },
-  petBreed: {
-    fontFamily: "Lexend_400Regular",
-    fontSize: 12,
-    color: "#777",
-  },
-  petLocationRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 3,
-    marginTop: 2,
-  },
-  petLocation: {
-    fontFamily: "Lexend_400Regular",
-    fontSize: 11,
-    color: "#999",
-    flex: 1,
-  },
-
   // Empty state
   emptyState: {
     alignItems: "center",

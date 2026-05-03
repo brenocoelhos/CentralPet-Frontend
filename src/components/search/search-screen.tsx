@@ -1,8 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
+import PetCard from "@/components/pet/pet-card";
 import { useMemo, useState } from "react";
 import {
     FlatList,
-    Image,
     Platform,
     Pressable,
     SafeAreaView,
@@ -119,19 +119,15 @@ export default function SearchScreen() {
 
   const renderPetCard = ({ item }: { item: PetItem }) => {
     return (
-      <View style={styles.itemCard}>
-        <Image source={{ uri: item.imageUrl }} style={styles.petImage} resizeMode="cover" />
-
-        <View style={styles.itemContent}>
-          <Text style={styles.itemName} numberOfLines={1}>{item.name}</Text>
-
-          <Text style={styles.itemBreed} numberOfLines={1}>
-            {item.breed}
-          </Text>
-
-          <Text style={styles.itemLocation} numberOfLines={2}>{item.location}</Text>
-        </View>
-      </View>
+      <PetCard
+        variant="search"
+        name={item.name}
+        breed={item.breed}
+        location={item.location}
+        imageUrl={item.imageUrl}
+        imageHeight={180}
+        cardStyle={styles.itemCard}
+      />
     );
   };
 
@@ -248,36 +244,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E6DED2",
     borderRadius: 14,
-    overflow: "hidden",
     backgroundColor: "#FAF8F4",
-  },
-  petImage: {
-    width: "100%",
-    height: 180,
-    alignSelf: "center",
-    backgroundColor: "#EFE7DE",
-  },
-  itemContent: {
-    flex: 1,
-    paddingHorizontal: 10,
-    paddingVertical: 10,
-  },
-  itemName: {
-    fontSize: 22,
-    color: "#2A2621",
-    fontFamily: "Lexend_600SemiBold",
-    lineHeight: 26,
-  },
-  itemBreed: {
-    fontSize: 13,
-    color: "#6F665A",
-    fontFamily: "Lexend_500Medium",
-  },
-  itemLocation: {
-    fontSize: 11,
-    color: "#7A7268",
-    fontFamily: "Lexend_400Regular",
-    minHeight: 30,
   },
   emptyText: {
     textAlign: "center",

@@ -1,0 +1,85 @@
+export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+
+export type HttpRequestOptions = {
+  method?: HttpMethod;
+  body?: unknown;
+  headers?: Record<string, string>;
+  signal?: AbortSignal;
+};
+
+export type HttpClient = {
+  request<T>(path: string, options?: HttpRequestOptions): Promise<T>;
+  get<T>(path: string, options?: Omit<HttpRequestOptions, "method" | "body">): Promise<T>;
+  post<T>(path: string, body?: unknown, options?: Omit<HttpRequestOptions, "method" | "body">): Promise<T>;
+  put<T>(path: string, body?: unknown, options?: Omit<HttpRequestOptions, "method" | "body">): Promise<T>;
+  patch<T>(path: string, body?: unknown, options?: Omit<HttpRequestOptions, "method" | "body">): Promise<T>;
+  delete<T>(path: string, options?: Omit<HttpRequestOptions, "method" | "body">): Promise<T>;
+};
+
+const DEFAULT_HEADERS = {
+  "Content-Type": "application/json",
+};
+
+function toUrl(baseUrl: string, path: string): string {
+  const normalizedBase = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  return `${normalizedBase}${normalizedPath}`;
+}
+
+export class ApiError extends Error {
+  status: number;
+  data: unknown;
+
+  constructor(message: string, status: number, data: unknown) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+    this.data = data;
+  }
+}
+
+export function createHttpClient(baseUrl: string): HttpClient {
+  async function request<T>(path: string, options: HttpRequestOptions = {}): Promise<T> {
+    const { method = "GET", body, headers, signal } = options;
+
+    const response = await fetch(toUrl(baseUrl, path), {
+      method,
+      signal,
+      headers: {
+        ...DEFAULT_HEADERS,
+        ...headers,
+      },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+
+    const text = await response.text();
+    const data = text ? safeJsonParse(text) : null;
+
+    if (!response.ok) {
+      throw new ApiError(
+        `Request failed with status ${response.status}`,
+        response.status,
+        data,
+      );
+    }
+
+    return data as T;
+  }
+
+  return {
+    request,
+    get: (path, options) => request(path, { ...options, method: "GET" }),
+    post: (path, body, options) => request(path, { ...options, method: "POST", body }),
+    put: (path, body, options) => request(path, { ...options, method: "PUT", body }),
+    patch: (path, body, options) => request(path, { ...options, method: "PATCH", body }),
+    delete: (path, options) => request(path, { ...options, method: "DELETE" }),
+  };
+}
+
+function safeJsonParse(text: string): unknown {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
+}

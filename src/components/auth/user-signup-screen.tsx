@@ -21,8 +21,9 @@ import {
   View,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import AuthInputField from "./auth-input-field";
+import AuthPasswordField from "./auth-password-field";
 import { ThemedText as Text } from "../themed-text";
-import { ThemedTextInput } from "../themed-text-input";
 
 interface SignupFormState {
   nome: string;
@@ -39,8 +40,6 @@ export default function UserSignupScreen() {
   const router = useRouter();
   const { hasFirebaseConfig, missingConfigKeys } = useAuth();
   const [loading, setLoading] = useState<boolean>(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [form, setForm] = useState<SignupFormState>({
     nome: "",
@@ -226,11 +225,9 @@ export default function UserSignupScreen() {
           <Text style={styles.avatarLabel}>Adicionar foto</Text>
         </View>
 
-        <Text style={styles.label}>Nome:</Text>
-        <ThemedTextInput
-          style={styles.input}
+        <AuthInputField
+          label="Nome"
           placeholder="Nome Completo"
-          placeholderTextColor="#B0A898"
           value={form.nome}
           onChangeText={(v) => handleChange("nome", v)}
           autoCapitalize="words"
@@ -239,86 +236,56 @@ export default function UserSignupScreen() {
 
         <View style={styles.row}>
           <View style={styles.halfGroup}>
-            <Text style={styles.label}>CPF</Text>
-
-            <ThemedTextInput
-              style={[
-                styles.input,
-                errors.cpf ? { borderColor: "red" } : null
-              ]}
+            <AuthInputField
+              label="CPF"
               placeholder="000.000.000-00"
-              placeholderTextColor="#B0A898"
               value={form.cpf}
               onChangeText={(v) => handleChange("cpf", v)}
               keyboardType="numeric"
               maxLength={14}
               returnKeyType="next"
+              errorText={errors.cpf}
             />
-
-            {errors.cpf ? (
-              <Text style={styles.errorText}>{errors.cpf}</Text>
-            ) : null}
           </View>
           <View style={styles.halfGroup}>
-            <Text style={styles.label}>Data do nascimento</Text>
-            <ThemedTextInput
-              style={[
-                styles.input,
-                errors.dataNascimento ? { borderColor: "red" } : null
-              ]}
+            <AuthInputField
+              label="Data do nascimento"
               placeholder="00/00/0000"
-              placeholderTextColor="#B0A898"
               value={form.dataNascimento}
               onChangeText={(v) => handleChange("dataNascimento", v)}
               keyboardType="numeric"
               maxLength={10}
               returnKeyType="next"
+              errorText={errors.dataNascimento}
             />
-            {errors.dataNascimento ? (
-              <Text style={styles.errorText}>{errors.dataNascimento}</Text>
-            ) : null}
           </View>
         </View>
 
-        <Text style={styles.label}>E-mail</Text>
-        <ThemedTextInput
-          style={[
-            styles.input,
-            errors.email ? { borderColor: "red" } : null
-          ]}
+        <AuthInputField
+          label="E-mail"
           placeholder="exemplo@gmail.com"
-          placeholderTextColor="#B0A898"
           value={form.email}
           onChangeText={(v) => handleChange("email", v)}
           keyboardType="email-address"
           autoCapitalize="none"
           returnKeyType="next"
+          errorText={errors.email}
         />
-        {errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
 
-        <Text style={styles.label}>Telefone</Text>
-        <ThemedTextInput
-          style={[
-            styles.input,
-            errors.telefone ? { borderColor: "red" } : null
-          ]}
+        <AuthInputField
+          label="Telefone"
           placeholder="(00) 00000-0000"
-          placeholderTextColor="#B0A898"
           value={form.telefone}
           onChangeText={(v) => handleChange("telefone", v)}
           keyboardType="phone-pad"
           maxLength={15}
           returnKeyType="next"
+          errorText={errors.telefone}
         />
-        {errors.telefone ? (
-          <Text style={styles.errorText}>{errors.telefone}</Text>
-        ) : null}
 
-        <Text style={styles.label}>Endereço</Text>
-        <ThemedTextInput
-          style={styles.input}
+        <AuthInputField
+          label="Endereco"
           placeholder="Rua, número, cidade"
-          placeholderTextColor="#B0A898"
           value={form.endereco}
           onChangeText={(v) => handleChange("endereco", v)}
           autoCapitalize="words"
@@ -327,79 +294,25 @@ export default function UserSignupScreen() {
 
         <View style={styles.row}>
           <View style={styles.halfGroup}>
-            <Text style={styles.label}>Senha</Text>
-
-            <View
-              style={[
-                styles.passwordInputWrapper,
-                errors.senha ? { borderColor: "red" } : null
-              ]}
-            >
-              <ThemedTextInput
-                style={styles.passwordInput}
-                placeholder="••••••••"
-                placeholderTextColor="#B0A898"
-                value={form.senha}
-                onChangeText={(v) => handleChange("senha", v)}
-                secureTextEntry={!showPassword}
-                returnKeyType="next"
-              />
-
-              <TouchableOpacity
-                onPress={() => setShowPassword((prev) => !prev)}
-                activeOpacity={0.8}
-                style={styles.passwordIconButton}
-                disabled={loading}
-              >
-                <Ionicons
-                  name={showPassword ? "eye-off-outline" : "eye-outline"}
-                  size={18}
-                  color="#8A816F"
-                />
-              </TouchableOpacity>
-            </View>
-
-            {errors.senha ? (
-              <Text style={styles.errorText}>{errors.senha}</Text>
-            ) : null}
+            <AuthPasswordField
+              label="Senha"
+              value={form.senha}
+              onChangeText={(v) => handleChange("senha", v)}
+              returnKeyType="next"
+              errorText={errors.senha}
+              disabled={loading}
+            />
           </View>
 
           <View style={styles.halfGroup}>
-            <Text style={styles.label}>Confirmar senha</Text>
-
-            <View
-              style={[
-                styles.passwordInputWrapper,
-                errors.confirmarSenha ? { borderColor: "red" } : null
-              ]}
-            >
-              <ThemedTextInput
-                style={styles.passwordInput}
-                placeholder="••••••••"
-                placeholderTextColor="#B0A898"
-                value={form.confirmarSenha}
-                onChangeText={(v) => handleChange("confirmarSenha", v)}
-                secureTextEntry={!showConfirmPassword}
-                returnKeyType="done"
-              />
-
-              <TouchableOpacity
-                onPress={() => setShowConfirmPassword((prev) => !prev)}
-                activeOpacity={0.8}
-                style={styles.passwordIconButton}
-                disabled={loading}
-              >
-                <Ionicons
-                  name={showConfirmPassword ? "eye-off-outline" : "eye-outline"}
-                  size={18}
-                  color="#8A816F"
-                />
-              </TouchableOpacity>
-            </View>
-
-            {errors.confirmarSenha ? (
-              <Text style={styles.errorText}>{errors.confirmarSenha}</Text>
-            ) : null}
+            <AuthPasswordField
+              label="Confirmar senha"
+              value={form.confirmarSenha}
+              onChangeText={(v) => handleChange("confirmarSenha", v)}
+              returnKeyType="done"
+              errorText={errors.confirmarSenha}
+              disabled={loading}
+            />
           </View>
         </View>
 
@@ -452,50 +365,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#1A1A1A",
   },
-  label: {
-    fontSize: 13,
-    color: "#1A1A1A",
-    marginBottom: 6,
-    marginTop: 2,
-  },
-  input: {
-    fontSize: 13,
-    color: "#1A1A1A",
-    borderWidth: 1,
-    borderColor: "#E0DBD0",
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 13,
-    backgroundColor: "#FFFFFF",
-    marginBottom: 12,
-  },
   row: {
     flexDirection: "row",
     gap: 10,
-  },
-  passwordInputWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#E0DBD0",
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    backgroundColor: "#FFFFFF",
-    marginBottom: 12,
-  },
-  passwordInput: {
-    flex: 1,
-    fontSize: 13,
-    color: "#1A1A1A",
-    borderWidth: 0,
-    paddingHorizontal: 0,
-    paddingVertical: 13,
-    backgroundColor: "#FFFFFF",
-    marginBottom: 0,
-  },
-  passwordIconButton: {
-    paddingLeft: 8,
-    paddingVertical: 4,
   },
   halfGroup: {
     flex: 1,
@@ -512,12 +384,5 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: "#FFFFFF",
     fontWeight: "bold",
-  },
-
-  errorText: {
-    fontSize: 12,
-    color: "red",
-    marginTop: 1,
-    marginBottom: 8,
   },
 });
