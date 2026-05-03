@@ -5,10 +5,11 @@ import {
     Lexend_600SemiBold,
     Lexend_700Bold,
 } from "@expo-google-fonts/lexend";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import { useEffect } from "react";
-import { StyleSheet, Text, TextInput } from "react-native";
+import { StyleSheet, Text, TextInput, TouchableOpacity } from "react-native";
 
 const styles = StyleSheet.create({
   logoBold: {
@@ -20,6 +21,15 @@ const styles = StyleSheet.create({
     fontFamily: "Lexend_700Bold",
     fontSize: 22,
     color: "#D97757",
+  },
+  notifBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: "#F0EDEA",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 8,
   },
 });
 
@@ -52,18 +62,29 @@ function AppStack() {
             </Text>
           ),
           headerLeft: () => null,
-          headerRight: () => null,
+          headerRight: () => (
+            <TouchableOpacity style={styles.notifBtn}>
+              <Ionicons
+                name="notifications-outline"
+                size={22}
+                color="#1a1a1a"
+              />
+            </TouchableOpacity>
+          ),
         }}
       />
 
-      <Stack.Screen name="busca" options={{ 
-        headerTitle: () => (
-          <Text>
-            <Text style={styles.logoBold}>Busca</Text>
-            <Text style={styles.logoAccent}>Pet</Text>
-          </Text>
-        ),
-       }} />
+      <Stack.Screen
+        name="busca"
+        options={{
+          headerTitle: () => (
+            <Text>
+              <Text style={styles.logoBold}>Busca</Text>
+              <Text style={styles.logoAccent}>Pet</Text>
+            </Text>
+          ),
+        }}
+      />
 
       <Stack.Screen
         name="cadastro-pet"

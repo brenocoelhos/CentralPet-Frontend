@@ -1,7 +1,9 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { router } from "expo-router";
-import { useState } from "react";
+import React, { useState } from "react";
 import {
+  Dimensions,
+  Image,
   Platform,
   SafeAreaView,
   ScrollView,
@@ -25,6 +27,7 @@ type Occurrence = {
   neighborhood: string;
   distance: string;
   hasNewMessage: boolean;
+  photo?: string;
 };
 
 // ─── Mock Data ────────────────────────────────────────────────────────────────
@@ -41,6 +44,8 @@ const OCCURRENCES: Occurrence[] = [
     neighborhood: "Parque Ibirapuera",
     distance: "0,8 km de você",
     hasNewMessage: false,
+    photo:
+      "https://images.unsplash.com/photo-1552053831-71594a27632d?w=400&q=80",
   },
   {
     id: "2",
@@ -51,9 +56,11 @@ const OCCURRENCES: Occurrence[] = [
     breed: "SRD",
     size: "Porte pequeno",
     tags: ["Pelagem laranja", "Sem coleira", "Dócil"],
-    neighborhood: "Vila Mada",
+    neighborhood: "Vila Madalena",
     distance: "1,4 km de você",
     hasNewMessage: true,
+    photo:
+      "https://images.unsplash.com/photo-1574144611937-0df059b5ef3e?w=400&q=80",
   },
   {
     id: "3",
@@ -67,111 +74,102 @@ const OCCURRENCES: Occurrence[] = [
     neighborhood: "Pinheiros",
     distance: "2,1 km de você",
     hasNewMessage: false,
+    photo:
+      "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&q=80",
+  },
+  {
+    id: "4",
+    status: "PERDIDO",
+    time: "há 3h",
+    name: "Luna",
+    type: "Cão",
+    breed: "Shih Tzu",
+    size: "Porte pequeno",
+    tags: ["Pelagem branca", "Sem coleira"],
+    neighborhood: "Moema",
+    distance: "3,2 km de você",
+    hasNewMessage: false,
+    photo:
+      "https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?w=400&q=80",
   },
 ];
 
-const FILTERS = ["Todos", "Perdidos", "Encontrados", "Cães"] as const;
+const FILTERS = ["Todos", "Perdidos", "Encontrados", "Cães", "Gatos"] as const;
 type Filter = (typeof FILTERS)[number];
 
 const ORANGE = "#D97757";
 const BG = "#FAF7F5";
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const CARD_WIDTH = (SCREEN_WIDTH - 16 * 2 - 12) / 2;
 
-// ─── Icons ────────────────────────────────────────────────────────────────────
-const PawIcon = ({ size = 28 }: { size?: number }) => (
-  <Ionicons name="paw" size={size} color="#555" />
-);
+// ─── Pet Card ─────────────────────────────────────────────────────────────────
+const PetCard = ({ item }: { item: Occurrence }) => {
+  const isFound = item.status === "ENCONTRADO";
 
-const ChatIcon = ({ active }: { active: boolean }) => (
-  <View
-    style={[
-      styles.chatIcon,
-      { backgroundColor: active ? "#4CAF50" : "#E8E0DC" },
-    ]}
-  >
-    <Ionicons
-      name={active ? "chatbubble" : "chatbubble-outline"}
-      size={18}
-      color={active ? "#fff" : "#555"}
-    />
-  </View>
-);
-
-// ─── Sub-components ───────────────────────────────────────────────────────────
-const StatusBadge = ({ status }: { status: "PERDIDO" | "ENCONTRADO" }) => {
-  const isFound = status === "ENCONTRADO";
   return (
-    <View
-      style={[
-        styles.badge,
-        { backgroundColor: isFound ? "#E8F5E9" : "#FFF3E0" },
-      ]}
+    <TouchableOpacity
+      style={styles.petCard}
+      activeOpacity={0.88}
+      onPress={() =>
+        router.push({ pathname: "/pet-detail", params: { id: item.id } })
+      }
     >
-      <Text
-        style={[styles.badgeText, { color: isFound ? "#2E7D32" : "#E65100" }]}
-      >
-        {status}
-      </Text>
-    </View>
+      <View style={styles.photoWrapper}>
+        {item.photo ? (
+          <Image
+            source={{ uri: item.photo }}
+            style={styles.photo}
+            resizeMode="cover"
+          />
+        ) : (
+          <View style={styles.photoPlaceholder}>
+            <Ionicons name="paw" size={36} color="#ccc" />
+          </View>
+        )}
+
+        <View style={styles.photoOverlay} />
+
+        <View
+          style={[
+            styles.photoBadge,
+            { backgroundColor: isFound ? "#2E7D32" : ORANGE },
+          ]}
+        >
+          <Text style={styles.photoBadgeText}>{item.status}</Text>
+        </View>
+
+        {item.hasNewMessage && (
+          <View style={styles.chatDot}>
+            <Ionicons name="chatbubble" size={11} color="#fff" />
+          </View>
+        )}
+      </View>
+
+      <View style={styles.petInfoBox}>
+        <Text style={styles.petName} numberOfLines={1}>
+          {item.name}
+        </Text>
+        <Text style={styles.petBreed} numberOfLines={1}>
+          {item.breed}
+        </Text>
+        <View style={styles.petLocationRow}>
+          <Ionicons name="location-outline" size={11} color={ORANGE} />
+          <Text style={styles.petLocation} numberOfLines={1}>
+            {item.neighborhood}
+          </Text>
+        </View>
+      </View>
+    </TouchableOpacity>
   );
 };
 
-const TagChip = ({ label }: { label: string }) => (
-  <View style={styles.chip}>
-    <Text style={styles.chipText}>{label}</Text>
-  </View>
-);
-
-const OccurrenceCard = ({ item }: { item: Occurrence }) => (
-  <TouchableOpacity
-    style={styles.card}
-    onPress={() =>
-      router.push({
-        pathname: "/pet-detail",
-        params: { id: item.id },
-      })
-    }
-    activeOpacity={0.85}
-  >
-    <View style={styles.cardRow}>
-      <View style={styles.avatar}>
-        <PawIcon size={30} />
-      </View>
-
-      <View style={styles.cardContent}>
-        <View style={styles.cardHeader}>
-          <StatusBadge status={item.status} />
-          <Text style={styles.timeText}>{item.time}</Text>
-        </View>
-
-        <Text style={styles.petName}>{item.name}</Text>
-
-        <Text style={styles.petInfo}>
-          {item.type} · {item.breed} · {item.size}
-        </Text>
-
-        <View style={styles.tagsRow}>
-          {item.tags.map((tag) => (
-            <TagChip key={tag} label={tag} />
-          ))}
-        </View>
-
-        <Text style={styles.locationText}>
-          {item.neighborhood} ·{" "}
-          <Text style={styles.distanceBold}>{item.distance}</Text>
-        </Text>
-      </View>
-
-      <ChatIcon active={item.hasNewMessage} />
-    </View>
-  </TouchableOpacity>
-);
-
+// ─── Filter Bar ───────────────────────────────────────────────────────────────
 const FilterBar = ({
   active,
   onSelect,
 }: {
   active: Filter;
-  onSelect: (filter: Filter) => void;
+  onSelect: (f: Filter) => void;
 }) => (
   <ScrollView
     horizontal
@@ -195,23 +193,6 @@ const FilterBar = ({
   </ScrollView>
 );
 
-const UrgentBanner = ({ onPress }: { onPress: () => void }) => (
-  <TouchableOpacity style={styles.banner} onPress={onPress} activeOpacity={0.9}>
-    <View style={styles.bannerIcon}>
-      <Ionicons name="alert" size={18} color="#fff" />
-    </View>
-
-    <View style={styles.bannerContent}>
-      <Text style={styles.bannerLabel}>URGENTE · HÁ 2 HORAS</Text>
-      <Text style={styles.bannerTitle}>
-        Bolt desapareceu no Parque Ibirapuera
-      </Text>
-    </View>
-
-    <Text style={styles.bannerCta}>Ver →</Text>
-  </TouchableOpacity>
-);
-
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function DashboardScreen() {
   const [activeFilter, setActiveFilter] = useState<Filter>("Todos");
@@ -225,31 +206,28 @@ export default function DashboardScreen() {
           ? OCCURRENCES.filter((o) => o.status === "ENCONTRADO")
           : activeFilter === "Cães"
             ? OCCURRENCES.filter((o) => o.type === "Cão")
-            : OCCURRENCES;
+            : activeFilter === "Gatos"
+              ? OCCURRENCES.filter((o) => o.type === "Gato")
+              : OCCURRENCES;
+
+  const rows: Occurrence[][] = [];
+  for (let i = 0; i < filtered.length; i += 2) {
+    rows.push(filtered.slice(i, i + 2));
+  }
 
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar barStyle="dark-content" backgroundColor={BG} />
-
-      <View style={styles.header}>
-        <Text>
-          <Text style={styles.logoBold}>Central</Text>
-          <Text style={styles.logoAccent}>Pet</Text>
-        </Text>
-
-        <TouchableOpacity hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-          <Ionicons name="notifications" size={24} color="#1a1a1a" />
-        </TouchableOpacity>
-      </View>
 
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <UrgentBanner onPress={() => {}} />
+        {/* ── Filters ── */}
         <FilterBar active={activeFilter} onSelect={setActiveFilter} />
 
+        {/* ── Section header ── */}
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>OCORRÊNCIAS NA REGIÃO</Text>
           <TouchableOpacity>
@@ -257,15 +235,35 @@ export default function DashboardScreen() {
           </TouchableOpacity>
         </View>
 
-        {filtered.map((item) => (
-          <OccurrenceCard key={item.id} item={item} />
+        {/* ── Grid ── */}
+        {rows.map((row, i) => (
+          <View key={i} style={styles.gridRow}>
+            {row.map((item) => (
+              <PetCard key={item.id} item={item} />
+            ))}
+            {row.length === 1 && <View style={{ width: CARD_WIDTH }} />}
+          </View>
         ))}
 
-        <View style={{ height: 100 }} />
+        {filtered.length === 0 && (
+          <View style={styles.emptyState}>
+            <Ionicons name="paw-outline" size={48} color="#ccc" />
+            <Text style={styles.emptyText}>Nenhuma ocorrência encontrada</Text>
+          </View>
+        )}
+
+        <View style={{ height: 110 }} />
       </ScrollView>
 
+      {/* ── FAB ── */}
       <View style={styles.fabContainer}>
         <TouchableOpacity style={styles.fab} activeOpacity={0.88}>
+          <Ionicons
+            name="add-circle-outline"
+            size={20}
+            color="#fff"
+            style={{ marginRight: 8 }}
+          />
           <Text style={styles.fabText}>Registrar ocorrência</Text>
         </TouchableOpacity>
       </View>
@@ -277,69 +275,10 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: BG },
 
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === "android" ? 12 : 4,
-    paddingBottom: 12,
-    backgroundColor: BG,
-  },
-
-  logoBold: {
-    fontFamily: "Lexend_700Bold",
-    color: "#1a1a1a",
-    fontSize: 24,
-  },
-  logoAccent: {
-    fontFamily: "Lexend_700Bold",
-    color: ORANGE,
-    fontSize: 24,
-  },
-
   scroll: { flex: 1 },
-  scrollContent: { paddingHorizontal: 16, paddingTop: 4 },
-
-  // Banner
-  banner: {
-    backgroundColor: ORANGE,
-    borderRadius: 14,
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 14,
-    paddingHorizontal: 14,
-    marginBottom: 20,
-    elevation: 5,
-  },
-  bannerIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "rgba(255,255,255,0.25)",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  bannerContent: { flex: 1 },
-  bannerLabel: {
-    fontFamily: "Lexend_700Bold",
-    fontSize: 10,
-    color: "rgba(255,255,255,0.85)",
-    letterSpacing: 0.5,
-    marginBottom: 2,
-  },
-  bannerTitle: {
-    fontFamily: "Lexend_700Bold",
-    fontSize: 13,
-    color: "#fff",
-    lineHeight: 20,
-  },
-  bannerCta: {
-    fontFamily: "Lexend_700Bold",
-    fontSize: 13,
-    color: "#fff",
-    marginLeft: 8,
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingTop: Platform.OS === "android" ? 12 : 8,
   },
 
   // Filters
@@ -371,7 +310,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 14,
   },
   sectionTitle: {
     fontFamily: "Lexend_700Bold",
@@ -385,101 +324,113 @@ const styles = StyleSheet.create({
     color: ORANGE,
   },
 
-  // Card
-  card: {
-    backgroundColor: "#F5F2EC",
-    borderRadius: 16,
-    padding: 14,
-    marginBottom: 12,
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  cardRow: { flexDirection: "row", alignItems: "flex-start" },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#E8E4DF",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-    marginTop: 2,
-  },
-  cardContent: { flex: 1 },
-  cardHeader: {
+  // Grid
+  gridRow: {
     flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 2,
+    gap: 12,
+    marginBottom: 12,
   },
 
-  badge: {
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    borderRadius: 6,
+  // Pet Card
+  petCard: {
+    width: CARD_WIDTH,
+    backgroundColor: "#F5F2EC",
+    borderRadius: 18,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowOffset: { width: 0, height: 3 },
+    shadowRadius: 8,
+    elevation: 3,
   },
-  badgeText: {
+  photoWrapper: {
+    width: "100%",
+    height: CARD_WIDTH * 1.15,
+    backgroundColor: "#E8E4DF",
+  },
+  photo: {
+    width: "100%",
+    height: "100%",
+  },
+  photoPlaceholder: {
+    width: "100%",
+    height: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  photoOverlay: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 40,
+    backgroundColor: "rgba(0,0,0,0.18)",
+  },
+  photoBadge: {
+    position: "absolute",
+    top: 8,
+    left: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  photoBadgeText: {
     fontFamily: "Lexend_700Bold",
-    fontSize: 10,
-    letterSpacing: 0.4,
+    fontSize: 9,
+    color: "#fff",
+    letterSpacing: 0.3,
   },
-  timeText: {
-    fontFamily: "Lexend_400Regular",
-    fontSize: 11,
-    color: "#999",
+  chatDot: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: "#4CAF50",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  // Info below photo
+  petInfoBox: {
+    padding: 10,
+    gap: 2,
   },
   petName: {
     fontFamily: "Lexend_700Bold",
-    fontSize: 17,
+    fontSize: 15,
     color: "#1a1a1a",
-    marginBottom: 2,
   },
-  petInfo: {
-    fontFamily: "Lexend_400Regular",
-    fontSize: 13,
-    color: "#666",
-    marginBottom: 8,
-  },
-
-  tagsRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 6,
-    marginBottom: 8,
-  },
-  chip: {
-    backgroundColor: "#E8E4DF",
-    borderRadius: 8,
-    paddingHorizontal: 9,
-    paddingVertical: 3,
-  },
-  chipText: {
-    fontFamily: "Lexend_500Medium",
-    fontSize: 11,
-    color: "#555",
-  },
-
-  locationText: {
+  petBreed: {
     fontFamily: "Lexend_400Regular",
     fontSize: 12,
-    color: "#888",
+    color: "#777",
   },
-  distanceBold: {
-    fontFamily: "Lexend_700Bold",
-    color: "#444",
+  petLocationRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+    marginTop: 2,
+  },
+  petLocation: {
+    fontFamily: "Lexend_400Regular",
+    fontSize: 11,
+    color: "#999",
+    flex: 1,
   },
 
-  chatIcon: {
-    width: 38,
-    height: 38,
-    borderRadius: 10,
+  // Empty state
+  emptyState: {
     alignItems: "center",
     justifyContent: "center",
-    marginLeft: 8,
-    marginTop: 2,
+    paddingVertical: 60,
+    gap: 12,
+  },
+  emptyText: {
+    fontFamily: "Lexend_500Medium",
+    fontSize: 14,
+    color: "#bbb",
   },
 
   // FAB
@@ -494,6 +445,8 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     paddingVertical: 18,
     alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
     shadowColor: ORANGE,
     shadowOpacity: 0.4,
     shadowOffset: { width: 0, height: 6 },

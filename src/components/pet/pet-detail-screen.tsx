@@ -1,6 +1,8 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useState } from "react";
 import {
+  Dimensions,
+  Image,
   Platform,
   SafeAreaView,
   ScrollView,
@@ -24,16 +26,13 @@ type Occurrence = {
   neighborhood: string;
   distance: string;
   hasNewMessage: boolean;
-  // Detail extras
-  description?: string;
+  photos?: string[];
   ownerName?: string;
   ownerPhone?: string;
   reward?: boolean;
   lastSeenDate?: string;
   lastSeenAddress?: string;
   color?: string;
-  age?: string;
-  weight?: string;
   castrated?: boolean;
   vaccinated?: boolean;
 };
@@ -41,6 +40,9 @@ type Occurrence = {
 // ─── Constants ────────────────────────────────────────────────────────────────
 const ORANGE = "#D97757";
 const BG = "#FAF7F5";
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const PHOTO_WIDTH = SCREEN_WIDTH * 0.62;
+const PHOTO_HEIGHT = PHOTO_WIDTH * 1.15;
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 type PetDetailScreenProps = {
@@ -97,19 +99,73 @@ const SectionTitle = ({ title }: { title: string }) => (
   <Text style={styles.sectionTitle}>{title}</Text>
 );
 
+// ─── Photo Carousel ───────────────────────────────────────────────────────────
+const PhotoCarousel = ({
+  photos,
+  activeIndex,
+  onScroll,
+}: {
+  photos: string[];
+  activeIndex: number;
+  onScroll: (index: number) => void;
+}) => (
+  <View style={styles.carouselWrapper}>
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      snapToInterval={PHOTO_WIDTH + 12}
+      decelerationRate="fast"
+      contentContainerStyle={styles.carouselContent}
+      onScroll={(e) => {
+        const index = Math.round(
+          e.nativeEvent.contentOffset.x / (PHOTO_WIDTH + 12),
+        );
+        onScroll(index);
+      }}
+      scrollEventThrottle={16}
+    >
+      {photos.map((uri, i) => (
+        <View key={i} style={styles.photoCard}>
+          <Image source={{ uri }} style={styles.photo} resizeMode="cover" />
+        </View>
+      ))}
+    </ScrollView>
+
+    {/* Dots */}
+    <View style={styles.dotsRow}>
+      {photos.map((_, i) => (
+        <View
+          key={i}
+          style={[styles.dot, i === activeIndex && styles.dotActive]}
+        />
+      ))}
+    </View>
+  </View>
+);
+
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function PetDetailScreen({
   item,
   onBack,
 }: PetDetailScreenProps) {
   const [contactPressed, setContactPressed] = useState(false);
+  const [activePhoto, setActivePhoto] = useState(0);
   const isFound = item.status === "ENCONTRADO";
+
+  // Fallback photos if none provided
+  const photos = item.photos?.length
+    ? item.photos
+    : [
+        "https://images.unsplash.com/photo-1552053831-71594a27632d?w=600&q=80",
+        "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600&q=80",
+        "https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?w=600&q=80",
+      ];
 
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar barStyle="dark-content" backgroundColor={BG} />
 
-      {/* Header */}
+      {/* ── Header ── */}
       <View style={styles.header}>
         <TouchableOpacity
           onPress={onBack}
@@ -121,8 +177,11 @@ export default function PetDetailScreen({
 
         <Text style={styles.headerTitle}>Detalhes</Text>
 
-        <TouchableOpacity hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-          <Ionicons name="share-social-outline" size={24} color="#1a1a1a" />
+        <TouchableOpacity
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          style={styles.shareBtn}
+        >
+          <Ionicons name="share-social-outline" size={22} color="#1a1a1a" />
         </TouchableOpacity>
       </View>
 
@@ -131,14 +190,17 @@ export default function PetDetailScreen({
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* ── Avatar Card ── */}
-        <View style={styles.avatarCard}>
-          <View style={styles.avatarCircle}>
-            <Ionicons name="paw" size={56} color="#bbb" />
-          </View>
+        {/* ── Photo Carousel ── */}
+        <PhotoCarousel
+          photos={photos}
+          activeIndex={activePhoto}
+          onScroll={setActivePhoto}
+        />
 
-          <View style={styles.avatarInfo}>
-            <View style={styles.avatarBadgeRow}>
+        {/* ── Pet identity ── */}
+        <View style={styles.identityCard}>
+          <View style={styles.identityTop}>
+            <View style={styles.identityBadgeRow}>
               <StatusBadge status={item.status} />
               {item.reward && (
                 <View style={styles.rewardBadge}>
@@ -152,16 +214,15 @@ export default function PetDetailScreen({
             <Text style={styles.petBreed}>
               {item.type} · {item.breed}
             </Text>
+          </View>
 
-            <View style={styles.locationRow}>
+          <View style={styles.identityMeta}>
+            <View style={styles.metaItem}>
               <Ionicons name="location-outline" size={13} color={ORANGE} />
-              <Text style={styles.locationText}>
-                {item.neighborhood} ·{" "}
-                <Text style={styles.distanceBold}>{item.distance}</Text>
-              </Text>
+              <Text style={styles.metaText}>{item.neighborhood}</Text>
             </View>
-
-            <Text style={styles.timeAgo}>Publicado {item.time}</Text>
+            <View style={styles.metaDot} />
+            <Text style={styles.metaTime}>Publicado {item.time}</Text>
           </View>
         </View>
 
@@ -169,6 +230,7 @@ export default function PetDetailScreen({
         <View style={styles.section}>
           <SectionTitle title="CARACTERÍSTICAS" />
           <View style={styles.card}>
+            {/* Grid: Porte + Cor apenas */}
             <View style={styles.charsGrid}>
               <View style={styles.charItem}>
                 <Text style={styles.charLabel}>Porte</Text>
@@ -179,20 +241,11 @@ export default function PetDetailScreen({
                 <Text style={styles.charLabel}>Cor</Text>
                 <Text style={styles.charValue}>{item.color ?? "—"}</Text>
               </View>
-              <View style={styles.charDivider} />
-              <View style={styles.charItem}>
-                <Text style={styles.charLabel}>Idade</Text>
-                <Text style={styles.charValue}>{item.age ?? "—"}</Text>
-              </View>
-              <View style={styles.charDivider} />
-              <View style={styles.charItem}>
-                <Text style={styles.charLabel}>Peso</Text>
-                <Text style={styles.charValue}>{item.weight ?? "—"}</Text>
-              </View>
             </View>
 
             <View style={styles.charsDividerH} />
 
+            {/* Castrado / Vacinado */}
             <View style={styles.charsCheckRow}>
               <View style={styles.checkItem}>
                 <Ionicons
@@ -212,6 +265,7 @@ export default function PetDetailScreen({
               </View>
             </View>
 
+            {/* Tags */}
             <View style={styles.tagsRow}>
               {item.tags.map((tag) => (
                 <TagChip key={tag} label={tag} />
@@ -219,16 +273,6 @@ export default function PetDetailScreen({
             </View>
           </View>
         </View>
-
-        {/* ── Descrição ── */}
-        {item.description && (
-          <View style={styles.section}>
-            <SectionTitle title="DESCRIÇÃO" />
-            <View style={styles.card}>
-              <Text style={styles.descriptionText}>{item.description}</Text>
-            </View>
-          </View>
-        )}
 
         {/* ── Último avistamento ── */}
         <View style={styles.section}>
@@ -246,12 +290,6 @@ export default function PetDetailScreen({
               icon="location-outline"
               label="Endereço"
               value={item.lastSeenAddress ?? item.neighborhood}
-            />
-            <View style={styles.infoSeparator} />
-            <InfoRow
-              icon="navigate-outline"
-              label="Distância de você"
-              value={item.distance}
             />
           </View>
         </View>
@@ -328,6 +366,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  shareBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: "#F0EDEA",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   headerTitle: {
     fontFamily: "Lexend_700Bold",
     fontSize: 17,
@@ -335,39 +381,66 @@ const styles = StyleSheet.create({
   },
 
   scroll: { flex: 1 },
-  scrollContent: { paddingHorizontal: 16, paddingTop: 8 },
+  scrollContent: { paddingTop: 4, paddingBottom: 16 },
 
-  // Avatar Card
-  avatarCard: {
-    backgroundColor: "#F5F2EC",
+  // ── Carousel ──
+  carouselWrapper: {
+    marginBottom: 16,
+  },
+  carouselContent: {
+    paddingHorizontal: 16,
+    gap: 12,
+  },
+  photoCard: {
+    width: PHOTO_WIDTH,
+    height: PHOTO_HEIGHT,
     borderRadius: 20,
-    padding: 18,
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 20,
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  avatarCircle: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
+    overflow: "hidden",
     backgroundColor: "#E8E4DF",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 16,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 10,
+    elevation: 4,
   },
-  avatarInfo: { flex: 1 },
-  avatarBadgeRow: {
+  photo: {
+    width: "100%",
+    height: "100%",
+  },
+
+  // Dots
+  dotsRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 6,
+    marginTop: 12,
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "#D9D3CF",
+  },
+  dotActive: {
+    width: 18,
+    backgroundColor: ORANGE,
+  },
+
+  // ── Identity Card ──
+  identityCard: {
+    paddingHorizontal: 16,
+    marginBottom: 20,
+  },
+  identityTop: {
+    marginBottom: 10,
+  },
+  identityBadgeRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    marginBottom: 4,
+    marginBottom: 6,
   },
-
   rewardBadge: {
     flexDirection: "row",
     alignItems: "center",
@@ -382,42 +455,49 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: "#B8860B",
   },
-
   petName: {
     fontFamily: "Lexend_700Bold",
-    fontSize: 22,
+    fontSize: 26,
     color: "#1a1a1a",
     marginBottom: 2,
   },
   petBreed: {
     fontFamily: "Lexend_400Regular",
-    fontSize: 13,
+    fontSize: 14,
     color: "#666",
-    marginBottom: 6,
   },
-  locationRow: {
+  identityMeta: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  metaItem: {
     flexDirection: "row",
     alignItems: "center",
     gap: 3,
-    marginBottom: 4,
   },
-  locationText: {
+  metaText: {
     fontFamily: "Lexend_400Regular",
     fontSize: 12,
     color: "#888",
   },
-  distanceBold: {
-    fontFamily: "Lexend_700Bold",
-    color: "#444",
+  metaDot: {
+    width: 3,
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: "#ccc",
   },
-  timeAgo: {
+  metaTime: {
     fontFamily: "Lexend_400Regular",
-    fontSize: 11,
+    fontSize: 12,
     color: "#aaa",
   },
 
-  // Sections
-  section: { marginBottom: 20 },
+  // ── Sections ──
+  section: {
+    marginBottom: 20,
+    paddingHorizontal: 16,
+  },
   sectionTitle: {
     fontFamily: "Lexend_700Bold",
     fontSize: 11,
@@ -469,10 +549,10 @@ const styles = StyleSheet.create({
     color: "#555",
   },
 
-  // Chars grid
+  // Chars grid (só Porte e Cor)
   charsGrid: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "space-around",
   },
   charItem: {
     flex: 1,
@@ -515,14 +595,6 @@ const styles = StyleSheet.create({
     fontFamily: "Lexend_500Medium",
     fontSize: 13,
     color: "#555",
-  },
-
-  // Description
-  descriptionText: {
-    fontFamily: "Lexend_400Regular",
-    fontSize: 13,
-    color: "#555",
-    lineHeight: 20,
   },
 
   // InfoRow
