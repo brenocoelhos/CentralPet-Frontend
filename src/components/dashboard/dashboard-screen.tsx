@@ -2,16 +2,16 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-  Dimensions,
-  Image,
-  Platform,
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Dimensions,
+    Image,
+    Platform,
+    SafeAreaView,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -100,7 +100,11 @@ type Filter = (typeof FILTERS)[number];
 const ORANGE = "#D97757";
 const BG = "#FAF7F5";
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const CARD_WIDTH = (SCREEN_WIDTH - 16 * 2 - 12) / 2;
+const HORIZONTAL_PADDING = 14;
+const CARD_GAP = 10;
+const CARD_WIDTH = (SCREEN_WIDTH - HORIZONTAL_PADDING * 2 - CARD_GAP) / 2;
+const CARD_HEIGHT = 272;
+const CARD_IMAGE_HEIGHT = 180;
 
 // ─── Pet Card ─────────────────────────────────────────────────────────────────
 const PetCard = ({ item }: { item: Occurrence }) => {
@@ -277,7 +281,7 @@ const styles = StyleSheet.create({
 
   scroll: { flex: 1 },
   scrollContent: {
-    paddingHorizontal: 16,
+    paddingHorizontal: HORIZONTAL_PADDING,
     paddingTop: Platform.OS === "android" ? 12 : 8,
   },
 
@@ -327,13 +331,14 @@ const styles = StyleSheet.create({
   // Grid
   gridRow: {
     flexDirection: "row",
-    gap: 12,
-    marginBottom: 12,
+    gap: CARD_GAP,
+    marginBottom: CARD_GAP,
   },
 
   // Pet Card
   petCard: {
     width: CARD_WIDTH,
+    height: CARD_HEIGHT,
     backgroundColor: "#F5F2EC",
     borderRadius: 18,
     overflow: "hidden",
@@ -345,7 +350,7 @@ const styles = StyleSheet.create({
   },
   photoWrapper: {
     width: "100%",
-    height: CARD_WIDTH * 1.15,
+    height: CARD_IMAGE_HEIGHT,
     backgroundColor: "#E8E4DF",
   },
   photo: {

@@ -1,6 +1,6 @@
 import AppShell from "@/components/layout/app-shell";
 import PetDetailScreen from "@/components/pet/pet-detail-screen";
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 
 // 🔹 MOCK (use o mesmo do dashboard)
 const MOCK_DATA = [
@@ -65,7 +65,7 @@ export default function PetDetailRoute() {
 
   return (
     <AppShell>
-      <PetDetailScreen item={item} onBack={() => router.back()} />
+      <PetDetailScreen item={item} />
     </AppShell>
   );
 }

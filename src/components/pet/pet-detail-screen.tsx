@@ -1,16 +1,15 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useState } from "react";
 import {
-  Dimensions,
-  Image,
-  Platform,
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Dimensions,
+    Image,
+    SafeAreaView,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -41,13 +40,15 @@ type Occurrence = {
 const ORANGE = "#D97757";
 const BG = "#FAF7F5";
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const PHOTO_WIDTH = SCREEN_WIDTH * 0.62;
+const CAROUSEL_SIDE_PADDING = 16;
+const PHOTO_GAP = 10;
+const PHOTO_WIDTH =
+  (SCREEN_WIDTH - CAROUSEL_SIDE_PADDING * 2 - PHOTO_GAP * 2) / 2.5;
 const PHOTO_HEIGHT = PHOTO_WIDTH * 1.15;
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 type PetDetailScreenProps = {
   item: Occurrence;
-  onBack: () => void;
 };
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -113,12 +114,16 @@ const PhotoCarousel = ({
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      snapToInterval={PHOTO_WIDTH + 12}
+      snapToInterval={PHOTO_WIDTH + PHOTO_GAP}
       decelerationRate="fast"
       contentContainerStyle={styles.carouselContent}
       onScroll={(e) => {
-        const index = Math.round(
-          e.nativeEvent.contentOffset.x / (PHOTO_WIDTH + 12),
+        const index = Math.max(
+          0,
+          Math.min(
+            photos.length - 1,
+            Math.round(e.nativeEvent.contentOffset.x / (PHOTO_WIDTH + PHOTO_GAP)),
+          ),
         );
         onScroll(index);
       }}
@@ -144,10 +149,7 @@ const PhotoCarousel = ({
 );
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
-export default function PetDetailScreen({
-  item,
-  onBack,
-}: PetDetailScreenProps) {
+export default function PetDetailScreen({ item }: PetDetailScreenProps) {
   const [contactPressed, setContactPressed] = useState(false);
   const [activePhoto, setActivePhoto] = useState(0);
   const isFound = item.status === "ENCONTRADO";
@@ -164,26 +166,6 @@ export default function PetDetailScreen({
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar barStyle="dark-content" backgroundColor={BG} />
-
-      {/* ── Header ── */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          onPress={onBack}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          style={styles.backBtn}
-        >
-          <Ionicons name="arrow-back" size={24} color="#1a1a1a" />
-        </TouchableOpacity>
-
-        <Text style={styles.headerTitle}>Detalhes</Text>
-
-        <TouchableOpacity
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          style={styles.shareBtn}
-        >
-          <Ionicons name="share-social-outline" size={22} color="#1a1a1a" />
-        </TouchableOpacity>
-      </View>
 
       <ScrollView
         style={styles.scroll}
@@ -348,48 +330,16 @@ export default function PetDetailScreen({
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: BG },
 
-  // Header
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === "android" ? 12 : 4,
-    paddingBottom: 12,
-    backgroundColor: BG,
-  },
-  backBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: "#F0EDEA",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  shareBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: "#F0EDEA",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  headerTitle: {
-    fontFamily: "Lexend_700Bold",
-    fontSize: 17,
-    color: "#1a1a1a",
-  },
-
   scroll: { flex: 1 },
-  scrollContent: { paddingTop: 4, paddingBottom: 16 },
+  scrollContent: { paddingTop: 14, paddingBottom: 16 },
 
   // ── Carousel ──
   carouselWrapper: {
     marginBottom: 16,
   },
   carouselContent: {
-    paddingHorizontal: 16,
-    gap: 12,
+    paddingHorizontal: CAROUSEL_SIDE_PADDING,
+    gap: PHOTO_GAP,
   },
   photoCard: {
     width: PHOTO_WIDTH,

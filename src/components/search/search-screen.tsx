@@ -1,14 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useMemo, useState } from "react";
 import {
-  FlatList,
-  Image,
-  Platform,
-  Pressable,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  View,
+    FlatList,
+    Image,
+    Platform,
+    Pressable,
+    SafeAreaView,
+    StyleSheet,
+    View,
 } from "react-native";
 import { ThemedText as Text } from "../themed-text";
 import { ThemedTextInput } from "../themed-text-input";
@@ -93,26 +92,14 @@ const MOCK_PETS: PetItem[] = [
   },
 ];
 
-const FILTER_OPTIONS = ["Todos", "Perdidos", "Encontrados", "Cachorro", "Gato"] as const;
-
-type FilterOption = (typeof FILTER_OPTIONS)[number];
-
 export default function SearchScreen() {
   const [query, setQuery] = useState("");
-  const [activeFilter, setActiveFilter] = useState<FilterOption>("Todos");
   const [sortByRecent, setSortByRecent] = useState(true);
 
   const filteredPets = useMemo(() => {
     const term = query.trim().toLowerCase();
 
-    const byFilter = MOCK_PETS.filter((pet) => {
-      if (activeFilter === "Todos") return true;
-      if (activeFilter === "Perdidos") return pet.status === "Perdido";
-      if (activeFilter === "Encontrados") return pet.status === "Encontrado";
-      return pet.species === activeFilter;
-    });
-
-    const byQuery = byFilter.filter((pet) => {
+    const byQuery = MOCK_PETS.filter((pet) => {
       if (!term) return true;
 
       return [pet.name, pet.species, pet.breed, pet.location]
@@ -128,7 +115,7 @@ export default function SearchScreen() {
 
       return right.daysAgo - left.daysAgo;
     });
-  }, [activeFilter, query, sortByRecent]);
+  }, [query, sortByRecent]);
 
   const renderPetCard = ({ item }: { item: PetItem }) => {
     return (
@@ -160,27 +147,6 @@ export default function SearchScreen() {
           style={styles.input}
         />
       </View>
-
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.filtersRow}
-      >
-        {FILTER_OPTIONS.map((option) => {
-          const active = option === activeFilter;
-          return (
-            <Pressable
-              key={option}
-              style={[styles.filterChip, active && styles.filterChipActive]}
-              onPress={() => setActiveFilter(option)}
-            >
-              <Text style={[styles.filterChipText, active && styles.filterChipTextActive]}>
-                {option}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
 
       <View style={styles.resultsRow}>
         <Text style={styles.resultsLabel}>{filteredPets.length} animais encontrados</Text>
@@ -251,31 +217,6 @@ const styles = StyleSheet.create({
     color: "#37332D",
     fontSize: 15,
     paddingVertical: Platform.select({ ios: 10, android: 7 }),
-  },
-  filtersRow: {
-    gap: 8,
-    paddingVertical: 2,
-    paddingRight: 8,
-  },
-  filterChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: "#DDD5C9",
-    backgroundColor: "#FFFFFF",
-  },
-  filterChipActive: {
-    backgroundColor: "#E57639",
-    borderColor: "#E57639",
-  },
-  filterChipText: {
-    color: "#6F6659",
-    fontSize: 12,
-    fontFamily: "Lexend_500Medium",
-  },
-  filterChipTextActive: {
-    color: "#FFFFFF",
   },
   resultsRow: {
     marginTop: 2,

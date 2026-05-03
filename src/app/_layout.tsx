@@ -1,9 +1,9 @@
 import { AuthProvider } from "@/context/auth-context";
 import {
-    Lexend_400Regular,
-    Lexend_500Medium,
-    Lexend_600SemiBold,
-    Lexend_700Bold,
+  Lexend_400Regular,
+  Lexend_500Medium,
+  Lexend_600SemiBold,
+  Lexend_700Bold,
 } from "@expo-google-fonts/lexend";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useFonts } from "expo-font";
@@ -103,7 +103,7 @@ function AppStack() {
       <Stack.Screen
         name="pet-detail"
         options={{
-          headerShown: false,
+          title: "Detalhes",
         }}
       />
 
