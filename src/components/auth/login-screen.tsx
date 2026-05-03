@@ -14,9 +14,9 @@ import {
   View,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { ThemedText as Text } from "../themed-text";
 import AuthInputField from "./auth-input-field";
 import AuthPasswordField from "./auth-password-field";
-import { ThemedText as Text } from "../themed-text";
 
 export default function LoginScreen() {
   const router = useRouter();

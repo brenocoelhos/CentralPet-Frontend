@@ -2,28 +2,28 @@ import { useAuth } from "@/context/auth-context";
 import { auth } from "@/lib/firebase";
 import { getFirebaseAuthErrorMessage } from "@/utils/firebase-auth-errors";
 import {
-  maskCPF,
-  maskDate,
-  maskPhone,
-  validaCPF,
-  validaData,
-  validaTelefone,
+    maskCPF,
+    maskDate,
+    maskPhone,
+    validaCPF,
+    validaData,
+    validaTelefone,
 } from "@/utils/validators";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  StyleSheet,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    StyleSheet,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { ThemedText as Text } from "../themed-text";
 import AuthInputField from "./auth-input-field";
 import AuthPasswordField from "./auth-password-field";
-import { ThemedText as Text } from "../themed-text";
 
 interface SignupFormState {
   nome: string;

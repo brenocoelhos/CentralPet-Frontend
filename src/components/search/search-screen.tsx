@@ -1,13 +1,13 @@
-import { Ionicons } from "@expo/vector-icons";
 import PetCard from "@/components/pet/pet-card";
+import { Ionicons } from "@expo/vector-icons";
 import { useMemo, useState } from "react";
 import {
-    FlatList,
-    Platform,
-    Pressable,
-    SafeAreaView,
-    StyleSheet,
-    View,
+  FlatList,
+  Platform,
+  Pressable,
+  SafeAreaView,
+  StyleSheet,
+  View,
 } from "react-native";
 import { ThemedText as Text } from "../themed-text";
 import { ThemedTextInput } from "../themed-text-input";
