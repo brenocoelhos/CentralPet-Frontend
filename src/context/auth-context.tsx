@@ -21,6 +21,8 @@ export type AuthUser = {
   uid: string;
   email?: string;
   displayName?: string;
+  endereco?: string;
+  emailVerified?: boolean;
   provider: "jwt" | "firebase";
 };
 
@@ -212,6 +214,8 @@ function normalizeApiUser(payload: Record<string, unknown>): AuthUser | null {
     uid: id,
     email: readString(payload.email),
     displayName,
+    endereco: readString(payload.endereco),
+    emailVerified: typeof payload.emailVerified === "boolean" ? payload.emailVerified : undefined,
     provider: "jwt",
   };
 }

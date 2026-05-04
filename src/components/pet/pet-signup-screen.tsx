@@ -15,6 +15,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  TouchableOpacity,
   View,
 } from "react-native";
 import { ThemedText as Text } from "../themed-text";
@@ -66,9 +67,36 @@ function SelectField({
   );
 }
 
+function NotLoggedInGate() {
+  const router = useRouter();
+  return (
+    <View style={styles.gateContainer}>
+      <View style={styles.gateIconWrap}>
+        <Ionicons name="lock-closed-outline" size={48} color="#D97757" />
+      </View>
+      <Text style={styles.gateTitle}>Acesso restrito</Text>
+      <Text style={styles.gateDescription}>
+        Você precisa ter uma conta para cadastrar um pet desaparecido. Faça login ou crie sua conta para continuar.
+      </Text>
+      <TouchableOpacity
+        style={styles.gateButton}
+        activeOpacity={0.85}
+        onPress={() => router.replace("/login")}
+      >
+        <Ionicons name="log-in-outline" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
+        <Text style={styles.gateButtonText}>Entrar ou criar conta</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
 export default function PetSignupScreen() {
   const router = useRouter();
   const { user, token } = useAuth();
+
+  if (!user) {
+    return <NotLoggedInGate />;
+  }
   const [name, setName] = useState("");
   const [species, setSpecies] = useState("Cachorro");
   const [breed, setBreed] = useState("");
@@ -553,6 +581,54 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
     letterSpacing: 0.3,
+  },
+  gateContainer: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 32,
+    gap: 16,
+  },
+  gateIconWrap: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: "#FDF0EA",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
+  },
+  gateTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#1A1A1A",
+    textAlign: "center",
+  },
+  gateDescription: {
+    fontSize: 14,
+    color: "#8E8476",
+    textAlign: "center",
+    lineHeight: 21,
+  },
+  gateButton: {
+    backgroundColor: "#D97757",
+    borderRadius: 30,
+    paddingVertical: 16,
+    paddingHorizontal: 28,
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 8,
+    shadowColor: "#D97757",
+    shadowOpacity: 0.35,
+    shadowOffset: { width: 0, height: 5 },
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  gateButtonText: {
+    color: "#FFFFFF",
+    fontSize: 15,
+    fontWeight: "700",
   },
 });
 

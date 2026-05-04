@@ -17,7 +17,10 @@ export type CadastroPayload = {
   email: string;
   senha: string;
   telefone: string;
-  endereco?: string;
+  rua?: string;
+  numero?: string;
+  cidade?: string;
+  estado?: string;
 };
 
 export type LoginResponse =

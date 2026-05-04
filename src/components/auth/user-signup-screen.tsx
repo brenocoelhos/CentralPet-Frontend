@@ -29,7 +29,10 @@ interface SignupFormState {
   dataNascimento: string;
   email: string;
   telefone: string;
-  endereco: string;
+  rua: string;
+  numero: string;
+  cidade: string;
+  estado: string;
   senha: string;
   confirmarSenha: string;
 }
@@ -44,7 +47,10 @@ export default function UserSignupScreen() {
     dataNascimento: "",
     email: "",
     telefone: "",
-    endereco: "",
+    rua: "",
+    numero: "",
+    cidade: "",
+    estado: "",
     senha: "",
     confirmarSenha: "",
   });
@@ -185,7 +191,10 @@ export default function UserSignupScreen() {
         email: email.trim(),
         senha,
         telefone: telefone.replace(/\D/g, ""),
-        endereco: form.endereco.trim() || undefined,
+        rua: form.rua.trim() || undefined,
+        numero: form.numero.trim() || undefined,
+        cidade: form.cidade.trim() || undefined,
+        estado: form.estado.trim() || undefined,
       });
 
       Alert.alert("Sucesso!", "Cadastro realizado com sucesso.");
@@ -272,14 +281,52 @@ export default function UserSignupScreen() {
           errorText={errors.telefone}
         />
 
-        <AuthInputField
-          label="Endereco"
-          placeholder="Rua, número, cidade"
-          value={form.endereco}
-          onChangeText={(v) => handleChange("endereco", v)}
-          autoCapitalize="words"
-          returnKeyType="next"
-        />
+        <View style={styles.row}>
+          <View style={{ flex: 3 }}>
+            <AuthInputField
+              label="Rua"
+              placeholder="Nome da rua"
+              value={form.rua}
+              onChangeText={(v) => handleChange("rua", v)}
+              autoCapitalize="words"
+              returnKeyType="next"
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            <AuthInputField
+              label="Número"
+              placeholder="Nº"
+              value={form.numero}
+              onChangeText={(v) => handleChange("numero", v)}
+              keyboardType="numeric"
+              returnKeyType="next"
+            />
+          </View>
+        </View>
+
+        <View style={styles.row}>
+          <View style={styles.halfGroup}>
+            <AuthInputField
+              label="Cidade"
+              placeholder="Cidade"
+              value={form.cidade}
+              onChangeText={(v) => handleChange("cidade", v)}
+              autoCapitalize="words"
+              returnKeyType="next"
+            />
+          </View>
+          <View style={styles.halfGroup}>
+            <AuthInputField
+              label="Estado"
+              placeholder="UF"
+              value={form.estado}
+              onChangeText={(v) => handleChange("estado", v)}
+              autoCapitalize="characters"
+              maxLength={2}
+              returnKeyType="next"
+            />
+          </View>
+        </View>
 
         <View style={styles.row}>
           <View style={styles.halfGroup}>

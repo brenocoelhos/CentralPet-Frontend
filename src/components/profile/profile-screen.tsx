@@ -1,26 +1,48 @@
 import { useAuth } from "@/context/auth-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  ScrollView,
   StyleSheet,
+  Switch,
   TouchableOpacity,
   View,
 } from "react-native";
 import { ThemedText as Text } from "../themed-text";
 
+function parseCidadeEstado(endereco?: string): string | null {
+  if (!endereco) return null;
+  const parts = endereco.split(",").map((s) => s.trim()).filter(Boolean);
+  if (parts.length >= 2) {
+    return `${parts[parts.length - 2]}, ${parts[parts.length - 1]}`;
+  }
+  return parts[0] ?? null;
+}
+
 export default function ProfileScreen() {
   const router = useRouter();
-  const { user, initializing, logout } = useAuth();
+  const { user, initializing, logout, getApi } = useAuth();
   const profileName =
     user?.displayName?.trim() || user?.email?.split("@")[0] || "Usuario";
 
-  const handleLogout = async () => {
-    if (!user) {
-      return;
-    }
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [stats, setStats] = useState({ registros: 0, encontrados: 0, avistamentos: 0 });
 
+  useEffect(() => {
+    if (!user) return;
+    getApi()
+      .pets.buscaPets({ usuarioId: user.id })
+      .then((pets) => setStats((prev) => ({ ...prev, registros: pets.length })))
+      .catch(() => {});
+  }, [user, getApi]);
+
+  const cidadeEstado = parseCidadeEstado(user?.endereco);
+
+  const handleLogout = async () => {
+    if (!user) return;
     try {
       await logout();
       router.replace("/login");
@@ -38,7 +60,12 @@ export default function ProfileScreen() {
   }
 
   return (
-    <View style={styles.root}>
+    <ScrollView
+      style={styles.root}
+      contentContainerStyle={styles.scrollContent}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Header */}
       <View style={styles.topSection}>
         <View style={styles.avatarWrapper}>
           <View style={styles.avatarCircle}>
@@ -46,6 +73,18 @@ export default function ProfileScreen() {
           </View>
           <Text style={styles.avatarName}>{user ? profileName : "Visitante"}</Text>
           {user?.email && <Text style={styles.avatarEmail}>{user.email}</Text>}
+          {cidadeEstado && (
+            <View style={styles.locationRow}>
+              <Ionicons name="location-outline" size={13} color="#8E8476" />
+              <Text style={styles.locationText}>{cidadeEstado}</Text>
+            </View>
+          )}
+          {user?.emailVerified && (
+            <View style={styles.verifiedBadge}>
+              <Ionicons name="checkmark-circle" size={12} color="#FFFFFF" />
+              <Text style={styles.verifiedText}>Verificado</Text>
+            </View>
+          )}
         </View>
 
         {!user && (
@@ -65,7 +104,43 @@ export default function ProfileScreen() {
         )}
       </View>
 
+      {/* Stats row */}
+      {user && (
+        <View style={styles.statsRow}>
+          <View style={styles.statItem}>
+            <Text style={styles.statValue}>{stats.registros}</Text>
+            <Text style={styles.statLabel}>Registros</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={[styles.statValue, styles.statValueGreen]}>{stats.encontrados}</Text>
+            <Text style={styles.statLabel}>Encontrados</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={styles.statValue}>{stats.avistamentos}</Text>
+            <Text style={styles.statLabel}>Avistamentos</Text>
+          </View>
+        </View>
+      )}
+
+      {/* Menu */}
       <View style={styles.menuContainer}>
+        {/* Meus pets — não implementado ainda */}
+        <View style={[styles.menuItem, styles.menuItemDisabled]}>
+          <View style={[styles.menuIconWrap, styles.menuIconWrapDisabled]}>
+            <Ionicons name="paw-outline" size={20} color="#B8B8B8" />
+          </View>
+          <View style={styles.menuTextWrap}>
+            <Text style={[styles.menuTitle, styles.menuTextDisabled]}>Meus pets</Text>
+            <Text style={[styles.menuDescription, styles.menuTextDisabled]}>Gerencie os perfis dos seus animais</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color="#D0D0D0" />
+        </View>
+
+        <View style={styles.menuDivider} />
+
+        {/* Meus registros */}
         <TouchableOpacity
           style={[styles.menuItem, !user && styles.menuItemDisabled]}
           activeOpacity={user ? 0.85 : 1}
@@ -84,24 +159,64 @@ export default function ProfileScreen() {
 
         <View style={styles.menuDivider} />
 
+        {/* Contatos de emergência */}
         <TouchableOpacity
           style={[styles.menuItem, !user && styles.menuItemDisabled]}
           activeOpacity={user ? 0.85 : 1}
-          onPress={() => user && router.push("/configuracoes")}
           disabled={!user}
         >
           <View style={[styles.menuIconWrap, !user && styles.menuIconWrapDisabled]}>
-            <Ionicons name="settings-outline" size={20} color={user ? "#8A7060" : "#B8B8B8"} />
+            <Ionicons name="call-outline" size={20} color={user ? "#8A7060" : "#B8B8B8"} />
           </View>
           <View style={styles.menuTextWrap}>
-            <Text style={[styles.menuTitle, !user && styles.menuTextDisabled]}>Configuracoes</Text>
-            <Text style={[styles.menuDescription, !user && styles.menuTextDisabled]}>Ajuste preferencias da sua conta</Text>
+            <Text style={[styles.menuTitle, !user && styles.menuTextDisabled]}>Contatos de emergência</Text>
+            <Text style={[styles.menuDescription, !user && styles.menuTextDisabled]}>Vet, abrigos e pessoas de confiança</Text>
           </View>
           <Ionicons name="chevron-forward" size={18} color={user ? "#B7AE9F" : "#D0D0D0"} />
         </TouchableOpacity>
 
         <View style={styles.menuDivider} />
 
+        {/* Histórico de avistamentos */}
+        <TouchableOpacity
+          style={[styles.menuItem, !user && styles.menuItemDisabled]}
+          activeOpacity={user ? 0.85 : 1}
+          disabled={!user}
+        >
+          <View style={[styles.menuIconWrap, !user && styles.menuIconWrapDisabled]}>
+            <Ionicons name="eye-outline" size={20} color={user ? "#8A7060" : "#B8B8B8"} />
+          </View>
+          <View style={styles.menuTextWrap}>
+            <Text style={[styles.menuTitle, !user && styles.menuTextDisabled]}>Histórico de avistamentos</Text>
+            <Text style={[styles.menuDescription, !user && styles.menuTextDisabled]}>Reportes que você enviou</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={user ? "#B7AE9F" : "#D0D0D0"} />
+        </TouchableOpacity>
+
+        <View style={styles.menuDivider} />
+
+        {/* Notificações com toggle */}
+        <View style={[styles.menuItem, !user && styles.menuItemDisabled]}>
+          <View style={[styles.menuIconWrap, !user && styles.menuIconWrapDisabled]}>
+            <Ionicons name="notifications-outline" size={20} color={user ? "#8A7060" : "#B8B8B8"} />
+          </View>
+          <View style={styles.menuTextWrap}>
+            <Text style={[styles.menuTitle, !user && styles.menuTextDisabled]}>Notificações</Text>
+            <Text style={[styles.menuDescription, !user && styles.menuTextDisabled]}>Alertas de pets na região</Text>
+          </View>
+          <Switch
+            value={notificationsEnabled}
+            onValueChange={user ? setNotificationsEnabled : undefined}
+            disabled={!user}
+            trackColor={{ false: "#E0D9CF", true: "#D97757" }}
+            thumbColor="#FFFFFF"
+            ios_backgroundColor="#E0D9CF"
+          />
+        </View>
+
+        <View style={styles.menuDivider} />
+
+        {/* Sair */}
         <TouchableOpacity
           style={[styles.menuItem, !user && styles.menuItemDisabled]}
           activeOpacity={user ? 0.85 : 1}
@@ -109,26 +224,16 @@ export default function ProfileScreen() {
           disabled={!user}
         >
           <View style={[styles.menuIconWrap, !user && styles.menuIconWrapDisabled]}>
-            <Ionicons
-              name="log-out-outline"
-              size={20}
-              color={user ? "#8A7060" : "#B8B8B8"}
-            />
+            <Ionicons name="log-out-outline" size={20} color={user ? "#8A7060" : "#B8B8B8"} />
           </View>
           <View style={styles.menuTextWrap}>
             <Text style={[styles.menuTitle, !user && styles.menuTextDisabled]}>Sair</Text>
-            <Text style={[styles.menuDescription, !user && styles.menuTextDisabled]}>
-              Encerrar sessao da conta atual
-            </Text>
+            <Text style={[styles.menuDescription, !user && styles.menuTextDisabled]}>Encerrar sessao da conta atual</Text>
           </View>
-          <Ionicons
-            name="chevron-forward"
-            size={18}
-            color={user ? "#B7AE9F" : "#D0D0D0"}
-          />
+          <Ionicons name="chevron-forward" size={18} color={user ? "#B7AE9F" : "#D0D0D0"} />
         </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -136,7 +241,9 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: "#FFFFFF",
-    justifyContent: "space-between",
+  },
+  scrollContent: {
+    paddingBottom: 32,
   },
   centered: {
     flex: 1,
@@ -173,6 +280,31 @@ const styles = StyleSheet.create({
     color: "#8E8476",
     marginTop: 2,
   },
+  locationRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+    marginTop: 4,
+  },
+  locationText: {
+    fontSize: 12,
+    color: "#8E8476",
+  },
+  verifiedBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "#4CAF50",
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    marginTop: 8,
+  },
+  verifiedText: {
+    fontSize: 11,
+    color: "#FFFFFF",
+    fontWeight: "600",
+  },
   authButton: {
     backgroundColor: "#D97757",
     borderRadius: 30,
@@ -192,6 +324,40 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 16,
     letterSpacing: 0.2,
+  },
+  statsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginHorizontal: 20,
+    marginBottom: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 8,
+    backgroundColor: "#FAF7F3",
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#EAE5DA",
+  },
+  statItem: {
+    flex: 1,
+    alignItems: "center",
+    gap: 2,
+  },
+  statDivider: {
+    width: 1,
+    height: 32,
+    backgroundColor: "#EAE5DA",
+  },
+  statValue: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#1A1A1A",
+  },
+  statValueGreen: {
+    color: "#4CAF50",
+  },
+  statLabel: {
+    fontSize: 11,
+    color: "#8E8476",
   },
   menuContainer: {
     borderTopWidth: 1,

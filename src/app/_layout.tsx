@@ -1,9 +1,9 @@
 import { AuthProvider } from "@/context/auth-context";
 import {
-  Lexend_400Regular,
-  Lexend_500Medium,
-  Lexend_600SemiBold,
-  Lexend_700Bold,
+    Lexend_400Regular,
+    Lexend_500Medium,
+    Lexend_600SemiBold,
+    Lexend_700Bold,
 } from "@expo-google-fonts/lexend";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useFonts } from "expo-font";
@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
   notifBtn: {
     width: 36,
     height: 36,
-    borderRadius: 10,
+    borderRadius: 18,
     backgroundColor: "#F0EDEA",
     alignItems: "center",
     justifyContent: "center",
@@ -109,14 +109,22 @@ function AppStack() {
 
       <Stack.Screen
         name="perfil"
-        options={{
+        options={({ navigation }) => ({
           title: "Perfil",
           headerTitleStyle: {
             fontFamily: "Lexend_700Bold",
             fontSize: 22,
             color: "#1A1A1A",
           },
-        }}
+          headerRight: () => (
+            <TouchableOpacity
+              style={styles.notifBtn}
+              onPress={() => navigation.navigate("configuracoes")}
+            >
+              <Ionicons name="settings-outline" size={22} color="#1a1a1a" />
+            </TouchableOpacity>
+          ),
+        })}
       />
       <Stack.Screen
         name="meus-registros"
