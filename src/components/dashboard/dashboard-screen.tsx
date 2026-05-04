@@ -39,7 +39,7 @@ const FILTERS = ["Todos", "Perdidos", "Encontrados", "Cães", "Gatos"] as const;
 type Filter = (typeof FILTERS)[number];
 
 const ORANGE = "#D97757";
-const BG = "#FAF7F5";
+const BG = "#FFFFFF";
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const HORIZONTAL_PADDING = 14;
 const CARD_GAP = 10;

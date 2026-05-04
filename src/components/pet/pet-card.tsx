@@ -49,8 +49,6 @@ export default function PetCard({
           </View>
         )}
 
-        {isDashboard ? <View style={styles.photoOverlay} /> : null}
-
         {isDashboard && status ? (
           <View style={[styles.badge, { backgroundColor: statusColor }]}>
             <Text style={styles.badgeText}>{status}</Text>
@@ -113,14 +111,6 @@ const styles = StyleSheet.create({
     height: "100%",
     alignItems: "center",
     justifyContent: "center",
-  },
-  photoOverlay: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 40,
-    backgroundColor: "rgba(0,0,0,0.18)",
   },
   badge: {
     position: "absolute",
