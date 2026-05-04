@@ -32,6 +32,9 @@ export type CadastroPetPayload = {
   fotoUrl?: string;
   nomeTutor?: string;
   telefoneTutor?: string;
+  castrado?: boolean;
+  vacinado?: boolean;
+  recompensa?: boolean;
 };
 
 export type BuscaPetsParams = {
@@ -68,6 +71,9 @@ export function createPetsApi(http: HttpClient, routes: PetsRoutes) {
     },
     buscaPets(params?: Partial<BuscaPetsParams>) {
       return http.get<PetDashboardDto[]>(`${routes.buscaPets}${toBuscaPetsQuery(params)}`);
+    },
+    deletePet(id: string) {
+      return http.delete<void>(`${routes.deletePet}/${id}`);
     },
   };
 }

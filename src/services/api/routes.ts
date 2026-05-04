@@ -9,6 +9,7 @@ export type AuthRoutes = {
 export type PetsRoutes = {
   cadastroPet: string;
   buscaPets: string;
+  deletePet: string;
 };
 
 export type ApiRoutes = {
@@ -27,5 +28,6 @@ export const apiRoutes: ApiRoutes = {
   pets: {
     cadastroPet: "/auth/cadastro-pet",
     buscaPets: "/auth/busca-pets",
+    deletePet: "/auth/deletar-pet",
   },
 };
