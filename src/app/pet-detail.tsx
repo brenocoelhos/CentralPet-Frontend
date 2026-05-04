@@ -74,11 +74,11 @@ function mapPetToDetailItem(item: PetDashboardDto): DetailItem {
     photos: item.fotoUrl ? [item.fotoUrl] : undefined,
     ownerName: item.nomeTutor,
     ownerPhone: item.telefoneTutor,
-    reward: item.descricao.some((chip) => chip.toLowerCase().includes("recompensa")),
+    reward: item.recompensa ?? false,
     lastSeenDate: item.dataDesaparecimento,
     lastSeenAddress: item.localDesaparecimento,
     color: item.cor,
-    castrated: item.descricao.some((chip) => chip.toLowerCase().includes("castrad")),
-    vaccinated: item.descricao.some((chip) => chip.toLowerCase().includes("vacinad")),
+    castrated: item.castrado ?? false,
+    vaccinated: item.vacinado ?? false,
   };
 }

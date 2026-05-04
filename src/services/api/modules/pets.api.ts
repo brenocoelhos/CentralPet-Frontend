@@ -13,6 +13,9 @@ export type PetDashboardDto = {
   dataCadastro?: string;
   localDesaparecimento: string;
   descricao: string[];
+  castrado?: boolean;
+  vacinado?: boolean;
+  recompensa?: boolean;
   fotoUrl?: string;
   nomeTutor: string;
   telefoneTutor: string;
@@ -72,8 +75,9 @@ export function createPetsApi(http: HttpClient, routes: PetsRoutes) {
     buscaPets(params?: Partial<BuscaPetsParams>) {
       return http.get<PetDashboardDto[]>(`${routes.buscaPets}${toBuscaPetsQuery(params)}`);
     },
-    deletePet(id: string) {
-      return http.delete<void>(`${routes.deletePet}/${id}`);
+    deletePet(petId: string) {
+      // Backend contract: DELETE /auth/cadastro-pet/{petId}
+      return http.delete<void>(`${routes.cadastroPet}/${encodeURIComponent(petId)}`);
     },
   };
 }

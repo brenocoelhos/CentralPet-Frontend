@@ -28,6 +28,6 @@ export const apiRoutes: ApiRoutes = {
   pets: {
     cadastroPet: "/auth/cadastro-pet",
     buscaPets: "/auth/busca-pets",
-    deletePet: "/auth/deletar-pet",
+    deletePet: "/auth/cadastro-pet",
   },
 };

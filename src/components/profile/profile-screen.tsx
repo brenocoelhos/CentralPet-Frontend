@@ -52,8 +52,14 @@ export default function ProfileScreen() {
           <TouchableOpacity
             style={styles.authButton}
             onPress={() => router.push("/login")}
-            activeOpacity={0.85}
+            activeOpacity={0.88}
           >
+            <Ionicons
+              name="log-in-outline"
+              size={20}
+              color="#fff"
+              style={{ marginRight: 8 }}
+            />
             <Text style={styles.authButtonText}>Entrar ou criar conta</Text>
           </TouchableOpacity>
         )}
@@ -169,15 +175,23 @@ const styles = StyleSheet.create({
   },
   authButton: {
     backgroundColor: "#D97757",
-    borderRadius: 16,
-    paddingVertical: 16,
+    borderRadius: 30,
+    paddingVertical: 18,
     alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
     marginBottom: 22,
+    shadowColor: "#D97757",
+    shadowOpacity: 0.4,
+    shadowOffset: { width: 0, height: 6 },
+    shadowRadius: 12,
+    elevation: 6,
   },
   authButtonText: {
-    fontSize: 15,
+    fontFamily: "Lexend_700Bold",
     color: "#FFFFFF",
-    fontWeight: "bold",
+    fontSize: 16,
+    letterSpacing: 0.2,
   },
   menuContainer: {
     borderTopWidth: 1,

@@ -1,6 +1,8 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
+import * as Linking from "expo-linking";
 import { useState } from "react";
 import {
+    Alert,
     Dimensions,
     Image,
     SafeAreaView,
@@ -38,7 +40,7 @@ type Occurrence = {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const ORANGE = "#D97757";
-const BG = "#FAF7F5";
+const BG = "#FFFFFF";
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const CAROUSEL_SIDE_PADDING = 16;
 const PHOTO_GAP = 10;
@@ -194,9 +196,26 @@ const PhotoCarousel = ({
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function PetDetailScreen({ item }: PetDetailScreenProps) {
-  const [contactPressed, setContactPressed] = useState(false);
   const [activePhoto, setActivePhoto] = useState(0);
   const isFound = item.status === "ENCONTRADO";
+
+  const handleOpenWhatsApp = async () => {
+    const cleanedPhone = item.ownerPhone?.replace(/\D/g, "") ?? "";
+
+    if (!cleanedPhone) {
+      Alert.alert("Telefone indisponível", "Este registro não possui telefone para contato.");
+      return;
+    }
+
+    const message = "olá achei seu pet no CentralPet.";
+    const url = `https://wa.me/${cleanedPhone}?text=${encodeURIComponent(message)}`;
+
+    try {
+      await Linking.openURL(url);
+    } catch {
+      Alert.alert("Erro", "Não foi possível abrir o WhatsApp.");
+    }
+  };
 
   // Fallback photos if none provided
   const photos = item.photos?.length
@@ -271,23 +290,31 @@ export default function PetDetailScreen({ item }: PetDetailScreenProps) {
 
             <View style={styles.charsDividerH} />
 
-            {/* Castrado / Vacinado */}
+            {/* Castrado / Vacinado / Recompensa */}
             <View style={styles.charsCheckRow}>
               <View style={styles.checkItem}>
                 <Ionicons
-                  name={item.castrated ? "checkmark-circle" : "close-circle"}
+                  name="checkmark-circle"
                   size={18}
-                  color={item.castrated ? "#4CAF50" : "#ccc"}
+                  color={item.castrated ? "#4CAF50" : "#D0CECA"}
                 />
-                <Text style={styles.checkLabel}>Castrado</Text>
+                <Text style={[styles.checkLabel, !item.castrated && styles.checkLabelOff]}>Castrado</Text>
               </View>
               <View style={styles.checkItem}>
                 <Ionicons
-                  name={item.vaccinated ? "checkmark-circle" : "close-circle"}
+                  name="checkmark-circle"
                   size={18}
-                  color={item.vaccinated ? "#4CAF50" : "#ccc"}
+                  color={item.vaccinated ? "#4CAF50" : "#D0CECA"}
                 />
-                <Text style={styles.checkLabel}>Vacinado</Text>
+                <Text style={[styles.checkLabel, !item.vaccinated && styles.checkLabelOff]}>Vacinado</Text>
+              </View>
+              <View style={styles.checkItem}>
+                <Ionicons
+                  name="checkmark-circle"
+                  size={18}
+                  color={item.reward ? "#4CAF50" : "#D0CECA"}
+                />
+                <Text style={[styles.checkLabel, !item.reward && styles.checkLabelOff]}>Recompensa</Text>
               </View>
             </View>
 
@@ -337,35 +364,20 @@ export default function PetDetailScreen({ item }: PetDetailScreenProps) {
                 </Text>
               </View>
               {item.ownerPhone && (
-                <TouchableOpacity style={styles.callBtn}>
-                  <Ionicons name="call-outline" size={18} color={ORANGE} />
+                <TouchableOpacity
+                  style={styles.callBtn}
+                  activeOpacity={0.85}
+                  onPress={handleOpenWhatsApp}
+                >
+                  <Ionicons name="logo-whatsapp" size={18} color={ORANGE} />
                 </TouchableOpacity>
               )}
             </View>
           </View>
         </View>
 
-        <View style={{ height: 110 }} />
+        <View style={{ height: 24 }} />
       </ScrollView>
-
-      {/* ── CTA ── */}
-      <View style={styles.fabContainer}>
-        <TouchableOpacity
-          style={[styles.fab, contactPressed && styles.fabPressed]}
-          activeOpacity={0.88}
-          onPress={() => setContactPressed(true)}
-        >
-          <Ionicons
-            name="chatbubble-ellipses-outline"
-            size={20}
-            color="#fff"
-            style={{ marginRight: 8 }}
-          />
-          <Text style={styles.fabText}>
-            {isFound ? "Entrar em contato" : "Já vi esse pet"}
-          </Text>
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 }
@@ -590,6 +602,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#555",
   },
+  checkLabelOff: {
+    color: "#C0BBB5",
+  },
 
   // InfoRow
   infoRow: {
@@ -657,33 +672,4 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
-  // FAB
-  fabContainer: {
-    position: "absolute",
-    bottom: 24,
-    left: 16,
-    right: 16,
-  },
-  fab: {
-    backgroundColor: ORANGE,
-    borderRadius: 30,
-    paddingVertical: 18,
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "center",
-    shadowColor: ORANGE,
-    shadowOpacity: 0.4,
-    shadowOffset: { width: 0, height: 6 },
-    shadowRadius: 12,
-    elevation: 6,
-  },
-  fabPressed: {
-    backgroundColor: "#c4663e",
-  },
-  fabText: {
-    fontFamily: "Lexend_700Bold",
-    color: "#fff",
-    fontSize: 16,
-    letterSpacing: 0.2,
-  },
 });
