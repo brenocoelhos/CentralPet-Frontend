@@ -134,6 +134,10 @@ function AppStack() {
         name="configuracoes"
         options={{ title: "Configuracoes" }}
       />
+      <Stack.Screen
+        name="contatos-emergencia"
+        options={{ title: "Contatos de emergencia" }}
+      />
     </Stack>
   );
 }

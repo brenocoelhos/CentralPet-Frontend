@@ -163,6 +163,7 @@ export default function TelaPerfil() {
         <TouchableOpacity
           style={[styles.menuItem, !user && styles.menuItemDisabled]}
           activeOpacity={user ? 0.85 : 1}
+          onPress={() => user && router.push("/contatos-emergencia")}
           disabled={!user}
         >
           <View style={[styles.menuIconWrap, !user && styles.menuIconWrapDisabled]}>
