@@ -36,15 +36,6 @@ const meusContatosMock: Contato[] = [
     destaque: "WhatsApp ativo",
   },
   {
-    id: "meu-2",
-    nome: "Carlos (vizinho)",
-    categoria: "Pessoa de confianca",
-    telefone: "(11) 97777-1234",
-    endereco: "Mesmo condominio",
-    horario: "Disponivel apos 18:00",
-    destaque: "Pode buscar o pet rapido",
-  },
-  {
     id: "meu-3",
     nome: "Ana Pet Sitter",
     categoria: "Pet sitter",
@@ -192,7 +183,7 @@ export default function TelaContatosEmergencia() {
       <View style={styles.hero}>
         <Text style={styles.heroTitle}>Contatos de Emergencia</Text>
         <Text style={styles.heroSubtitle}>
-          Mock para demonstracao: organize contatos proprios e contatos da regiao para resposta rapida.
+          Organize contatos proprios e contatos da regiao para resposta rapida.
         </Text>
       </View>
 
@@ -215,12 +206,6 @@ export default function TelaContatosEmergencia() {
         {listaAtual.map((item) => (
           <CardContato key={item.id} item={item} />
         ))}
-        <View style={styles.mockBox}>
-          <Ionicons name="construct-outline" size={15} color="#8F4B36" />
-          <Text style={styles.mockText}>
-            Versao demonstrativa com dados ficticios para validar interesse de clinicas e parceiros.
-          </Text>
-        </View>
       </ScrollView>
     </View>
   );
@@ -362,23 +347,5 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: "#8F4B36",
     fontWeight: "700",
-  },
-  mockBox: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginTop: 4,
-    backgroundColor: "#FDEADE",
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#F3D4C2",
-    paddingHorizontal: 10,
-    paddingVertical: 9,
-  },
-  mockText: {
-    flex: 1,
-    fontSize: 11,
-    lineHeight: 15,
-    color: "#8F4B36",
   },
 });
