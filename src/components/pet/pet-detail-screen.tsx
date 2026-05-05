@@ -403,10 +403,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: "hidden",
     backgroundColor: "#E8E4DF",
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 10,
+    boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
     elevation: 4,
   },
   photo: {
@@ -517,10 +514,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F5F2EC",
     borderRadius: 16,
     padding: 14,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 6,
+    boxShadow: "0px 2px 6px rgba(0,0,0,0.05)",
     elevation: 1,
   },
 

@@ -8,15 +8,15 @@ import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-  Alert,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  View,
+    Alert,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { ThemedText as Text } from "../themed-text";
 import { ThemedTextInput } from "../themed-text-input";
@@ -209,7 +209,7 @@ export default function PetSignupScreen() {
       });
 
       Alert.alert("Animal cadastrado", "Cadastro realizado com sucesso.");
-      router.replace("/dashboard");
+      router.replace("/meus-registros");
     } catch (error) {
       showApiErrorAlert("Erro no cadastro", error, "Nao foi possivel cadastrar o pet.");
     } finally {
@@ -522,10 +522,7 @@ const styles = StyleSheet.create({
     width: 220,
     overflow: "hidden",
     elevation: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
+    boxShadow: "0px 4px 10px rgba(0,0,0,0.15)",
   },
   modalOption: {
     paddingVertical: 13,
@@ -619,10 +616,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginTop: 8,
-    shadowColor: "#D97757",
-    shadowOpacity: 0.35,
-    shadowOffset: { width: 0, height: 5 },
-    shadowRadius: 10,
+    boxShadow: "0px 5px 10px rgba(217,119,87,0.35)",
     elevation: 5,
   },
   gateButtonText: {

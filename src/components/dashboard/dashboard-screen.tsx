@@ -278,10 +278,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F5F2EC",
     borderRadius: 18,
     overflow: "hidden",
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowOffset: { width: 0, height: 3 },
-    shadowRadius: 8,
+    boxShadow: "0px 3px 8px rgba(0,0,0,0.08)",
     elevation: 3,
   },
   // Empty state
@@ -322,10 +319,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "center",
-    shadowColor: ORANGE,
-    shadowOpacity: 0.4,
-    shadowOffset: { width: 0, height: 6 },
-    shadowRadius: 12,
+    boxShadow: "0px 6px 12px rgba(217,119,87,0.4)",
     elevation: 6,
   },
   fabText: {

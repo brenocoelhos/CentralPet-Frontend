@@ -5,16 +5,17 @@ import { useAuth } from "@/context/auth-context";
 import { ApiError, createApi } from "@/services/api";
 import type { PetDashboardDto } from "@/services/api/modules/pets.api";
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Dimensions,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Dimensions,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 const ORANGE = "#D97757";
@@ -32,33 +33,35 @@ export default function MeusRegistrosRoute() {
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function loadPets() {
-      try {
-        setLoading(true);
-        setErrorMessage(null);
+  useFocusEffect(
+    useCallback(() => {
+      async function loadPets() {
+        try {
+          setLoading(true);
+          setErrorMessage(null);
 
-        if (!user?.uid || !token) {
-          setErrorMessage("Você precisa estar logado para ver seus registros.");
-          return;
-        }
+          if (!user?.uid || !token) {
+            setErrorMessage("Você precisa estar logado para ver seus registros.");
+            return;
+          }
 
-        const result = await createApi({ token }).pets.buscaPets({ usuarioId: user.uid });
-        setPets(result);
-      } catch (error) {
-        if (error instanceof ApiError && typeof error.data === "object" && error.data) {
-          const data = error.data as { erro?: string; erros?: string[] };
-          setErrorMessage(data.erro ?? data.erros?.[0] ?? "Erro ao carregar registros.");
-        } else {
-          setErrorMessage("Erro ao carregar registros.");
+          const result = await createApi({ token }).pets.buscaPets({ usuarioId: user.uid });
+          setPets(result);
+        } catch (error) {
+          if (error instanceof ApiError && typeof error.data === "object" && error.data) {
+            const data = error.data as { erro?: string; erros?: string[] };
+            setErrorMessage(data.erro ?? data.erros?.[0] ?? "Erro ao carregar registros.");
+          } else {
+            setErrorMessage("Erro ao carregar registros.");
+          }
+        } finally {
+          setLoading(false);
         }
-      } finally {
-        setLoading(false);
       }
-    }
 
-    loadPets();
-  }, [token, user?.uid]);
+      void loadPets();
+    }, [token, user?.uid]),
+  );
 
   const handleDelete = (id: string, nome: string) => {
     if (!token) {
@@ -236,10 +239,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F5F2EC",
     borderRadius: 18,
     overflow: "hidden",
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowOffset: { width: 0, height: 3 },
-    shadowRadius: 8,
+    boxShadow: "0px 3px 8px rgba(0,0,0,0.08)",
     elevation: 3,
   },
   deleteBtn: {

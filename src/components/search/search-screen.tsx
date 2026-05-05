@@ -6,14 +6,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import {
-  ActivityIndicator,
-  Dimensions,
-  FlatList,
-  Platform,
-  Pressable,
-  SafeAreaView,
-  StyleSheet,
-  View,
+    ActivityIndicator,
+    Dimensions,
+    FlatList,
+    Platform,
+    Pressable,
+    SafeAreaView,
+    StyleSheet,
+    View,
 } from "react-native";
 import { ThemedText as Text } from "../themed-text";
 import { ThemedTextInput } from "../themed-text-input";
@@ -271,10 +271,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F5F2EC",
     borderRadius: 18,
     overflow: "hidden",
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowOffset: { width: 0, height: 3 },
-    shadowRadius: 8,
+    boxShadow: "0px 3px 8px rgba(0,0,0,0.08)",
     elevation: 3,
   },
   emptyText: {
