@@ -126,14 +126,14 @@ export default function TelaPerfil() {
 
       {/* Menu */}
       <View style={styles.menuContainer}>
-        {/* Meus pets — não implementado ainda */}
+        {/* Saude do pet — em breve */}
         <View style={[styles.menuItem, styles.menuItemDisabled]}>
           <View style={[styles.menuIconWrap, styles.menuIconWrapDisabled]}>
-            <Ionicons name="paw-outline" size={20} color="#B8B8B8" />
+            <Ionicons name="medkit-outline" size={20} color="#B8B8B8" />
           </View>
           <View style={styles.menuTextWrap}>
-            <Text style={[styles.menuTitle, styles.menuTextDisabled]}>Meus pets</Text>
-            <Text style={[styles.menuDescription, styles.menuTextDisabled]}>Gerencie os perfis dos seus animais</Text>
+            <Text style={[styles.menuTitle, styles.menuTextDisabled]}>Saude do pet</Text>
+            <Text style={[styles.menuDescription, styles.menuTextDisabled]}>Vacinas, consultas, vermifugo e lembretes (em breve)</Text>
           </View>
           <Ionicons name="chevron-forward" size={18} color="#D0D0D0" />
         </View>

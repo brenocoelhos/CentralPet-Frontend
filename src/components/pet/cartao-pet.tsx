@@ -31,7 +31,7 @@ export default function CartaoPet({
   accentColor = "#D97757",
 }: PetCardProps) {
   const isDashboard = variant === "dashboard";
-  const statusColor = status === "ENCONTRADO" ? "#2E7D32" : accentColor;
+  const statusColor = accentColor;
 
   return (
     <TouchableOpacity

@@ -53,7 +53,7 @@ function AppStack() {
       <Stack.Screen name="index" options={{ title: "Inicio" }} />
 
       <Stack.Screen
-        name="dashboard"
+        name="painel"
         options={{
           headerTitle: () => (
             <Text>

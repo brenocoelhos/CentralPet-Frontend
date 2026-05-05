@@ -55,17 +55,14 @@ type PetDetailScreenProps = {
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 const StatusBadge = ({ status }: { status: "PERDIDO" | "ENCONTRADO" }) => {
-  const isFound = status === "ENCONTRADO";
   return (
     <View
       style={[
         styles.badge,
-        { backgroundColor: isFound ? "#E8F5E9" : "#FFF3E0" },
+        { backgroundColor: "#FFF3E0" },
       ]}
     >
-      <Text
-        style={[styles.badgeText, { color: isFound ? "#2E7D32" : "#E65100" }]}
-      >
+      <Text style={[styles.badgeText, { color: "#E65100" }]}>
         {status}
       </Text>
     </View>
@@ -197,7 +194,6 @@ const PhotoCarousel = ({
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 export default function TelaDetalhePet({ item }: PetDetailScreenProps) {
   const [activePhoto, setActivePhoto] = useState(0);
-  const isFound = item.status === "ENCONTRADO";
 
   const handleOpenWhatsApp = async () => {
     const cleanedPhone = item.ownerPhone?.replace(/\D/g, "") ?? "";
@@ -207,7 +203,7 @@ export default function TelaDetalhePet({ item }: PetDetailScreenProps) {
       return;
     }
 
-    const message = "olá achei seu pet no CentralPet.";
+    const message = "Ola! Vi seu pet perdido e quero ajudar com informacoes.";
     const url = `https://wa.me/${cleanedPhone}?text=${encodeURIComponent(message)}`;
 
     try {
@@ -329,9 +325,7 @@ export default function TelaDetalhePet({ item }: PetDetailScreenProps) {
 
         {/* ── Último avistamento ── */}
         <View style={styles.section}>
-          <SectionTitle
-            title={isFound ? "ONDE FOI ENCONTRADO" : "ÚLTIMO AVISTAMENTO"}
-          />
+          <SectionTitle title="ÚLTIMO AVISTAMENTO" />
           <View style={styles.card}>
             <InfoRow
               icon="calendar-outline"
@@ -349,7 +343,7 @@ export default function TelaDetalhePet({ item }: PetDetailScreenProps) {
 
         {/* ── Tutor / Quem encontrou ── */}
         <View style={styles.section}>
-          <SectionTitle title={isFound ? "QUEM ENCONTROU" : "TUTOR"} />
+          <SectionTitle title="CONTATO DO TUTOR" />
           <View style={styles.card}>
             <View style={styles.ownerRow}>
               <View style={styles.ownerAvatar}>
@@ -360,7 +354,7 @@ export default function TelaDetalhePet({ item }: PetDetailScreenProps) {
                   {item.ownerName ?? "Anônimo"}
                 </Text>
                 <Text style={styles.ownerSub}>
-                  {isFound ? "Encontrou o pet" : "Dono do pet"}
+                  Tutor(a) do pet
                 </Text>
               </View>
               {item.ownerPhone && (

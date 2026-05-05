@@ -15,8 +15,8 @@ import {
     StyleSheet,
     View,
 } from "react-native";
-import { TextoTema as Text } from "../texto-tema";
 import { EntradaTextoTema } from "../entrada-texto-tema";
+import { TextoTema as Text } from "../texto-tema";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const HORIZONTAL_PADDING = 14;
@@ -128,7 +128,7 @@ export default function TelaBusca() {
 
       <View style={styles.resultsRow}>
         <Text style={styles.resultsLabel}>
-          {shouldSearch ? `${sortedPets.length} animais encontrados` : "Digite para buscar"}
+          {shouldSearch ? `${sortedPets.length} pets perdidos encontrados` : "Digite para buscar"}
         </Text>
         <Pressable
           style={styles.sortButton}
@@ -162,7 +162,7 @@ export default function TelaBusca() {
         renderItem={renderPetCard}
         ListHeaderComponent={listHeader}
         ListEmptyComponent={
-          shouldSearch ? <Text style={styles.emptyText}>Nenhum animal encontrado.</Text> : null
+          shouldSearch ? <Text style={styles.emptyText}>Nenhum pet perdido encontrado.</Text> : null
         }
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}

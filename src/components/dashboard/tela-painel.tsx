@@ -21,7 +21,7 @@ import {
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Occurrence = {
   id: string;
-  status: "PERDIDO" | "ENCONTRADO";
+  status: "PERDIDO";
   time: string;
   name: string;
   type: string;
@@ -35,7 +35,7 @@ type Occurrence = {
   raw: PetDashboardDto;
 };
 
-const FILTERS = ["Todos", "Perdidos", "Encontrados", "Cães", "Gatos"] as const;
+const FILTERS = ["Todos", "Cães", "Gatos"] as const;
 type Filter = (typeof FILTERS)[number];
 
 const ORANGE = "#D97757";
@@ -111,15 +111,11 @@ export default function TelaPainel() {
     () =>
       activeFilter === "Todos"
         ? occurrences
-        : activeFilter === "Perdidos"
-          ? occurrences.filter((o) => o.status === "PERDIDO")
-          : activeFilter === "Encontrados"
-            ? occurrences.filter((o) => o.status === "ENCONTRADO")
-            : activeFilter === "Cães"
-              ? occurrences.filter((o) => o.type.toLowerCase().includes("cão") || o.type.toLowerCase().includes("cach"))
-              : activeFilter === "Gatos"
-                ? occurrences.filter((o) => o.type.toLowerCase().includes("gato"))
-                : occurrences,
+        : activeFilter === "Cães"
+          ? occurrences.filter((o) => o.type.toLowerCase().includes("cão") || o.type.toLowerCase().includes("cach"))
+          : activeFilter === "Gatos"
+            ? occurrences.filter((o) => o.type.toLowerCase().includes("gato"))
+            : occurrences,
     [activeFilter, occurrences],
   );
 
@@ -142,10 +138,7 @@ export default function TelaPainel() {
 
         {/* ── Section header ── */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>OCORRÊNCIAS NA REGIÃO</Text>
-          <TouchableOpacity>
-            <Text style={styles.sectionLink}>Ver mapa</Text>
-          </TouchableOpacity>
+          <Text style={styles.sectionTitle}>PETS PERDIDOS NA REGIÃO</Text>
         </View>
 
         {loading ? (
@@ -188,7 +181,7 @@ export default function TelaPainel() {
         {filtered.length === 0 && (
           <View style={styles.emptyState}>
             <Ionicons name="paw-outline" size={48} color="#ccc" />
-            <Text style={styles.emptyText}>Nenhuma ocorrência encontrada</Text>
+            <Text style={styles.emptyText}>Nenhum pet perdido encontrado</Text>
           </View>
         )}
 
@@ -331,13 +324,9 @@ const styles = StyleSheet.create({
 });
 
 function mapPetToOccurrence(item: PetDashboardDto): Occurrence {
-  const hasFoundKeyword = item.descricao.some((chip) =>
-    chip.toLowerCase().includes("encontr"),
-  );
-
   return {
     id: item.id,
-    status: hasFoundKeyword ? "ENCONTRADO" : "PERDIDO",
+    status: "PERDIDO",
     time: item.dataDesaparecimento,
     name: item.nome,
     type: item.especie,
