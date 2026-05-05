@@ -1,5 +1,6 @@
 ﻿import { criarClienteHttp } from "./cliente-http";
 import { criarApiAutenticacao } from "./modules/autenticacao.api";
+import { criarApiNotificacoes } from "./modules/notificacoes.api";
 import { criarApiPets } from "./modules/pets.api";
 import { rotasApi, type RotasApi } from "./rotas";
 
@@ -45,6 +46,7 @@ export function criarApi(options?: {
   return {
     auth: criarApiAutenticacao(authHttp, routes.auth),
     pets: criarApiPets(authHttp, routes.pets),
+    notificacoes: criarApiNotificacoes(authHttp, routes.notificacoes),
   };
 }
 

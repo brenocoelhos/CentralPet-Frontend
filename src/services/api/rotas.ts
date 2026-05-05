@@ -23,9 +23,14 @@ export type RotasPerfil = {
   update: string;
 };
 
+export type RotasNotificacoes = {
+  registrarToken: string;
+};
+
 export type RotasApi = {
   auth: RotasAutenticacao;
   pets: RotasPets;
+  notificacoes: RotasNotificacoes;
 };
 
 export const rotasApi: RotasApi = {
@@ -40,5 +45,8 @@ export const rotasApi: RotasApi = {
     cadastroPet: "/auth/cadastro-pet",
     buscaPets: "/auth/busca-pets",
     deletePet: "/auth/cadastro-pet",
+  },
+  notificacoes: {
+    registrarToken: "/notificacoes/token",
   },
 };

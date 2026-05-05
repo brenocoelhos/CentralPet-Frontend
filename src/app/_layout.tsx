@@ -1,4 +1,5 @@
-﻿import { ProvedorAutenticacao } from "@/context/contexto-autenticacao";
+﻿import { ProvedorAutenticacao, useAutenticacao } from "@/context/contexto-autenticacao";
+import { useNotificacoesPush } from "@/hooks/use-notificacoes-push";
 import {
     Lexend_400Regular,
     Lexend_500Medium,
@@ -142,6 +143,12 @@ function AppStack() {
   );
 }
 
+function NotificacoesSetup() {
+  const { user, getApi } = useAutenticacao();
+  useNotificacoesPush(user, getApi);
+  return null;
+}
+
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
     Lexend_400Regular,
@@ -181,6 +188,7 @@ export default function RootLayout() {
 
   return (
     <ProvedorAutenticacao>
+      <NotificacoesSetup />
       <AppStack />
     </ProvedorAutenticacao>
   );
