@@ -1,11 +1,11 @@
-import AppShell from "@/components/layout/app-shell";
-import { ThemedText as Text } from "@/components/themed-text";
+﻿import EstruturaApp from "@/components/layout/estrutura-app";
+import { TextoTema as Text } from "@/components/texto-tema";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, View } from "react-native";
 
 export default function ConfiguracoesRoute() {
   return (
-    <AppShell>
+    <EstruturaApp>
       <View style={styles.root}>
         <View style={styles.iconWrap}>
           <Ionicons name="settings-outline" size={30} color="#8A7060" />
@@ -15,7 +15,7 @@ export default function ConfiguracoesRoute() {
           Ajuste preferencias da conta e personalize sua experiencia no app.
         </Text>
       </View>
-    </AppShell>
+    </EstruturaApp>
   );
 }
 

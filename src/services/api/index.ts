@@ -1,20 +1,20 @@
-import { createHttpClient } from "./http-client";
-import { createAuthApi } from "./modules/auth.api";
-import { createPetsApi } from "./modules/pets.api";
-import { apiRoutes, type ApiRoutes } from "./routes";
+﻿import { criarClienteHttp } from "./cliente-http";
+import { criarApiAutenticacao } from "./modules/autenticacao.api";
+import { criarApiPets } from "./modules/pets.api";
+import { rotasApi, type RotasApi } from "./rotas";
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
 
-export function createApi(options?: {
+export function criarApi(options?: {
   baseUrl?: string;
-  routes?: ApiRoutes;
+  routes?: RotasApi;
   token?: string;
 }) {
   const baseUrl = options?.baseUrl ?? API_BASE_URL;
-  const routes = options?.routes ?? apiRoutes;
+  const routes = options?.routes ?? rotasApi;
   const token = options?.token;
 
-  const http = createHttpClient(baseUrl);
+  const http = criarClienteHttp(baseUrl);
 
   const authHeaders = token
     ? {
@@ -43,13 +43,13 @@ export function createApi(options?: {
   };
 
   return {
-    auth: createAuthApi(authHttp, routes.auth),
-    pets: createPetsApi(authHttp, routes.pets),
+    auth: criarApiAutenticacao(authHttp, routes.auth),
+    pets: criarApiPets(authHttp, routes.pets),
   };
 }
 
-export const api = createApi();
+export const api = criarApi();
 
-export * from "./http-client";
-export * from "./routes";
+export * from "./cliente-http";
+export * from "./rotas";
 

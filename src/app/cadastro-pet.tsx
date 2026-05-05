@@ -1,10 +1,10 @@
-import AppShell from "@/components/layout/app-shell";
-import PetSignupScreen from "@/components/pet/pet-signup-screen";
+﻿import EstruturaApp from "@/components/layout/estrutura-app";
+import TelaCadastroPet from "@/components/pet/tela-cadastro-pet";
 
 export default function PetSignupRoute() {
   return (
-    <AppShell>
-      <PetSignupScreen />
-    </AppShell>
+    <EstruturaApp>
+      <TelaCadastroPet />
+    </EstruturaApp>
   );
 }

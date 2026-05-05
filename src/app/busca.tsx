@@ -1,10 +1,10 @@
-import AppShell from "@/components/layout/app-shell";
-import SearchScreen from "@/components/search/search-screen";
+﻿import EstruturaApp from "@/components/layout/estrutura-app";
+import TelaBusca from "@/components/search/tela-busca";
 
 export default function SearchRoute() {
   return (
-    <AppShell>
-      <SearchScreen />
-    </AppShell>
+    <EstruturaApp>
+      <TelaBusca />
+    </EstruturaApp>
   );
 }

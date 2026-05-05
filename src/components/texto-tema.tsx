@@ -1,0 +1,75 @@
+﻿import { Platform, StyleSheet, Text, type TextProps } from 'react-native';
+
+import { Fonts, CorTema } from '@/constants/tema';
+import { useTema } from '@/hooks/use-tema';
+
+export type ThemedTextProps = TextProps & {
+  type?: 'default' | 'title' | 'small' | 'smallBold' | 'subtitle' | 'link' | 'linkPrimary' | 'code';
+  themeColor?: CorTema;
+};
+
+export function TextoTema({ style, type = 'default', themeColor, ...rest }: ThemedTextProps) {
+  const theme = useTema();
+
+  return (
+    <Text
+      style={[
+        { color: theme[themeColor ?? 'text'] },
+        type === 'default' && styles.default,
+        type === 'title' && styles.title,
+        type === 'small' && styles.small,
+        type === 'smallBold' && styles.smallBold,
+        type === 'subtitle' && styles.subtitle,
+        type === 'link' && styles.link,
+        type === 'linkPrimary' && styles.linkPrimary,
+        type === 'code' && styles.code,
+        style,
+      ]}
+      {...rest}
+    />
+  );
+}
+
+const styles = StyleSheet.create({
+  small: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontFamily: 'Lexend_500Medium',
+  },
+  smallBold: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontFamily: 'Lexend_700Bold',
+  },
+  default: {
+    fontSize: 16,
+    lineHeight: 24,
+    fontFamily: 'Lexend_400Regular',
+  },
+  title: {
+    fontSize: 48,
+    fontFamily: 'Lexend_700Bold',
+    lineHeight: 52,
+  },
+  subtitle: {
+    fontSize: 32,
+    lineHeight: 44,
+    fontFamily: 'Lexend_600SemiBold',
+  },
+  link: {
+    lineHeight: 30,
+    fontSize: 14,
+    fontFamily: 'Lexend_500Medium',
+  },
+  linkPrimary: {
+    lineHeight: 30,
+    fontSize: 14,
+    color: '#3c87f7',
+    fontFamily: 'Lexend_500Medium',
+  },
+  code: {
+    fontFamily: Fonts.mono,
+    fontWeight: Platform.select({ android: 700 }) ?? 500,
+    fontSize: 12,
+  },
+});

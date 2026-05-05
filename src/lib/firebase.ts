@@ -1,8 +1,8 @@
-export {
+﻿export {
   app,
   auth,
   firebaseConfig,
   hasFirebaseConfig,
   missingFirebaseConfigKeys
-} from "@/lib/firebaseConfig";
+} from "@/lib/configuracao-firebase";
 

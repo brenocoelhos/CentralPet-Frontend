@@ -1,5 +1,5 @@
-import type { HttpClient } from "../http-client";
-import type { PetsRoutes } from "../routes";
+﻿import type { ClienteHttp } from "../cliente-http";
+import type { RotasPets } from "../rotas";
 
 export type PetDashboardDto = {
   id: string;
@@ -67,7 +67,7 @@ function toBuscaPetsQuery(params?: Partial<BuscaPetsParams>) {
   return queryString ? `?${queryString}` : "";
 }
 
-export function createPetsApi(http: HttpClient, routes: PetsRoutes) {
+export function criarApiPets(http: ClienteHttp, routes: RotasPets) {
   return {
     cadastroPet(payload: CadastroPetPayload) {
       return http.post<CadastroPetResponse>(routes.cadastroPet, payload);

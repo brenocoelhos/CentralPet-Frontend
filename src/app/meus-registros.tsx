@@ -1,8 +1,8 @@
-import AppShell from "@/components/layout/app-shell";
-import PetCard from "@/components/pet/pet-card";
-import { ThemedText as Text } from "@/components/themed-text";
-import { useAuth } from "@/context/auth-context";
-import { ApiError, createApi } from "@/services/api";
+﻿import EstruturaApp from "@/components/layout/estrutura-app";
+import CartaoPet from "@/components/pet/cartao-pet";
+import { TextoTema as Text } from "@/components/texto-tema";
+import { useAutenticacao } from "@/context/contexto-autenticacao";
+import { ErroApi, criarApi } from "@/services/api";
 import type { PetDashboardDto } from "@/services/api/modules/pets.api";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "expo-router";
@@ -28,7 +28,7 @@ const CARD_HEIGHT = 272;
 const CARD_IMAGE_HEIGHT = 180;
 
 export default function MeusRegistrosRoute() {
-  const { user, token } = useAuth();
+  const { user, token } = useAutenticacao();
   const [pets, setPets] = useState<PetDashboardDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -45,10 +45,10 @@ export default function MeusRegistrosRoute() {
             return;
           }
 
-          const result = await createApi({ token }).pets.buscaPets({ usuarioId: user.uid });
+          const result = await criarApi({ token }).pets.buscaPets({ usuarioId: user.uid });
           setPets(result);
         } catch (error) {
-          if (error instanceof ApiError && typeof error.data === "object" && error.data) {
+          if (error instanceof ErroApi && typeof error.data === "object" && error.data) {
             const data = error.data as { erro?: string; erros?: string[] };
             setErrorMessage(data.erro ?? data.erros?.[0] ?? "Erro ao carregar registros.");
           } else {
@@ -79,7 +79,7 @@ export default function MeusRegistrosRoute() {
           style: "destructive",
           onPress: async () => {
             try {
-              await createApi({ token }).pets.deletePet(id);
+              await criarApi({ token }).pets.deletePet(id);
               setPets((prev) => prev.filter((p) => p.id !== id));
               Alert.alert("Registro removido", "O pet foi excluído com sucesso.");
             } catch {
@@ -99,17 +99,17 @@ export default function MeusRegistrosRoute() {
 
   if (loading) {
     return (
-      <AppShell>
+      <EstruturaApp>
         <View style={styles.centered}>
           <ActivityIndicator size="large" color={ORANGE} />
         </View>
-      </AppShell>
+      </EstruturaApp>
     );
   }
 
   if (errorMessage) {
     return (
-      <AppShell>
+      <EstruturaApp>
         <View style={styles.centered}>
           <View style={styles.iconWrap}>
             <Ionicons name="alert-circle-outline" size={30} color="#8A7060" />
@@ -117,13 +117,13 @@ export default function MeusRegistrosRoute() {
           <Text style={styles.title}>Ops!</Text>
           <Text style={styles.description}>{errorMessage}</Text>
         </View>
-      </AppShell>
+      </EstruturaApp>
     );
   }
 
   if (pets.length === 0) {
     return (
-      <AppShell>
+      <EstruturaApp>
         <View style={styles.centered}>
           <View style={styles.iconWrap}>
             <Ionicons name="document-text-outline" size={30} color="#8A7060" />
@@ -133,12 +133,12 @@ export default function MeusRegistrosRoute() {
             Você ainda não cadastrou nenhum pet desaparecido.
           </Text>
         </View>
-      </AppShell>
+      </EstruturaApp>
     );
   }
 
   return (
-    <AppShell>
+    <EstruturaApp>
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
@@ -152,7 +152,7 @@ export default function MeusRegistrosRoute() {
           <View key={i} style={styles.gridRow}>
             {row.map((item) => (
               <View key={item.id} style={styles.cardWrapper}>
-                <PetCard
+                <CartaoPet
                   variant="dashboard"
                   name={item.nome}
                   breed={item.raca ?? item.especie}
@@ -181,7 +181,7 @@ export default function MeusRegistrosRoute() {
 
         <View style={{ height: 24 }} />
       </ScrollView>
-    </AppShell>
+    </EstruturaApp>
   );
 }
 

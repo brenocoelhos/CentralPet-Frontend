@@ -1,10 +1,10 @@
-import LoginScreen from "@/components/auth/login-screen";
-import AppShell from "@/components/layout/app-shell";
+﻿import TelaLogin from "@/components/auth/tela-login";
+import EstruturaApp from "@/components/layout/estrutura-app";
 
 export default function LoginRoute() {
   return (
-    <AppShell>
-      <LoginScreen />
-    </AppShell>
+    <EstruturaApp>
+      <TelaLogin />
+    </EstruturaApp>
   );
 }

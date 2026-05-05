@@ -1,10 +1,10 @@
-import AppShell from "@/components/layout/app-shell";
-import ProfileScreen from "@/components/profile/profile-screen";
+﻿import EstruturaApp from "@/components/layout/estrutura-app";
+import TelaPerfil from "@/components/profile/tela-perfil";
 
 export default function ProfileRoute() {
   return (
-    <AppShell>
-      <ProfileScreen />
-    </AppShell>
+    <EstruturaApp>
+      <TelaPerfil />
+    </EstruturaApp>
   );
 }

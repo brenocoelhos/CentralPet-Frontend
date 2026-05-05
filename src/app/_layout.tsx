@@ -1,4 +1,4 @@
-import { AuthProvider } from "@/context/auth-context";
+﻿import { ProvedorAutenticacao } from "@/context/contexto-autenticacao";
 import {
     Lexend_400Regular,
     Lexend_500Medium,
@@ -176,8 +176,8 @@ export default function RootLayout() {
   }
 
   return (
-    <AuthProvider>
+    <ProvedorAutenticacao>
       <AppStack />
-    </AuthProvider>
+    </ProvedorAutenticacao>
   );
 }

@@ -1,10 +1,10 @@
-import UserSignupScreen from '@/components/auth/user-signup-screen';
-import AppShell from "@/components/layout/app-shell";
+﻿import TelaCadastroUsuario from '@/components/auth/tela-cadastro-usuario';
+import EstruturaApp from "@/components/layout/estrutura-app";
 
 export default function UserSignupRoute() {
   return (
-    <AppShell>
-      <UserSignupScreen />
-    </AppShell>
+    <EstruturaApp>
+      <TelaCadastroUsuario />
+    </EstruturaApp>
   );
 }
