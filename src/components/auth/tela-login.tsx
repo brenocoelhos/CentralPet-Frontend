@@ -6,11 +6,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    StyleSheet,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { TextoTema as Text } from "../texto-tema";
@@ -63,6 +64,7 @@ export default function TelaLogin() {
         enableOnAndroid={true}
         extraScrollHeight={95}
       >
+        <Image source={require("../../../assets/images/logo.png")} style={{ width: 150, height: 150, alignSelf: "center", marginBottom: 16 }} />
         <View style={styles.headerWrapper}>
           <Text style={styles.title}>Bem-vindo de volta</Text>
           <Text style={styles.subtitle}>Entre com seu email e senha</Text>
@@ -149,13 +151,12 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     paddingHorizontal: 20,
-    paddingTop: 36,
     paddingBottom: 48,
     justifyContent: "center",
   },
   headerWrapper: {
     alignItems: "center",
-    marginBottom: 24,
+    marginBottom: 18,
   },
   title: {
     fontSize: 24,

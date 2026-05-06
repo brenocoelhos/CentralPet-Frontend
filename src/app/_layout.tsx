@@ -102,7 +102,7 @@ function AppStack() {
       />
 
       <Stack.Screen
-        name="pet-detail"
+        name="detalhe-pet"
         options={{
           title: "Detalhes",
         }}

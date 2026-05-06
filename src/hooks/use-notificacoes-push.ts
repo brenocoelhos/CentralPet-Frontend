@@ -1,21 +1,27 @@
 import type { UsuarioAutenticado } from "@/context/contexto-autenticacao";
 import type { criarApi } from "@/services/api";
+import Constants, { ExecutionEnvironment } from "expo-constants";
 import * as Location from "expo-location";
 import * as Notifications from "expo-notifications";
 import { router } from "expo-router";
 import { useEffect, useRef } from "react";
 import { Platform } from "react-native";
 
+const isExpoGo =
+  Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
+
 // Configuração de como exibir notificações quando o app está em foreground
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+if (!isExpoGo) {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+      shouldShowBanner: true,
+      shouldShowList: true,
+    }),
+  });
+}
 
 type NotificacaoPetData = {
   petId?: string;
@@ -23,7 +29,7 @@ type NotificacaoPetData = {
 };
 
 async function obterTokenPush(): Promise<string | null> {
-  if (Platform.OS === "web") return null;
+  if (Platform.OS === "web" || isExpoGo) return null;
 
   // NotificationPermissionsStatus extends PermissionResponse, mas expo-modules-core
   // não está hoistado no node_modules raiz — usamos cast seguro para ler `status`.
@@ -98,6 +104,8 @@ export function useNotificacoesPush(
 
   // Listener: app em foreground recebe notificação
   useEffect(() => {
+    if (isExpoGo) return;
+
     const subscription = Notifications.addNotificationReceivedListener(
       (_notification) => {
         // Notificação já aparece automaticamente pelo setNotificationHandler acima
@@ -108,6 +116,8 @@ export function useNotificacoesPush(
 
   // Listener: usuário toca na notificação
   useEffect(() => {
+    if (isExpoGo) return;
+
     const subscription = Notifications.addNotificationResponseReceivedListener(
       (response) => {
         const data = response.notification.request.content.data as NotificacaoPetData;
@@ -121,6 +131,8 @@ export function useNotificacoesPush(
 
   // Lidar com notificação que abriu o app do estado fechado
   useEffect(() => {
+    if (isExpoGo) return;
+
     Notifications.getLastNotificationResponseAsync().then((response) => {
       if (!response) return;
       const data = response.notification.request.content.data as NotificacaoPetData;
