@@ -18,8 +18,8 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import { TextoTema as Text } from "../texto-tema";
 import { EntradaTextoTema } from "../entrada-texto-tema";
+import { TextoTema as Text } from "../texto-tema";
 
 const SPECIES_OPTIONS = ["Cachorro", "Gato", "Pássaro", "Coelho", "Outro"];
 const SIZE_OPTIONS = ["Pequeno", "Médio", "Grande"];
@@ -189,6 +189,8 @@ export default function TelaCadastroPet() {
         (typeof me.uid === "string" && me.uid.trim()) ||
         user.uid;
       const tutorName = user.displayName?.trim() || user.email?.split("@")[0] || user.uid;
+      const firstPhotoUrl = photos[0]?.trim();
+      const fotoUrl = firstPhotoUrl && /^https?:\/\//i.test(firstPhotoUrl) ? firstPhotoUrl : undefined;
 
       await apiClient.pets.cadastroPet({
         usuarioId,
@@ -196,20 +198,17 @@ export default function TelaCadastroPet() {
         especie: species,
         raca: breed.trim() || undefined,
         cor: color.trim() || undefined,
-        porte: size || undefined,
+        porte: normalizePorte(size),
         dataDesaparecimento: toApiDate(disappearanceDate),
         localDesaparecimento: location.trim(),
         descricao: descriptionChips,
-        castrado: castrated,
-        vacinado: vaccinated,
-        recompensa: hasReward,
-        fotoUrl: photos[0],
+        fotoUrl,
         nomeTutor: tutorName,
         telefoneTutor: phone.replace(/\D/g, ""),
       });
 
       Alert.alert("Animal cadastrado", "Cadastro realizado com sucesso.");
-      router.replace("/meus-registros");
+      router.replace("/painel");
     } catch (error) {
       exibirAlertaErroApi("Erro no cadastro", error, "Nao foi possivel cadastrar o pet.");
     } finally {
@@ -629,4 +628,9 @@ const styles = StyleSheet.create({
 function toApiDate(maskedDate: string) {
   const [day, month, year] = maskedDate.split("/");
   return `${year}-${month}-${day}`;
+}
+
+function normalizePorte(size: string) {
+  if (size === "Médio") return "Medio";
+  return size || undefined;
 }

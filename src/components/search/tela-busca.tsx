@@ -84,21 +84,23 @@ export default function TelaBusca() {
 
   const renderPetCard = ({ item }: { item: PetDashboardDto }) => {
     return (
-      <CartaoPet
-        variant="dashboard"
-        name={item.nome}
-        breed={item.raca ?? item.especie}
-        location={item.localDesaparecimento}
-        imageUrl={item.fotoUrl}
-        imageHeight={CARD_IMAGE_HEIGHT}
-        cardStyle={styles.itemCard}
-        onPress={() =>
-          router.push({
-            pathname: "/detalhe-pet",
-            params: { pet: encodeURIComponent(JSON.stringify(item)) },
-          })
-        }
-      />
+      <View style={styles.itemWrapper}>
+        <CartaoPet
+          variant="dashboard"
+          name={item.nome}
+          breed={item.raca ?? item.especie}
+          location={item.localDesaparecimento}
+          imageUrl={item.fotoUrl}
+          imageHeight={CARD_IMAGE_HEIGHT}
+          cardStyle={styles.itemCard}
+          onPress={() =>
+            router.push({
+              pathname: "/detalhe-pet",
+              params: { pet: encodeURIComponent(JSON.stringify(item)) },
+            })
+          }
+        />
+      </View>
     );
   };
 
@@ -182,10 +184,13 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingBottom: 20,
-    gap: 10,
   },
   cardRow: {
-    gap: 10,
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  itemWrapper: {
+    width: CARD_WIDTH,
   },
   headerBlock: {
     gap: 12,

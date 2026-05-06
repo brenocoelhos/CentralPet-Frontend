@@ -35,9 +35,6 @@ export type CadastroPetPayload = {
   fotoUrl?: string;
   nomeTutor?: string;
   telefoneTutor?: string;
-  castrado?: boolean;
-  vacinado?: boolean;
-  recompensa?: boolean;
 };
 
 export type BuscaPetsParams = {
