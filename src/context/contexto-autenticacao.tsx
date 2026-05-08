@@ -282,8 +282,7 @@ function normalizeApiUser(payload: Record<string, unknown>): UsuarioAutenticado 
   const id =
     readString(payload.id) ??
     readString(payload.usuarioId) ??
-    readString(payload.uid) ??
-    readString(payload.email);
+    readString(payload.uid);
 
   if (!id) {
     return null;
@@ -310,10 +309,10 @@ function readString(value: unknown): string | undefined {
 }
 
 function normalizeLoginPayload(
-  payload: { token: string; nome?: string; email?: string },
+  payload: { token: string; nome?: string; email?: string; id?: string; usuarioId?: string },
   _token: string,
 ): UsuarioAutenticado | null {
-  const id = payload.email ?? payload.nome;
+  const id = payload.id ?? payload.usuarioId;
 
   if (!id) {
     return null;

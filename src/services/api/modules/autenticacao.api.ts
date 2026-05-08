@@ -29,6 +29,8 @@ export type LoginResponse =
       token: string;
       tipo?: string;
       expiraEmMs?: number;
+      id?: string;
+      usuarioId?: string;
       nome?: string;
       email?: string;
     };

@@ -8,14 +8,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Dimensions,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 const ORANGE = "#D97757";
@@ -63,33 +63,40 @@ export default function MeusRegistrosRoute() {
     }, [token, user?.uid]),
   );
 
-  const handleDelete = (id: string, nome: string) => {
+  const handleDelete = async (id: string, _nome: string) => {
     if (!token) {
       Alert.alert("Sessão expirada", "Entre novamente para excluir este registro.");
       return;
     }
 
-    Alert.alert(
-      "Excluir registro",
-      `Deseja excluir o registro de "${nome}"? Esta ação não pode ser desfeita.`,
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Excluir",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await criarApi({ token }).pets.deletePet(id);
-              setPets((prev) => prev.filter((p) => p.id !== id));
-              Alert.alert("Registro removido", "O pet foi excluído com sucesso.");
-            } catch {
-              Alert.alert("Erro", "Não foi possível excluir o registro.");
-            }
-          },
-        },
-      ],
-      { cancelable: true },
-    );
+    // Alert.alert(
+    //   "Excluir registro",
+    //   `Deseja excluir o registro de "${_nome}"? Esta ação não pode ser desfeita.`,
+    //   [
+    //     { text: "Cancelar", style: "cancel" },
+    //     {
+    //       text: "Excluir",
+    //       style: "destructive",
+    //       onPress: async () => {
+    //         try {
+    //           await criarApi({ token }).pets.deletePet(id);
+    //           setPets((prev) => prev.filter((p) => p.id !== id));
+    //           Alert.alert("Registro removido", "O pet foi excluído com sucesso.");
+    //         } catch {
+    //           Alert.alert("Erro", "Não foi possível excluir o registro.");
+    //         }
+    //       },
+    //     },
+    //   ],
+    //   { cancelable: true },
+    // );
+
+    try {
+      await criarApi({ token }).pets.deletePet(id);
+      setPets((prev) => prev.filter((p) => p.id !== id));
+    } catch {
+      Alert.alert("Erro", "Não foi possível excluir o registro.");
+    }
   };
 
   const rows: PetDashboardDto[][] = [];
