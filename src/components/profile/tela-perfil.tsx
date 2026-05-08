@@ -4,15 +4,15 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Switch,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Pressable,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    Switch,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { TextoTema as Text } from "../texto-tema";
 
@@ -43,7 +43,7 @@ export default function TelaPerfil() {
       setStatsLoading(true);
       setStatsError(null);
       const pets = await getApi().pets.buscaPets({ usuarioId: user.id });
-      setStats((prev) => ({ ...prev, registros: pets.length }));
+      setStats((prev) => ({ ...prev, registros: pets.content.length }));
     } catch {
       setStatsError("Nao foi possivel carregar seus dados agora.");
     } finally {

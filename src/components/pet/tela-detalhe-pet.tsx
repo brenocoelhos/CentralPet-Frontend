@@ -133,12 +133,17 @@ function formatDisplayDateTime(value?: string): string {
 
   const date = new Date(value);
   if (!Number.isNaN(date.getTime())) {
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = String(date.getFullYear());
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    return `${day}/${month}/${year} às ${hours}:${minutes}`;
+    const parts = new Intl.DateTimeFormat("pt-BR", {
+      timeZone: "America/Sao_Paulo",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).formatToParts(date);
+    const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
+    return `${get("day")}/${get("month")}/${get("year")} às ${get("hour")}:${get("minute")}`;
   }
 
   return formatDisplayDate(value);

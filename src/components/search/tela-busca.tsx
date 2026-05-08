@@ -8,12 +8,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import {
-  ActivityIndicator,
-  FlatList,
-  Platform,
-  Pressable,
-  StyleSheet,
-  View,
+    ActivityIndicator,
+    FlatList,
+    Platform,
+    Pressable,
+    StyleSheet,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { EntradaTextoTema } from "../entrada-texto-tema";
@@ -53,7 +53,7 @@ export default function TelaBusca() {
       setLoading(true);
       setErrorMessage(null);
       const result = await getApi().pets.buscaPets({ nome: term });
-      setPets(result);
+      setPets(result.content);
     } catch (error) {
       setPets([]);
       setErrorMessage(extrairMensagemErroApi(error, "Erro ao buscar pets."));

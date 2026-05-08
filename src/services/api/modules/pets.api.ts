@@ -44,6 +44,16 @@ export type CadastroPetPayload = {
   castrado: boolean;
   vacinado: boolean;
   recompensa: boolean;
+  dataCadastro?: string;
+};
+
+export type PaginatedResponse<T> = {
+  content: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  hasNext: boolean;
 };
 
 export type BuscaPetsParams = {
@@ -83,7 +93,7 @@ export function criarApiPets(http: ClienteHttp, routes: RotasPets) {
       return http.post<CadastroPetResponse>(routes.cadastroPet, payload);
     },
     buscaPets(params?: Partial<BuscaPetsParams>) {
-      return http.get<PetDashboardDto[]>(`${routes.buscaPets}${toBuscaPetsQuery(params)}`);
+      return http.get<PaginatedResponse<PetDashboardDto>>(`${routes.buscaPets}${toBuscaPetsQuery(params)}`);
     },
     buscarPetPorId(petId: string) {
       return http.get<PetDashboardDto>(`${routes.cadastroPet}/${encodeURIComponent(petId)}`);

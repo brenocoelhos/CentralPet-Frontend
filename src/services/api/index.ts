@@ -4,7 +4,7 @@ import { criarApiNotificacoes } from "./modules/notificacoes.api";
 import { criarApiPets } from "./modules/pets.api";
 import { rotasApi, type RotasApi } from "./rotas";
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL ?? "http://localhost:8080";
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 
 export function criarApi(options?: {
   baseUrl?: string;

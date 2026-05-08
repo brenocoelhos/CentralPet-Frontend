@@ -191,9 +191,16 @@ export default function TelaCadastroPet() {
         user.uid;
       const tutorName = user.displayName?.trim() || user.email?.split("@")[0] || user.uid;
 
+      const nowBrasilia = (() => {
+        const b = new Date(Date.now() - 3 * 60 * 60 * 1000);
+        const pad = (n: number) => String(n).padStart(2, "0");
+        return `${b.getUTCFullYear()}-${pad(b.getUTCMonth() + 1)}-${pad(b.getUTCDate())}T${pad(b.getUTCHours())}:${pad(b.getUTCMinutes())}:${pad(b.getUTCSeconds())}-03:00`;
+      })();
+
       const cadastroResponse = await apiClient.pets.cadastroPet({
         usuarioId,
         nome: name.trim(),
+        dataCadastro: nowBrasilia,
         especie: species,
         raca: breed.trim() || undefined,
         cor: color.trim() || undefined,

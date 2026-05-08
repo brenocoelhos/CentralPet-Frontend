@@ -8,14 +8,14 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { router } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  FlatList,
-  Platform,
-  Pressable,
-  RefreshControl,
-  StatusBar,
-  StyleSheet,
-  Text,
-  View,
+    FlatList,
+    Platform,
+    Pressable,
+    RefreshControl,
+    StatusBar,
+    StyleSheet,
+    Text,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -87,7 +87,7 @@ export default function TelaPainel() {
         }
         setErrorMessage(null);
         const result = await getApi().pets.buscaPets();
-        setOccurrences(result.map(mapPetToOccurrence));
+        setOccurrences(result.content.map(mapPetToOccurrence));
       } catch (error) {
         setErrorMessage(extrairMensagemErroApi(error, "Nao foi possivel carregar o dashboard."));
       } finally {

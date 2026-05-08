@@ -11,15 +11,15 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import {
-  Alert,
-  FlatList,
-  Platform,
-  Pressable,
-  RefreshControl,
-  StyleSheet,
-  TouchableOpacity,
-  Vibration,
-  View
+    Alert,
+    FlatList,
+    Platform,
+    Pressable,
+    RefreshControl,
+    StyleSheet,
+    TouchableOpacity,
+    Vibration,
+    View
 } from "react-native";
 
 const ORANGE = AppColors.brand;
@@ -48,7 +48,7 @@ export default function MeusRegistrosRoute() {
         }
 
         const result = await criarApi({ token }).pets.buscaPets({ usuarioId: user.uid });
-        setPets(result);
+        setPets(result.content);
       } catch (error) {
         setErrorMessage(extrairMensagemErroApi(error, "Erro ao carregar registros."));
       } finally {
