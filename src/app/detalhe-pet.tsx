@@ -58,6 +58,7 @@ function mapPetToDetailItem(item: PetDashboardDto): DetailItem {
   const hasFoundKeyword = item.descricao.some((chip) =>
     chip.toLowerCase().includes("encontr"),
   );
+  const photos = item.imagens?.length ? item.imagens : item.fotoUrl ? [item.fotoUrl] : undefined;
 
   return {
     id: item.id,
@@ -71,7 +72,7 @@ function mapPetToDetailItem(item: PetDashboardDto): DetailItem {
     neighborhood: item.localDesaparecimento,
     distance: "",
     hasNewMessage: false,
-    photos: item.fotoUrl ? [item.fotoUrl] : undefined,
+    photos,
     ownerName: item.nomeTutor,
     ownerPhone: item.telefoneTutor,
     reward: item.recompensa ?? false,

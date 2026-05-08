@@ -150,31 +150,35 @@ export default function MeusRegistrosRoute() {
 
         {rows.map((row, i) => (
           <View key={i} style={styles.gridRow}>
-            {row.map((item) => (
-              <View key={item.id} style={styles.cardWrapper}>
-                <CartaoPet
-                  variant="dashboard"
-                  name={item.nome}
-                  breed={item.raca ?? item.especie}
-                  location={item.localDesaparecimento}
-                  imageUrl={item.fotoUrl}
-                  status={
-                    item.descricao?.some((d) => d.toLowerCase().includes("encontr"))
-                      ? "ENCONTRADO"
-                      : "PERDIDO"
-                  }
-                  imageHeight={CARD_IMAGE_HEIGHT}
-                  cardStyle={styles.petCard}
-                />
-                <TouchableOpacity
-                  style={styles.deleteBtn}
-                  onPress={() => handleDelete(item.id, item.nome)}
-                  activeOpacity={0.8}
-                >
-                  <Ionicons name="trash-outline" size={16} color="#fff" />
-                </TouchableOpacity>
-              </View>
-            ))}
+            {row.map((item) => {
+              const cardImage = item.imagens?.[0] ?? item.fotoUrl;
+
+              return (
+                <View key={item.id} style={styles.cardWrapper}>
+                  <CartaoPet
+                    variant="dashboard"
+                    name={item.nome}
+                    breed={item.raca ?? item.especie}
+                    location={item.localDesaparecimento}
+                    imageUrl={cardImage}
+                    status={
+                      item.descricao?.some((d) => d.toLowerCase().includes("encontr"))
+                        ? "ENCONTRADO"
+                        : "PERDIDO"
+                    }
+                    imageHeight={CARD_IMAGE_HEIGHT}
+                    cardStyle={styles.petCard}
+                  />
+                  <TouchableOpacity
+                    style={styles.deleteBtn}
+                    onPress={() => handleDelete(item.id, item.nome)}
+                    activeOpacity={0.8}
+                  >
+                    <Ionicons name="trash-outline" size={16} color="#fff" />
+                  </TouchableOpacity>
+                </View>
+              );
+            })}
             {row.length === 1 && <View style={{ width: CARD_WIDTH }} />}
           </View>
         ))}

@@ -8,15 +8,15 @@ import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    TouchableOpacity,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { EntradaTextoTema } from "../entrada-texto-tema";
 import { TextoTema as Text } from "../texto-tema";
@@ -189,10 +189,8 @@ export default function TelaCadastroPet() {
         (typeof me.uid === "string" && me.uid.trim()) ||
         user.uid;
       const tutorName = user.displayName?.trim() || user.email?.split("@")[0] || user.uid;
-      const firstPhotoUrl = photos[0]?.trim();
-      const fotoUrl = firstPhotoUrl && /^https?:\/\//i.test(firstPhotoUrl) ? firstPhotoUrl : undefined;
 
-      await apiClient.pets.cadastroPet({
+      const cadastroResponse = await apiClient.pets.cadastroPet({
         usuarioId,
         nome: name.trim(),
         especie: species,
@@ -202,10 +200,21 @@ export default function TelaCadastroPet() {
         dataDesaparecimento: toApiDate(disappearanceDate),
         localDesaparecimento: location.trim(),
         descricao: descriptionChips,
-        fotoUrl,
         nomeTutor: tutorName,
         telefoneTutor: phone.replace(/\D/g, ""),
       });
+
+      const petId = typeof cadastroResponse === "object" && cadastroResponse?.id
+        ? String(cadastroResponse.id)
+        : null;
+
+      if (petId) {
+        await Promise.all(
+          photos.map((uri, index) =>
+            apiClient.pets.uploadImagem(petId, uri, `foto-${index + 1}.jpg`),
+          ),
+        );
+      }
 
       Alert.alert("Animal cadastrado", "Cadastro realizado com sucesso.");
       router.replace("/painel");

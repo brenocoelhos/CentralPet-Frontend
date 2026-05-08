@@ -83,6 +83,8 @@ export default function TelaBusca() {
   };
 
   const renderPetCard = ({ item }: { item: PetDashboardDto }) => {
+    const cardImage = item.imagens?.[0] ?? item.fotoUrl;
+
     return (
       <View style={styles.itemWrapper}>
         <CartaoPet
@@ -90,7 +92,7 @@ export default function TelaBusca() {
           name={item.nome}
           breed={item.raca ?? item.especie}
           location={item.localDesaparecimento}
-          imageUrl={item.fotoUrl}
+          imageUrl={cardImage}
           imageHeight={CARD_IMAGE_HEIGHT}
           cardStyle={styles.itemCard}
           onPress={() =>

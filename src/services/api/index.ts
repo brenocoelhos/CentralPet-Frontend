@@ -33,6 +33,8 @@ export function criarApi(options?: {
     patch: <T>(path: string, body?: unknown) =>
       http.patch<T>(path, body, { headers: authHeaders }),
     delete: <T>(path: string) => http.delete<T>(path, { headers: authHeaders }),
+    uploadFormData: <T>(path: string, formData: FormData) =>
+      http.uploadFormData<T>(path, formData, { headers: authHeaders }),
     request: <T>(path: string, opts?: Parameters<typeof http.request<T>>[1]) =>
       http.request<T>(path, {
         ...opts,

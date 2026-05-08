@@ -1,6 +1,11 @@
 ﻿import type { ClienteHttp } from "../cliente-http";
 import type { RotasPets } from "../rotas";
 
+export type PetImagemDto = {
+  id: number;
+  url: string;
+};
+
 export type PetDashboardDto = {
   id: string;
   name: string;
@@ -17,6 +22,7 @@ export type PetDashboardDto = {
   vacinado?: boolean;
   recompensa?: boolean;
   fotoUrl?: string;
+  imagens?: string[];
   nomeTutor: string;
   telefoneTutor: string;
   usuarioId: string;
@@ -45,7 +51,11 @@ export type BuscaPetsParams = {
   usuarioId?: string;
 };
 
-export type CadastroPetResponse = string;
+export type CadastroPetResponse = {
+  id: string | number;
+  nome: string;
+  message?: string;
+};
 
 function toBuscaPetsQuery(params?: Partial<BuscaPetsParams>) {
   if (!params) {
@@ -73,8 +83,26 @@ export function criarApiPets(http: ClienteHttp, routes: RotasPets) {
       return http.get<PetDashboardDto[]>(`${routes.buscaPets}${toBuscaPetsQuery(params)}`);
     },
     deletePet(petId: string) {
-      // Backend contract: DELETE /auth/cadastro-pet/{petId}
       return http.delete<void>(`${routes.cadastroPet}/${encodeURIComponent(petId)}`);
+    },
+    async uploadImagem(petId: string, uri: string, fileName = "foto.jpg"): Promise<PetImagemDto> {
+      const blob = await fetch(uri).then((r) => r.blob());
+      const formData = new FormData();
+      formData.append("file", blob, fileName);
+      return http.uploadFormData<PetImagemDto>(
+        `/auth/pets/${encodeURIComponent(petId)}/imagens`,
+        formData,
+      );
+    },
+    buscarImagens(petId: string): Promise<PetImagemDto[]> {
+      return http.get<PetImagemDto[]>(
+        `/auth/pets/${encodeURIComponent(petId)}/imagens`,
+      );
+    },
+    deletarImagem(petId: string, imagemId: number): Promise<void> {
+      return http.delete<void>(
+        `/auth/pets/${encodeURIComponent(petId)}/imagens/${imagemId}`,
+      );
     },
   };
 }

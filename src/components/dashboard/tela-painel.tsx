@@ -32,6 +32,7 @@ type Occurrence = {
   distance: string;
   hasNewMessage: boolean;
   photo?: string;
+  photos?: string[];
   raw: PetDashboardDto;
 };
 
@@ -324,6 +325,8 @@ const styles = StyleSheet.create({
 });
 
 function mapPetToOccurrence(item: PetDashboardDto): Occurrence {
+  const allImages = item.imagens?.length ? item.imagens : (item.fotoUrl ? [item.fotoUrl] : []);
+  
   return {
     id: item.id,
     status: "PERDIDO",
@@ -336,7 +339,8 @@ function mapPetToOccurrence(item: PetDashboardDto): Occurrence {
     neighborhood: item.localDesaparecimento,
     distance: "",
     hasNewMessage: false,
-    photo: item.fotoUrl,
+    photo: allImages[0],
+    photos: allImages,
     raw: item,
   };
 }
