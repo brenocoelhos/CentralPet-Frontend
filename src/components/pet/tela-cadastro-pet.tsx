@@ -202,6 +202,9 @@ export default function TelaCadastroPet() {
         descricao: descriptionChips,
         nomeTutor: tutorName,
         telefoneTutor: phone.replace(/\D/g, ""),
+        castrado: castrated,
+        vacinado: vaccinated,
+        recompensa: hasReward,
       });
 
       const petId = typeof cadastroResponse === "object" && cadastroResponse?.id

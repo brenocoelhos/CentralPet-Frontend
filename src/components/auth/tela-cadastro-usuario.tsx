@@ -1,22 +1,23 @@
-﻿import { api } from "@/services/api";
+﻿import { useAutenticacao } from "@/context/contexto-autenticacao";
+import { api } from "@/services/api";
 import { exibirAlertaErroApi } from "@/utils/alerta-erro-api";
 import {
-  maskCPF,
-  maskDate,
-  maskPhone,
-  validaCPF,
-  validaData,
-  validaTelefone,
+    maskCPF,
+    maskDate,
+    maskPhone,
+    validaCPF,
+    validaData,
+    validaTelefone,
 } from "@/utils/validadores";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  StyleSheet,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    StyleSheet,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { TextoTema as Text } from "../texto-tema";
@@ -39,6 +40,7 @@ interface SignupFormState {
 
 export default function TelaCadastroUsuario() {
   const router = useRouter();
+  const { signInWithToken } = useAutenticacao();
   const [loading, setLoading] = useState<boolean>(false);
 
   const [form, setForm] = useState<SignupFormState>({
@@ -197,7 +199,10 @@ export default function TelaCadastroUsuario() {
         estado: form.estado.trim() || undefined,
       });
 
-      Alert.alert("Sucesso!", "Cadastro realizado com sucesso.");
+      const loginResponse = await api.auth.login({ email: email.trim(), senha });
+      const token = typeof loginResponse === "string" ? loginResponse : loginResponse.token;
+      await signInWithToken(token, typeof loginResponse === "object" ? loginResponse : undefined);
+
       router.replace("/painel");
     } catch (error) {
       exibirAlertaErroApi("Falha no cadastro", error, "Nao foi possivel concluir o cadastro.");
