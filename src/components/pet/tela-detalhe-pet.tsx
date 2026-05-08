@@ -1,16 +1,17 @@
-﻿import Ionicons from "@expo/vector-icons/Ionicons";
+﻿import { Radius, TouchTarget } from "@/constants/tema";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import * as Linking from "expo-linking";
 import { useState } from "react";
 import {
-    Alert,
-    Dimensions,
-    Image,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  Dimensions,
+  Image,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -362,6 +363,8 @@ export default function TelaDetalhePet({ item }: PetDetailScreenProps) {
                   style={styles.callBtn}
                   activeOpacity={0.85}
                   onPress={handleOpenWhatsApp}
+                  accessibilityRole="button"
+                  accessibilityLabel="Conversar no WhatsApp com o tutor"
                 >
                   <Ionicons name="logo-whatsapp" size={18} color={ORANGE} />
                 </TouchableOpacity>
@@ -652,9 +655,9 @@ const styles = StyleSheet.create({
     color: "#888",
   },
   callBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 10,
+    width: TouchTarget.min,
+    height: TouchTarget.min,
+    borderRadius: Radius.sm,
     backgroundColor: "#EDE8E3",
     alignItems: "center",
     justifyContent: "center",

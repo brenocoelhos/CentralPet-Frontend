@@ -17,11 +17,6 @@
             "CFBundleURLSchemes": [
               "com.googleusercontent.apps.138731032989-kf122ihlmu30m848rffbe3jb4j0hcumj"
             ]
-          },
-          {
-            "CFBundleURLSchemes": [
-              "com.googleusercontent.apps.138731032989-kf122ihlmu30m848rffbe3jb4j0hcumj"
-            ]
           }
         ],
         "ITSAppUsesNonExemptEncryption": false
@@ -35,7 +30,7 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false,
+      "predictiveBackGestureEnabled": true,
       "googleServicesFile": "./google-services.json",
       "permissions": [
         "android.permission.ACCESS_COARSE_LOCATION",

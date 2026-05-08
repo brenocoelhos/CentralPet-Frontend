@@ -1,4 +1,5 @@
-﻿import { Ionicons } from "@expo/vector-icons";
+﻿import { TouchTarget } from "@/constants/tema";
+import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { StyleSheet, TouchableOpacity } from "react-native";
 import CampoEntrada from "./campo-entrada";
@@ -43,6 +44,8 @@ export default function CampoSenha({
           activeOpacity={0.8}
           style={styles.iconButton}
           disabled={disabled}
+          accessibilityRole="button"
+          accessibilityLabel={visible ? "Ocultar senha" : "Mostrar senha"}
         >
           <Ionicons
             name={visible ? "eye-off-outline" : "eye-outline"}
@@ -57,7 +60,10 @@ export default function CampoSenha({
 
 const styles = StyleSheet.create({
   iconButton: {
-    paddingLeft: 4,
-    paddingVertical: 4,
+    width: TouchTarget.min,
+    height: TouchTarget.min,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: -8,
   },
 });

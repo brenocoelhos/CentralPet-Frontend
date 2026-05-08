@@ -1,15 +1,18 @@
-﻿import { useAutenticacao } from "@/context/contexto-autenticacao";
+﻿import { AppColors, Radius, TouchTarget } from "@/constants/tema";
+import { useAutenticacao } from "@/context/contexto-autenticacao";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    ScrollView,
-    StyleSheet,
-    Switch,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { TextoTema as Text } from "../texto-tema";
 
@@ -30,14 +33,27 @@ export default function TelaPerfil() {
 
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [stats, setStats] = useState({ registros: 0, encontrados: 0, avistamentos: 0 });
+  const [statsLoading, setStatsLoading] = useState(false);
+  const [statsError, setStatsError] = useState<string | null>(null);
+
+  const loadStats = useCallback(async () => {
+    if (!user) return;
+
+    try {
+      setStatsLoading(true);
+      setStatsError(null);
+      const pets = await getApi().pets.buscaPets({ usuarioId: user.id });
+      setStats((prev) => ({ ...prev, registros: pets.length }));
+    } catch {
+      setStatsError("Nao foi possivel carregar seus dados agora.");
+    } finally {
+      setStatsLoading(false);
+    }
+  }, [getApi, user]);
 
   useEffect(() => {
-    if (!user) return;
-    getApi()
-      .pets.buscaPets({ usuarioId: user.id })
-      .then((pets) => setStats((prev) => ({ ...prev, registros: pets.length })))
-      .catch(() => {});
-  }, [user, getApi]);
+    void loadStats();
+  }, [loadStats]);
 
   const cidadeEstado = parseCidadeEstado(user?.endereco);
 
@@ -64,6 +80,14 @@ export default function TelaPerfil() {
       style={styles.root}
       contentContainerStyle={styles.scrollContent}
       showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl
+          refreshing={statsLoading}
+          onRefresh={() => void loadStats()}
+          colors={[AppColors.brand]}
+          tintColor={AppColors.brand}
+        />
+      }
     >
       {/* Header */}
       <View style={styles.topSection}>
@@ -92,6 +116,8 @@ export default function TelaPerfil() {
             style={styles.authButton}
             onPress={() => router.push("/login")}
             activeOpacity={0.88}
+            accessibilityRole="button"
+            accessibilityLabel="Entrar ou criar conta"
           >
             <Ionicons
               name="log-in-outline"
@@ -106,21 +132,31 @@ export default function TelaPerfil() {
 
       {/* Stats row */}
       {user && (
-        <View style={styles.statsRow}>
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>{stats.registros}</Text>
-            <Text style={styles.statLabel}>Registros</Text>
+        <View>
+          <View style={styles.statsRow}>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>{stats.registros}</Text>
+              <Text style={styles.statLabel}>Registros</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statItem}>
+              <Text style={[styles.statValue, styles.statValueGreen]}>{stats.encontrados}</Text>
+              <Text style={styles.statLabel}>Encontrados</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>{stats.avistamentos}</Text>
+              <Text style={styles.statLabel}>Avistamentos</Text>
+            </View>
           </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={[styles.statValue, styles.statValueGreen]}>{stats.encontrados}</Text>
-            <Text style={styles.statLabel}>Encontrados</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>{stats.avistamentos}</Text>
-            <Text style={styles.statLabel}>Avistamentos</Text>
-          </View>
+          {statsError ? (
+            <View style={styles.statsErrorWrap}>
+              <Text style={styles.statsErrorText}>{statsError}</Text>
+              <Pressable style={styles.retryButton} onPress={() => void loadStats()}>
+                <Text style={styles.retryButtonText}>Tentar novamente</Text>
+              </Pressable>
+            </View>
+          ) : null}
         </View>
       )}
 
@@ -146,6 +182,8 @@ export default function TelaPerfil() {
           activeOpacity={user ? 0.85 : 1}
           onPress={() => user && router.push("/meus-registros")}
           disabled={!user}
+          accessibilityRole="button"
+          accessibilityLabel="Abrir meus registros"
         >
           <View style={[styles.menuIconWrap, !user && styles.menuIconWrapDisabled]}>
             <Ionicons name="document-text-outline" size={20} color={user ? "#8A7060" : "#B8B8B8"} />
@@ -165,6 +203,8 @@ export default function TelaPerfil() {
           activeOpacity={user ? 0.85 : 1}
           onPress={() => user && router.push("/contatos-emergencia")}
           disabled={!user}
+          accessibilityRole="button"
+          accessibilityLabel="Abrir contatos de emergencia"
         >
           <View style={[styles.menuIconWrap, !user && styles.menuIconWrapDisabled]}>
             <Ionicons name="call-outline" size={20} color={user ? "#8A7060" : "#B8B8B8"} />
@@ -223,6 +263,8 @@ export default function TelaPerfil() {
           activeOpacity={user ? 0.85 : 1}
           onPress={handleLogout}
           disabled={!user}
+          accessibilityRole="button"
+          accessibilityLabel="Sair da conta"
         >
           <View style={[styles.menuIconWrap, !user && styles.menuIconWrapDisabled]}>
             <Ionicons name="log-out-outline" size={20} color={user ? "#8A7060" : "#B8B8B8"} />
@@ -307,8 +349,9 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   authButton: {
-    backgroundColor: "#D97757",
-    borderRadius: 30,
+    backgroundColor: AppColors.brand,
+    borderRadius: Radius.pill,
+    minHeight: TouchTarget.min,
     paddingVertical: 18,
     alignItems: "center",
     flexDirection: "row",
@@ -334,6 +377,29 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     borderWidth: 1,
     borderColor: "#EAE5DA",
+  },
+  statsErrorWrap: {
+    marginHorizontal: 20,
+    marginBottom: 14,
+    gap: 8,
+  },
+  statsErrorText: {
+    color: AppColors.danger,
+    fontSize: 13,
+  },
+  retryButton: {
+    minHeight: TouchTarget.min,
+    borderRadius: Radius.pill,
+    backgroundColor: AppColors.brand,
+    paddingHorizontal: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "flex-start",
+  },
+  retryButtonText: {
+    color: "#FFFFFF",
+    fontFamily: "Lexend_600SemiBold",
+    fontSize: 13,
   },
   statItem: {
     flex: 1,

@@ -1,20 +1,21 @@
 ﻿import CartaoPet from "@/components/pet/cartao-pet";
 import { CARD_GAP, CARD_HEIGHT, CARD_IMAGE_HEIGHT, CARD_WIDTH, HORIZONTAL_PADDING } from "@/constants/layout-grid";
+import { AppColors, Radius, TouchTarget } from "@/constants/tema";
 import { useAutenticacao } from "@/context/contexto-autenticacao";
 import type { PetDashboardDto } from "@/services/api/modules/pets.api";
 import { extrairMensagemErroApi } from "@/utils/alerta-erro-api";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { router } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-    ActivityIndicator,
-    Platform,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  FlatList,
+  Platform,
+  Pressable,
+  RefreshControl,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -39,8 +40,8 @@ type Occurrence = {
 const FILTERS = ["Todos", "Cães", "Gatos"] as const;
 type Filter = (typeof FILTERS)[number];
 
-const ORANGE = "#D97757";
-const BG = "#FFFFFF";
+const ORANGE = AppColors.brand;
+const BG = AppColors.surface;
 
 // ─── Filter Bar ───────────────────────────────────────────────────────────────
 const FilterBar = ({
@@ -50,26 +51,23 @@ const FilterBar = ({
   active: Filter;
   onSelect: (f: Filter) => void;
 }) => (
-  <ScrollView
-    horizontal
-    showsHorizontalScrollIndicator={false}
-    contentContainerStyle={styles.filterContainer}
-  >
+  <View style={styles.filterContainer}>
     {FILTERS.map((f) => (
-      <TouchableOpacity
+      <Pressable
         key={f}
         style={[styles.filterBtn, active === f && styles.filterBtnActive]}
         onPress={() => onSelect(f)}
-        activeOpacity={0.75}
+        accessibilityRole="button"
+        accessibilityLabel={`Filtrar por ${f}`}
       >
         <Text
           style={[styles.filterText, active === f && styles.filterTextActive]}
         >
           {f}
         </Text>
-      </TouchableOpacity>
+      </Pressable>
     ))}
-  </ScrollView>
+  </View>
 );
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
@@ -77,13 +75,16 @@ export default function TelaPainel() {
   const { getApi } = useAutenticacao();
   const [activeFilter, setActiveFilter] = useState<Filter>("Todos");
   const [occurrences, setOccurrences] = useState<Occurrence[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  useEffect(() => {
-    const loadDashboard = async () => {
+  const loadDashboard = useCallback(
+    async (showLoader = true) => {
       try {
-        setLoading(true);
+        if (showLoader) {
+          setLoading(true);
+        }
         setErrorMessage(null);
         const result = await getApi().pets.buscaPets();
         setOccurrences(result.map(mapPetToOccurrence));
@@ -91,11 +92,20 @@ export default function TelaPainel() {
         setErrorMessage(extrairMensagemErroApi(error, "Nao foi possivel carregar o dashboard."));
       } finally {
         setLoading(false);
+        setRefreshing(false);
       }
-    };
+    },
+    [getApi],
+  );
 
+  useEffect(() => {
     void loadDashboard();
-  }, [getApi]);
+  }, [loadDashboard]);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    void loadDashboard(false);
+  }, [loadDashboard]);
 
   const filtered: Occurrence[] = useMemo(
     () =>
@@ -109,78 +119,109 @@ export default function TelaPainel() {
     [activeFilter, occurrences],
   );
 
-  const rows: Occurrence[][] = [];
-  for (let i = 0; i < filtered.length; i += 2) {
-    rows.push(filtered.slice(i, i + 2));
-  }
+  const skeletonItems = useMemo(() => Array.from({ length: 4 }, (_, i) => `sk-${i}`), []);
+
+  const renderOccurrenceCard = ({ item }: { item: Occurrence }) => (
+    <View style={styles.itemWrapper}>
+      <CartaoPet
+        key={item.id}
+        variant="dashboard"
+        name={item.name}
+        breed={item.breed}
+        location={item.neighborhood}
+        imageUrl={item.photo}
+        status={item.status}
+        hasNewMessage={item.hasNewMessage}
+        imageHeight={CARD_IMAGE_HEIGHT}
+        cardStyle={styles.petCard}
+        onPress={() =>
+          router.push({
+            pathname: "/detalhe-pet",
+            params: { pet: encodeURIComponent(JSON.stringify(item.raw)) },
+          })
+        }
+      />
+    </View>
+  );
+
+  const renderSkeletonCard = ({ item }: { item: string }) => (
+    <View key={item} style={styles.itemWrapper}>
+      <View style={[styles.petCard, styles.skeletonCard]} />
+    </View>
+  );
+
+  const listHeader = (
+    <>
+      <FilterBar active={activeFilter} onSelect={setActiveFilter} />
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>PETS PERDIDOS NA REGIAO</Text>
+      </View>
+    </>
+  );
+
+  const listEmpty = loading ? (
+    <FlatList
+      data={skeletonItems}
+      keyExtractor={(item) => item}
+      numColumns={2}
+      renderItem={renderSkeletonCard}
+      columnWrapperStyle={styles.gridRow}
+      scrollEnabled={false}
+    />
+  ) : errorMessage ? (
+    <View style={styles.feedbackContainer}>
+      <Text style={styles.errorText}>{errorMessage}</Text>
+      <Pressable
+        style={styles.retryButton}
+        onPress={() => void loadDashboard(true)}
+        accessibilityRole="button"
+        accessibilityLabel="Tentar carregar o painel novamente"
+      >
+        <Text style={styles.retryButtonText}>Tentar novamente</Text>
+      </Pressable>
+    </View>
+  ) : (
+    <View style={styles.emptyState}>
+      <Ionicons name="paw-outline" size={48} color="#ccc" />
+      <Text style={styles.emptyText}>Nenhum pet perdido encontrado</Text>
+    </View>
+  );
 
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar barStyle="dark-content" backgroundColor={BG} />
 
-      <ScrollView
+      <FlatList
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
+        data={loading ? [] : filtered}
+        keyExtractor={(item) => item.id}
+        numColumns={2}
+        columnWrapperStyle={styles.gridRow}
+        renderItem={renderOccurrenceCard}
+        ListHeaderComponent={listHeader}
+        ListEmptyComponent={listEmpty}
+        ListFooterComponent={<View style={{ height: 110 }} />}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[ORANGE]}
+            tintColor={ORANGE}
+          />
+        }
         showsVerticalScrollIndicator={false}
-      >
-        {/* ── Filters ── */}
-        <FilterBar active={activeFilter} onSelect={setActiveFilter} />
-
-        {/* ── Section header ── */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>PETS PERDIDOS NA REGIÃO</Text>
-        </View>
-
-        {loading ? (
-          <View style={styles.loadingWrap}>
-            <ActivityIndicator color={ORANGE} />
-          </View>
-        ) : null}
-
-        {!loading && errorMessage ? (
-          <Text style={styles.errorText}>{errorMessage}</Text>
-        ) : null}
-
-        {/* ── Grid ── */}
-        {!loading && !errorMessage && rows.map((row, i) => (
-          <View key={i} style={styles.gridRow}>
-            {row.map((item) => (
-              <CartaoPet
-                key={item.id}
-                variant="dashboard"
-                name={item.name}
-                breed={item.breed}
-                location={item.neighborhood}
-                imageUrl={item.photo}
-                status={item.status}
-                hasNewMessage={item.hasNewMessage}
-                imageHeight={CARD_IMAGE_HEIGHT}
-                cardStyle={styles.petCard}
-                onPress={() =>
-                  router.push({
-                    pathname: "/detalhe-pet",
-                    params: { pet: encodeURIComponent(JSON.stringify(item.raw)) },
-                  })
-                }
-              />
-            ))}
-            {row.length === 1 && <View style={{ width: CARD_WIDTH }} />}
-          </View>
-        ))}
-
-        {filtered.length === 0 && (
-          <View style={styles.emptyState}>
-            <Ionicons name="paw-outline" size={48} color="#ccc" />
-            <Text style={styles.emptyText}>Nenhum pet perdido encontrado</Text>
-          </View>
-        )}
-
-        <View style={{ height: 110 }} />
-      </ScrollView>
+      />
 
       {/* ── FAB ── */}
       <View style={styles.fabContainer}>
-        <TouchableOpacity style={styles.fab} activeOpacity={0.88} onPress={() => router.push("/cadastro-pet")}>
+        <Pressable
+          style={styles.fab}
+          onPress={() => router.push("/cadastro-pet")}
+          accessibilityRole="button"
+          accessibilityLabel="Abrir cadastro de pet"
+          accessibilityHint="Vai para o formulario de cadastro"
+        >
           <Ionicons
             name="add-circle-outline"
             size={20}
@@ -188,7 +229,7 @@ export default function TelaPainel() {
             style={{ marginRight: 8 }}
           />
           <Text style={styles.fabText}>Realizar cadastro</Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </SafeAreaView>
   );
@@ -207,8 +248,9 @@ const styles = StyleSheet.create({
   // Filters
   filterContainer: { flexDirection: "row", paddingBottom: 16, gap: 8 },
   filterBtn: {
+    minHeight: TouchTarget.min,
     paddingHorizontal: 18,
-    paddingVertical: 8,
+    paddingVertical: 10,
     borderRadius: 20,
     borderWidth: 1.5,
     borderColor: "#D9D3CF",
@@ -249,9 +291,11 @@ const styles = StyleSheet.create({
 
   // Grid
   gridRow: {
-    flexDirection: "row",
-    gap: CARD_GAP,
+    justifyContent: "space-between",
     marginBottom: CARD_GAP,
+  },
+  itemWrapper: {
+    width: CARD_WIDTH,
   },
 
   // Pet Card
@@ -271,21 +315,38 @@ const styles = StyleSheet.create({
     paddingVertical: 60,
     gap: 12,
   },
+  feedbackContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 12,
+    paddingVertical: 24,
+  },
   emptyText: {
     fontFamily: "Lexend_500Medium",
     fontSize: 14,
     color: "#bbb",
   },
-  loadingWrap: {
-    paddingVertical: 20,
-    alignItems: "center",
-    justifyContent: "center",
-  },
   errorText: {
     color: "#D94F4F",
     textAlign: "center",
     fontSize: 13,
-    marginBottom: 12,
+  },
+  retryButton: {
+    minHeight: TouchTarget.min,
+    borderRadius: Radius.pill,
+    backgroundColor: ORANGE,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 16,
+  },
+  retryButtonText: {
+    color: "#FFFFFF",
+    fontFamily: "Lexend_600SemiBold",
+    fontSize: 14,
+  },
+  skeletonCard: {
+    opacity: 0.45,
+    backgroundColor: "#E8E2D8",
   },
 
   // FAB
@@ -296,8 +357,9 @@ const styles = StyleSheet.create({
     right: 16,
   },
   fab: {
+    minHeight: TouchTarget.min,
     backgroundColor: ORANGE,
-    borderRadius: 30,
+    borderRadius: Radius.pill,
     paddingVertical: 18,
     alignItems: "center",
     flexDirection: "row",

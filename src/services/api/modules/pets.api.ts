@@ -85,6 +85,9 @@ export function criarApiPets(http: ClienteHttp, routes: RotasPets) {
     buscaPets(params?: Partial<BuscaPetsParams>) {
       return http.get<PetDashboardDto[]>(`${routes.buscaPets}${toBuscaPetsQuery(params)}`);
     },
+    buscarPetPorId(petId: string) {
+      return http.get<PetDashboardDto>(`${routes.cadastroPet}/${encodeURIComponent(petId)}`);
+    },
     deletePet(petId: string) {
       return http.delete<void>(`${routes.cadastroPet}/${encodeURIComponent(petId)}`);
     },

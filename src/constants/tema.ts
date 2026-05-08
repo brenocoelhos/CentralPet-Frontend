@@ -61,5 +61,35 @@ export const Spacing = {
   six: 64,
 } as const;
 
+export const AppColors = {
+  brand: "#D97757",
+  danger: "#D94F4F",
+  surface: "#FFFFFF",
+  surfaceMuted: "#F5F2EC",
+  border: "#EAE5DA",
+  textPrimary: "#1A1A1A",
+  textSecondary: "#8E8476",
+} as const;
+
+export const Radius = {
+  sm: 10,
+  md: 14,
+  lg: 18,
+  pill: 30,
+  round: 999,
+} as const;
+
+export const Typography = {
+  bodySm: 12,
+  bodyMd: 14,
+  bodyLg: 16,
+  titleMd: 20,
+  titleLg: 22,
+} as const;
+
+export const TouchTarget = {
+  min: 44,
+} as const;
+
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
 export const MaxContentWidth = 800;

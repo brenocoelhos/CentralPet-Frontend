@@ -37,6 +37,13 @@ const FOOTER_ITEMS: FooterItem[] = [
   },
 ];
 
+const FOOTER_LABELS: Record<string, string> = {
+  "/painel": "Ir para painel",
+  "/busca": "Ir para busca",
+  "/cadastro-pet": "Cadastrar pet",
+  "/perfil": "Abrir perfil",
+};
+
 const HOME_ROUTES = new Set(["/", "/painel", "/index"]);
 
 export default function RodapeApp() {
@@ -77,7 +84,7 @@ export default function RodapeApp() {
               onPress={() => handleNavigate(item.route)}
               style={styles.item}
               accessibilityRole="button"
-              accessibilityLabel={item.route}
+              accessibilityLabel={FOOTER_LABELS[item.route] ?? "Navegar"}
             >
               <View style={styles.iconWrapper}>
                 <Ionicons

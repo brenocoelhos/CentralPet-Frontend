@@ -28,6 +28,11 @@ type NotificacaoPetData = {
   tipo?: "pet_perdido" | "avistamento";
 };
 
+function abrirDetalhePetPorId(petId?: string) {
+  if (!petId) return;
+  router.push(`/detalhe-pet?id=${encodeURIComponent(petId)}`);
+}
+
 async function obterTokenPush(): Promise<string | null> {
   if (Platform.OS === "web" || isExpoGo) return null;
 
@@ -121,9 +126,7 @@ export function useNotificacoesPush(
     const subscription = Notifications.addNotificationResponseReceivedListener(
       (response) => {
         const data = response.notification.request.content.data as NotificacaoPetData;
-        if (data?.petId) {
-          router.push(`/detalhe-pet?id=${data.petId}`);
-        }
+        abrirDetalhePetPorId(data?.petId);
       },
     );
     return () => subscription.remove();
@@ -136,9 +139,7 @@ export function useNotificacoesPush(
     Notifications.getLastNotificationResponseAsync().then((response) => {
       if (!response) return;
       const data = response.notification.request.content.data as NotificacaoPetData;
-      if (data?.petId) {
-        router.push(`/detalhe-pet?id=${data.petId}`);
-      }
+      abrirDetalhePetPorId(data?.petId);
     }).catch(() => undefined);
   }, []);
 }

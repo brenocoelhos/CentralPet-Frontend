@@ -16,6 +16,7 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
+  Vibration,
   View,
 } from "react-native";
 import { EntradaTextoTema } from "../entrada-texto-tema";
@@ -219,9 +220,11 @@ export default function TelaCadastroPet() {
         );
       }
 
+      Vibration.vibrate(20);
       Alert.alert("Animal cadastrado", "Cadastro realizado com sucesso.");
       router.replace("/painel");
     } catch (error) {
+      Vibration.vibrate([0, 40, 30, 40]);
       exibirAlertaErroApi("Erro no cadastro", error, "Nao foi possivel cadastrar o pet.");
     } finally {
       setLoading(false);

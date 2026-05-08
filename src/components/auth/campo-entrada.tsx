@@ -1,4 +1,5 @@
-﻿import { Ionicons } from "@expo/vector-icons";
+﻿import { Radius, TouchTarget } from "@/constants/tema";
+import { Ionicons } from "@expo/vector-icons";
 import type React from "react";
 import type { ComponentProps, ReactNode } from "react";
 import { StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
@@ -46,6 +47,7 @@ export default function CampoEntrada({
           {...inputProps}
           style={styles.input}
           placeholderTextColor={inputProps.placeholderTextColor ?? "#B0A898"}
+          accessibilityLabel={inputProps.accessibilityLabel ?? label}
         />
 
         {rightAccessory}
@@ -68,9 +70,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 1,
     borderColor: "#DDD5CA",
-    borderRadius: 10,
+    borderRadius: Radius.sm,
     paddingHorizontal: 12,
-    minHeight: 40,
+    minHeight: TouchTarget.min,
     backgroundColor: "#FFFFFF",
     marginBottom: 10,
   },

@@ -1,5 +1,6 @@
 ﻿import CartaoPet from "@/components/pet/cartao-pet";
 import { CARD_HEIGHT, CARD_IMAGE_HEIGHT, CARD_WIDTH } from "@/constants/layout-grid";
+import { AppColors, Radius, TouchTarget } from "@/constants/tema";
 import { useAutenticacao } from "@/context/contexto-autenticacao";
 import type { PetDashboardDto } from "@/services/api/modules/pets.api";
 import { extrairMensagemErroApi } from "@/utils/alerta-erro-api";
@@ -7,12 +8,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import {
-    ActivityIndicator,
-    FlatList,
-    Platform,
-    Pressable,
-    StyleSheet,
-    View,
+  ActivityIndicator,
+  FlatList,
+  Platform,
+  Pressable,
+  StyleSheet,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { EntradaTextoTema } from "../entrada-texto-tema";
@@ -113,6 +114,8 @@ export default function TelaBusca() {
           style={[styles.searchButton, !query.trim() && styles.searchButtonDisabled]}
           onPress={handleSearch}
           disabled={!query.trim() || loading}
+          accessibilityRole="button"
+          accessibilityLabel="Buscar pets"
         >
           <Text style={styles.searchButtonText}>Buscar</Text>
         </Pressable>
@@ -126,6 +129,8 @@ export default function TelaBusca() {
           style={styles.sortButton}
           onPress={() => setSortByRecent((current) => !current)}
           disabled={!shouldSearch}
+          accessibilityRole="button"
+          accessibilityLabel="Alterar ordenacao dos resultados"
         >
           <Text style={styles.sortButtonText}>
             {sortByRecent ? "Mais recentes" : "Mais antigos"}
@@ -139,7 +144,19 @@ export default function TelaBusca() {
         </View>
       ) : null}
 
-      {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
+      {errorMessage ? (
+        <View style={styles.errorBox}>
+          <Text style={styles.errorText}>{errorMessage}</Text>
+          <Pressable
+            style={styles.retryButton}
+            onPress={handleSearch}
+            accessibilityRole="button"
+            accessibilityLabel="Tentar buscar novamente"
+          >
+            <Text style={styles.retryButtonText}>Tentar novamente</Text>
+          </Pressable>
+        </View>
+      ) : null}
     </View>
   );
 
@@ -166,7 +183,7 @@ export default function TelaBusca() {
 const styles = StyleSheet.create({
   page: {
     flex: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: AppColors.surface,
   },
   container: {
     flex: 1,
@@ -204,10 +221,10 @@ const styles = StyleSheet.create({
     height: 46,
   },
   searchButton: {
-    height: 46,
+    minHeight: TouchTarget.min,
     paddingHorizontal: 16,
-    borderRadius: 12,
-    backgroundColor: "#D97757",
+    borderRadius: Radius.sm,
+    backgroundColor: AppColors.brand,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -256,9 +273,26 @@ const styles = StyleSheet.create({
     paddingTop: 2,
   },
   errorText: {
-    color: "#D94F4F",
+    color: AppColors.danger,
     fontSize: 12,
+  },
+  errorBox: {
+    gap: 8,
     marginTop: 2,
+  },
+  retryButton: {
+    minHeight: TouchTarget.min,
+    borderRadius: Radius.pill,
+    backgroundColor: AppColors.brand,
+    paddingHorizontal: 14,
+    alignSelf: "flex-start",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  retryButtonText: {
+    color: "#FFFFFF",
+    fontSize: 13,
+    fontFamily: "Lexend_600SemiBold",
   },
   itemCard: {
     width: CARD_WIDTH,

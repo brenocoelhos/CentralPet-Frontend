@@ -1,7 +1,9 @@
+import { AppColors, Radius, TouchTarget } from "@/constants/tema";
 import { Ionicons } from "@expo/vector-icons";
 import { useMemo, useState } from "react";
 import {
     Pressable,
+    RefreshControl,
     ScrollView,
     StyleSheet,
     View,
@@ -172,11 +174,17 @@ function CardContato({ item }: { item: Contato }) {
 
 export default function TelaContatosEmergencia() {
   const [abaAtiva, setAbaAtiva] = useState<Aba>("meus");
+  const [refreshing, setRefreshing] = useState(false);
 
   const listaAtual = useMemo(
     () => (abaAtiva === "meus" ? meusContatosMock : contatosRegiaoMock),
     [abaAtiva],
   );
+
+  const handleRetry = () => {
+    setRefreshing(true);
+    setTimeout(() => setRefreshing(false), 400);
+  };
 
   return (
     <View style={styles.root}>
@@ -191,21 +199,45 @@ export default function TelaContatosEmergencia() {
         <Pressable
           style={[styles.abaButton, abaAtiva === "meus" && styles.abaButtonAtiva]}
           onPress={() => setAbaAtiva("meus")}
+          accessibilityRole="button"
+          accessibilityLabel="Mostrar meus contatos"
         >
           <Text style={[styles.abaText, abaAtiva === "meus" && styles.abaTextAtiva]}>Meus contatos</Text>
         </Pressable>
         <Pressable
           style={[styles.abaButton, abaAtiva === "regiao" && styles.abaButtonAtiva]}
           onPress={() => setAbaAtiva("regiao")}
+          accessibilityRole="button"
+          accessibilityLabel="Mostrar contatos da regiao"
         >
           <Text style={[styles.abaText, abaAtiva === "regiao" && styles.abaTextAtiva]}>Contatos da regiao</Text>
         </Pressable>
       </View>
 
-      <ScrollView contentContainerStyle={styles.listaContainer} showsVerticalScrollIndicator={false}>
-        {listaAtual.map((item) => (
-          <CardContato key={item.id} item={item} />
-        ))}
+      <ScrollView
+        contentContainerStyle={styles.listaContainer}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRetry}
+            colors={[AppColors.brand]}
+            tintColor={AppColors.brand}
+          />
+        }
+      >
+        {listaAtual.length === 0 ? (
+          <View style={styles.emptyWrap}>
+            <Text style={styles.emptyText}>Nao foi possivel carregar contatos.</Text>
+            <Pressable style={styles.retryButton} onPress={handleRetry}>
+              <Text style={styles.retryButtonText}>Tentar novamente</Text>
+            </Pressable>
+          </View>
+        ) : (
+          listaAtual.map((item) => (
+            <CardContato key={item.id} item={item} />
+          ))
+        )}
       </ScrollView>
     </View>
   );
@@ -243,6 +275,7 @@ const styles = StyleSheet.create({
   },
   abaButton: {
     flex: 1,
+    minHeight: TouchTarget.min,
     backgroundColor: "#F2ECE6",
     borderRadius: 24,
     borderWidth: 1,
@@ -266,6 +299,29 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingBottom: 32,
     gap: 12,
+  },
+  emptyWrap: {
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    paddingVertical: 30,
+  },
+  emptyText: {
+    color: AppColors.textSecondary,
+    fontSize: 13,
+  },
+  retryButton: {
+    minHeight: TouchTarget.min,
+    borderRadius: Radius.pill,
+    backgroundColor: AppColors.brand,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 16,
+  },
+  retryButtonText: {
+    color: "#FFFFFF",
+    fontFamily: "Lexend_600SemiBold",
+    fontSize: 13,
   },
   card: {
     backgroundColor: "#FFFFFF",
