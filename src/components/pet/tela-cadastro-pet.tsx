@@ -8,16 +8,16 @@ import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-  Alert,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  Vibration,
-  View,
+    Alert,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    TouchableOpacity,
+    Vibration,
+    View,
 } from "react-native";
 import { EntradaTextoTema } from "../entrada-texto-tema";
 import { TextoTema as Text } from "../texto-tema";
