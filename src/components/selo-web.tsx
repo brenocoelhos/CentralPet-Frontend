@@ -1,7 +1,6 @@
-﻿import { version } from 'expo/package.json';
-import { Image } from 'expo-image';
-import React from 'react';
-import { useColorScheme as useEsquemaCores, StyleSheet } from 'react-native';
+﻿import { Image } from 'expo-image';
+import { version } from 'expo/package.json';
+import { StyleSheet, useColorScheme as useEsquemaCores } from 'react-native';
 
 import { TextoTema } from './texto-tema';
 import { ViewTema } from './view-tema';

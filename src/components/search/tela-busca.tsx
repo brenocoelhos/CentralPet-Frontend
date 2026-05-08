@@ -1,13 +1,13 @@
 ﻿import CartaoPet from "@/components/pet/cartao-pet";
+import { CARD_HEIGHT, CARD_IMAGE_HEIGHT, CARD_WIDTH } from "@/constants/layout-grid";
 import { useAutenticacao } from "@/context/contexto-autenticacao";
-import { ErroApi } from "@/services/api";
 import type { PetDashboardDto } from "@/services/api/modules/pets.api";
+import { extrairMensagemErroApi } from "@/utils/alerta-erro-api";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import {
     ActivityIndicator,
-    Dimensions,
     FlatList,
     Platform,
     Pressable,
@@ -17,13 +17,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { EntradaTextoTema } from "../entrada-texto-tema";
 import { TextoTema as Text } from "../texto-tema";
-
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const HORIZONTAL_PADDING = 14;
-const CARD_GAP = 10;
-const CARD_WIDTH = (SCREEN_WIDTH - HORIZONTAL_PADDING * 2 - CARD_GAP) / 2;
-const CARD_HEIGHT = 272;
-const CARD_IMAGE_HEIGHT = 180;
 
 export default function TelaBusca() {
   const { getApi } = useAutenticacao();
@@ -62,12 +55,7 @@ export default function TelaBusca() {
       setPets(result);
     } catch (error) {
       setPets([]);
-      if (error instanceof ErroApi && typeof error.data === "object" && error.data) {
-        const data = error.data as { erro?: string; erros?: string[] };
-        setErrorMessage(data.erro ?? data.erros?.[0] ?? "Erro ao buscar pets.");
-      } else {
-        setErrorMessage("Erro ao buscar pets.");
-      }
+      setErrorMessage(extrairMensagemErroApi(error, "Erro ao buscar pets."));
     } finally {
       setLoading(false);
     }

@@ -1,5 +1,5 @@
-﻿import React, { type ReactNode } from 'react';
-import { View, StyleSheet } from 'react-native';
+﻿import { type ReactNode } from 'react';
+import { StyleSheet, View } from 'react-native';
 
 import { TextoTema } from './texto-tema';
 import { ViewTema } from './view-tema';

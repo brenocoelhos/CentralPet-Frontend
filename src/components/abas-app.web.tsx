@@ -1,14 +1,13 @@
 ﻿import {
-  Tabs,
-  TabList,
-  TabTrigger,
-  TabSlot,
-  TabTriggerSlotProps,
-  TabListProps,
+    TabList,
+    TabListProps,
+    Tabs,
+    TabSlot,
+    TabTrigger,
+    TabTriggerSlotProps,
 } from 'expo-router/ui';
 import { SymbolView } from 'expo-symbols';
-import React from 'react';
-import { Pressable, useColorScheme as useEsquemaCores, View, StyleSheet } from 'react-native';
+import { Pressable, StyleSheet, useColorScheme as useEsquemaCores, View } from 'react-native';
 
 import { LinkExterno } from './link-externo';
 import { TextoTema } from './texto-tema';

@@ -38,8 +38,6 @@ export function useLoginGoogle(onSuccess?: () => void) {
     webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
     scopes: ["openid", "profile", "email"],
   });
-  console.log("REDIRECT URI:", request?.url ? new URL(request.url).searchParams.get("redirect_uri") : "aguardando");
-  console.log("PLATFORM:", Platform.OS);
 
   const handleGoogleLogin = async () => {
     if (missingGoogleConfigKeys.length > 0) {

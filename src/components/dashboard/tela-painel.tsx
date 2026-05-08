@@ -1,13 +1,13 @@
 ﻿import CartaoPet from "@/components/pet/cartao-pet";
+import { CARD_GAP, CARD_HEIGHT, CARD_IMAGE_HEIGHT, CARD_WIDTH, HORIZONTAL_PADDING } from "@/constants/layout-grid";
 import { useAutenticacao } from "@/context/contexto-autenticacao";
-import { ErroApi } from "@/services/api";
 import type { PetDashboardDto } from "@/services/api/modules/pets.api";
+import { extrairMensagemErroApi } from "@/utils/alerta-erro-api";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { router } from "expo-router";
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
     ActivityIndicator,
-    Dimensions,
     Platform,
     ScrollView,
     StatusBar,
@@ -41,12 +41,6 @@ type Filter = (typeof FILTERS)[number];
 
 const ORANGE = "#D97757";
 const BG = "#FFFFFF";
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const HORIZONTAL_PADDING = 14;
-const CARD_GAP = 10;
-const CARD_WIDTH = (SCREEN_WIDTH - HORIZONTAL_PADDING * 2 - CARD_GAP) / 2;
-const CARD_HEIGHT = 272;
-const CARD_IMAGE_HEIGHT = 180;
 
 // ─── Filter Bar ───────────────────────────────────────────────────────────────
 const FilterBar = ({
@@ -94,12 +88,7 @@ export default function TelaPainel() {
         const result = await getApi().pets.buscaPets();
         setOccurrences(result.map(mapPetToOccurrence));
       } catch (error) {
-        if (error instanceof ErroApi && typeof error.data === "object" && error.data) {
-          const data = error.data as { erro?: string; erros?: string[] };
-          setErrorMessage(data.erro ?? data.erros?.[0] ?? "Nao foi possivel carregar o dashboard.");
-        } else {
-          setErrorMessage("Nao foi possivel carregar o dashboard.");
-        }
+        setErrorMessage(extrairMensagemErroApi(error, "Nao foi possivel carregar o dashboard."));
       } finally {
         setLoading(false);
       }
