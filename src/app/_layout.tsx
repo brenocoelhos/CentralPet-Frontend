@@ -1,10 +1,13 @@
-﻿import { ProvedorAutenticacao, useAutenticacao } from "@/context/contexto-autenticacao";
+﻿import {
+  ProvedorAutenticacao,
+  useAutenticacao,
+} from "@/context/contexto-autenticacao";
 import { useNotificacoesPush } from "@/hooks/use-notificacoes-push";
 import {
-    Lexend_400Regular,
-    Lexend_500Medium,
-    Lexend_600SemiBold,
-    Lexend_700Bold,
+  Lexend_400Regular,
+  Lexend_500Medium,
+  Lexend_600SemiBold,
+  Lexend_700Bold,
 } from "@expo-google-fonts/lexend";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useFonts } from "expo-font";
@@ -47,6 +50,11 @@ function AppStack() {
       }}
     >
       <Stack.Screen name="login" options={{ title: "Login" }} />
+      <Stack.Screen
+        name="esqueci-senha"
+        options={{ title: "Recuperar senha" }}
+      />
+      <Stack.Screen name="redefinir-senha" options={{ title: "Nova senha" }} />
       <Stack.Screen
         name="cadastro-usuario"
         options={{ title: "Cadastro de Usuario" }}
@@ -131,10 +139,7 @@ function AppStack() {
         name="meus-registros"
         options={{ title: "Meus registros" }}
       />
-      <Stack.Screen
-        name="configuracoes"
-        options={{ title: "Configuracoes" }}
-      />
+      <Stack.Screen name="configuracoes" options={{ title: "Configuracoes" }} />
       <Stack.Screen
         name="contatos-emergencia"
         options={{ title: "Contatos de emergencia" }}

@@ -24,7 +24,9 @@ export default function TelaLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const { handleGoogleLogin, loading: googleLoading } = useLoginGoogle(() => router.replace("/painel"));
+  const { handleGoogleLogin, loading: googleLoading } = useLoginGoogle(() =>
+    router.replace("/painel"),
+  );
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -48,7 +50,11 @@ export default function TelaLogin() {
       await signInWithToken(token, response);
       router.replace("/painel");
     } catch (error) {
-      exibirAlertaErroApi("Falha no login", error, "Nao foi possivel realizar o login.");
+      exibirAlertaErroApi(
+        "Falha no login",
+        error,
+        "Nao foi possivel realizar o login.",
+      );
     } finally {
       setLoading(false);
     }
@@ -64,7 +70,15 @@ export default function TelaLogin() {
         enableOnAndroid={true}
         extraScrollHeight={95}
       >
-        <Image source={require("../../../assets/images/logo.png")} style={{ width: 150, height: 150, alignSelf: "center", marginBottom: 16 }} />
+        <Image
+          source={require("../../../assets/images/logo.png")}
+          style={{
+            width: 150,
+            height: 150,
+            alignSelf: "center",
+            marginBottom: 16,
+          }}
+        />
         <View style={styles.headerWrapper}>
           <Text style={styles.title}>Bem-vindo de volta</Text>
           <Text style={styles.subtitle}>Entre com seu email e senha</Text>
@@ -89,6 +103,15 @@ export default function TelaLogin() {
           returnKeyType="done"
           disabled={loading || googleLoading}
         />
+
+        <TouchableOpacity
+          onPress={() => router.push("/esqueci-senha")}
+          activeOpacity={0.8}
+          disabled={loading || googleLoading}
+          style={styles.forgotPasswordButton}
+        >
+          <Text style={styles.forgotPasswordText}>Esqueci minha senha</Text>
+        </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.primaryButton}
@@ -167,6 +190,16 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#6F6758",
     marginTop: 6,
+  },
+  forgotPasswordButton: {
+    alignSelf: "flex-end",
+    marginTop: 4,
+    marginBottom: 8,
+  },
+  forgotPasswordText: {
+    fontSize: 12,
+    color: "#D97757",
+    fontWeight: "700",
   },
   primaryButton: {
     backgroundColor: "#D97757",

@@ -4,6 +4,8 @@
   me: string;
   logout: string;
   google: string;
+  esqueciSenha: string;
+  redefinirSenha: string;
 };
 
 export type RotasPets = {
@@ -40,6 +42,8 @@ export const rotasApi: RotasApi = {
     me: "/auth/me",
     logout: "/auth/logout",
     google: "/auth/google",
+    esqueciSenha: "/auth/esqueci-senha",
+    redefinirSenha: "/auth/redefinir-senha",
   },
   pets: {
     cadastroPet: "/auth/cadastro-pet",

@@ -23,6 +23,15 @@ export type CadastroPayload = {
   estado?: string;
 };
 
+export type EsqueciSenhaPayload = {
+  email: string;
+};
+
+export type RedefinirSenhaPayload = {
+  token: string;
+  novaSenha: string;
+};
+
 export type LoginResponse =
   | string
   | {
@@ -58,7 +67,10 @@ export type ApiBusinessError = {
   erro: string;
 };
 
-export function criarApiAutenticacao(http: ClienteHttp, routes: RotasAutenticacao) {
+export function criarApiAutenticacao(
+  http: ClienteHttp,
+  routes: RotasAutenticacao,
+) {
   return {
     login(payload: LoginPayload) {
       return http.post<LoginResponse>(routes.login, payload);
@@ -68,6 +80,12 @@ export function criarApiAutenticacao(http: ClienteHttp, routes: RotasAutenticaca
     },
     cadastro(payload: CadastroPayload) {
       return http.post<AuthMessageResponse>(routes.cadastro, payload);
+    },
+    esqueciSenha(payload: EsqueciSenhaPayload) {
+      return http.post<AuthMessageResponse>(routes.esqueciSenha, payload);
+    },
+    redefinirSenha(payload: RedefinirSenhaPayload) {
+      return http.post<AuthMessageResponse>(routes.redefinirSenha, payload);
     },
     me() {
       return http.get<MeResponse>(routes.me);
