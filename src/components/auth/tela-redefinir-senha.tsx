@@ -62,16 +62,7 @@ export default function TelaRedefinirSenha() {
         novaSenha,
       });
 
-      Alert.alert(
-        "Senha alterada",
-        "Sua senha foi redefinida com sucesso. Faça login novamente.",
-        [
-          {
-            text: "OK",
-            onPress: () => router.replace("/login"),
-          },
-        ],
-      );
+      router.replace("/login");
     } catch (error) {
       exibirAlertaErroApi(
         "Erro",

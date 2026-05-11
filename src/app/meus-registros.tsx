@@ -1,7 +1,13 @@
 ﻿import EstruturaApp from "@/components/layout/estrutura-app";
 import CartaoPet from "@/components/pet/cartao-pet";
 import { TextoTema as Text } from "@/components/texto-tema";
-import { CARD_GAP, CARD_HEIGHT, CARD_IMAGE_HEIGHT, CARD_WIDTH, HORIZONTAL_PADDING } from "@/constants/layout-grid";
+import {
+    CARD_GAP,
+    CARD_HEIGHT,
+    CARD_IMAGE_HEIGHT,
+    CARD_WIDTH,
+    HORIZONTAL_PADDING,
+} from "@/constants/layout-grid";
 import { AppColors, Radius, TouchTarget } from "@/constants/tema";
 import { useAutenticacao } from "@/context/contexto-autenticacao";
 import { criarApi } from "@/services/api";
@@ -19,7 +25,7 @@ import {
     StyleSheet,
     TouchableOpacity,
     Vibration,
-    View
+    View,
 } from "react-native";
 
 const ORANGE = AppColors.brand;
@@ -47,10 +53,14 @@ export default function MeusRegistrosRoute() {
           return;
         }
 
-        const result = await criarApi({ token }).pets.buscaPets({ usuarioId: user.uid });
+        const result = await criarApi({ token }).pets.buscaPets({
+          usuarioId: user.uid,
+        });
         setPets(result.content);
       } catch (error) {
-        setErrorMessage(extrairMensagemErroApi(error, "Erro ao carregar registros."));
+        setErrorMessage(
+          extrairMensagemErroApi(error, "Erro ao carregar registros."),
+        );
       } finally {
         setLoading(false);
         setRefreshing(false);
@@ -72,7 +82,27 @@ export default function MeusRegistrosRoute() {
 
   const handleDelete = async (id: string, nome: string) => {
     if (!token) {
-      Alert.alert("Sessao expirada", "Entre novamente para excluir este registro.");
+      Alert.alert(
+        "Sessao expirada",
+        "Entre novamente para excluir este registro.",
+      );
+      return;
+    }
+
+    const deleteRegistro = async () => {
+      try {
+        Vibration.vibrate(35);
+        await criarApi({ token }).pets.deletePet(id);
+        setPets((prev) => prev.filter((p) => p.id !== id));
+        Vibration.vibrate(20);
+      } catch {
+        Vibration.vibrate([0, 40, 30, 40]);
+        Alert.alert("Erro", "Nao foi possivel excluir o registro.");
+      }
+    };
+
+    if (Platform.OS === "web") {
+      await deleteRegistro();
       return;
     }
 
@@ -84,16 +114,8 @@ export default function MeusRegistrosRoute() {
         {
           text: "Excluir",
           style: "destructive",
-          onPress: async () => {
-            try {
-              Vibration.vibrate(35);
-              await criarApi({ token }).pets.deletePet(id);
-              setPets((prev) => prev.filter((p) => p.id !== id));
-              Vibration.vibrate(20);
-            } catch {
-              Vibration.vibrate([0, 40, 30, 40]);
-              Alert.alert("Erro", "Nao foi possivel excluir o registro.");
-            }
+          onPress: () => {
+            void deleteRegistro();
           },
         },
       ],
@@ -101,7 +123,10 @@ export default function MeusRegistrosRoute() {
     );
   };
 
-  const skeletonItems = useMemo(() => Array.from({ length: 4 }, (_, i) => String(i)), []);
+  const skeletonItems = useMemo(
+    () => Array.from({ length: 4 }, (_, i) => String(i)),
+    [],
+  );
 
   const renderCard = ({ item }: { item: PetDashboardDto }) => {
     const cardImage = item.imagens?.[0] ?? item.fotoUrl;
@@ -114,7 +139,11 @@ export default function MeusRegistrosRoute() {
           breed={item.raca ?? item.especie}
           location={item.localDesaparecimento}
           imageUrl={cardImage}
-          status={item.descricao?.some((d) => d.toLowerCase().includes("encontr")) ? "ENCONTRADO" : "PERDIDO"}
+          status={
+            item.descricao?.some((d) => d.toLowerCase().includes("encontr"))
+              ? "ENCONTRADO"
+              : "PERDIDO"
+          }
           imageHeight={CARD_IMAGE_HEIGHT}
           cardStyle={styles.petCard}
         />
@@ -323,4 +352,3 @@ const styles = StyleSheet.create({
     backgroundColor: "#E8E2D8",
   },
 });
-
