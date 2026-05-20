@@ -261,9 +261,8 @@ const styles = StyleSheet.create({
   // Filters
   filterContainer: { flexDirection: "row", paddingBottom: 16, gap: 8 },
   filterBtn: {
-    minHeight: TouchTarget.min,
-    paddingHorizontal: 18,
-    paddingVertical: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
     borderRadius: 20,
     borderWidth: 1.5,
     borderColor: "#D9D3CF",

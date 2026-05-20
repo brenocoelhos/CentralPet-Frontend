@@ -232,9 +232,9 @@ const styles = StyleSheet.create({
     height: 46,
   },
   searchButton: {
-    minHeight: TouchTarget.min,
+    height: 46,
     paddingHorizontal: 16,
-    borderRadius: Radius.sm,
+    borderRadius: 12,
     backgroundColor: AppColors.brand,
     alignItems: "center",
     justifyContent: "center",
