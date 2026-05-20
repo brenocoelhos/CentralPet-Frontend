@@ -1,5 +1,11 @@
 ﻿import CartaoPet from "@/components/pet/cartao-pet";
-import { CARD_GAP, CARD_HEIGHT, CARD_IMAGE_HEIGHT, CARD_WIDTH, HORIZONTAL_PADDING } from "@/constants/layout-grid";
+import {
+  CARD_GAP,
+  CARD_HEIGHT,
+  CARD_IMAGE_HEIGHT,
+  CARD_WIDTH,
+  HORIZONTAL_PADDING,
+} from "@/constants/layout-grid";
 import { AppColors, Radius, TouchTarget } from "@/constants/tema";
 import { useAutenticacao } from "@/context/contexto-autenticacao";
 import type { PetDashboardDto } from "@/services/api/modules/pets.api";
@@ -8,16 +14,13 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { router } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-    FlatList,
-    Platform,
-    Pressable,
-    RefreshControl,
-    StatusBar,
-    StyleSheet,
-    Text,
-    View,
+  FlatList,
+  Pressable,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Occurrence = {
@@ -89,7 +92,12 @@ export default function TelaPainel() {
         const result = await getApi().pets.buscaPets();
         setOccurrences(result.content.map(mapPetToOccurrence));
       } catch (error) {
-        setErrorMessage(extrairMensagemErroApi(error, "Nao foi possivel carregar o dashboard."));
+        setErrorMessage(
+          extrairMensagemErroApi(
+            error,
+            "Nao foi possivel carregar o dashboard.",
+          ),
+        );
       } finally {
         setLoading(false);
         setRefreshing(false);
@@ -112,14 +120,21 @@ export default function TelaPainel() {
       activeFilter === "Todos"
         ? occurrences
         : activeFilter === "Cães"
-          ? occurrences.filter((o) => o.type.toLowerCase().includes("cão") || o.type.toLowerCase().includes("cach"))
+          ? occurrences.filter(
+              (o) =>
+                o.type.toLowerCase().includes("cão") ||
+                o.type.toLowerCase().includes("cach"),
+            )
           : activeFilter === "Gatos"
             ? occurrences.filter((o) => o.type.toLowerCase().includes("gato"))
             : occurrences,
     [activeFilter, occurrences],
   );
 
-  const skeletonItems = useMemo(() => Array.from({ length: 4 }, (_, i) => `sk-${i}`), []);
+  const skeletonItems = useMemo(
+    () => Array.from({ length: 4 }, (_, i) => `sk-${i}`),
+    [],
+  );
 
   const renderOccurrenceCard = ({ item }: { item: Occurrence }) => (
     <View style={styles.itemWrapper}>
@@ -188,9 +203,7 @@ export default function TelaPainel() {
   );
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="dark-content" backgroundColor={BG} />
-
+    <View style={styles.safe}>
       <FlatList
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
@@ -231,7 +244,7 @@ export default function TelaPainel() {
           <Text style={styles.fabText}>Realizar cadastro</Text>
         </Pressable>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -242,7 +255,7 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   scrollContent: {
     paddingHorizontal: HORIZONTAL_PADDING,
-    paddingTop: Platform.OS === "android" ? 12 : 8,
+    paddingTop: 8,
   },
 
   // Filters
@@ -376,8 +389,12 @@ const styles = StyleSheet.create({
 });
 
 function mapPetToOccurrence(item: PetDashboardDto): Occurrence {
-  const allImages = item.imagens?.length ? item.imagens : (item.fotoUrl ? [item.fotoUrl] : []);
-  
+  const allImages = item.imagens?.length
+    ? item.imagens
+    : item.fotoUrl
+      ? [item.fotoUrl]
+      : [];
+
   return {
     id: item.id,
     status: "PERDIDO",
