@@ -1,5 +1,9 @@
 ﻿import CartaoPet from "@/components/pet/cartao-pet";
-import { CARD_HEIGHT, CARD_IMAGE_HEIGHT, CARD_WIDTH } from "@/constants/layout-grid";
+import {
+  CARD_HEIGHT,
+  CARD_IMAGE_HEIGHT,
+  CARD_WIDTH,
+} from "@/constants/layout-grid";
 import { AppColors, Radius, TouchTarget } from "@/constants/tema";
 import { useAutenticacao } from "@/context/contexto-autenticacao";
 import type { PetDashboardDto } from "@/services/api/modules/pets.api";
@@ -8,12 +12,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import {
-    ActivityIndicator,
-    FlatList,
-    Platform,
-    Pressable,
-    StyleSheet,
-    View,
+  ActivityIndicator,
+  FlatList,
+  Platform,
+  Pressable,
+  StyleSheet,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { EntradaTextoTema } from "../entrada-texto-tema";
@@ -111,7 +115,10 @@ export default function TelaBusca() {
           />
         </View>
         <Pressable
-          style={[styles.searchButton, !query.trim() && styles.searchButtonDisabled]}
+          style={[
+            styles.searchButton,
+            !query.trim() && styles.searchButtonDisabled,
+          ]}
           onPress={handleSearch}
           disabled={!query.trim() || loading}
           accessibilityRole="button"
@@ -123,7 +130,9 @@ export default function TelaBusca() {
 
       <View style={styles.resultsRow}>
         <Text style={styles.resultsLabel}>
-          {shouldSearch ? `${sortedPets.length} pets perdidos encontrados` : "Digite para buscar"}
+          {shouldSearch
+            ? `${sortedPets.length} pets perdidos encontrados`
+            : "Digite para buscar"}
         </Text>
         <Pressable
           style={styles.sortButton}
@@ -161,7 +170,7 @@ export default function TelaBusca() {
   );
 
   return (
-    <SafeAreaView style={styles.page}>
+    <SafeAreaView style={styles.page} edges={["right", "bottom", "left"]}>
       <FlatList
         style={styles.container}
         data={shouldSearch ? sortedPets : []}
@@ -171,7 +180,9 @@ export default function TelaBusca() {
         renderItem={renderPetCard}
         ListHeaderComponent={listHeader}
         ListEmptyComponent={
-          shouldSearch ? <Text style={styles.emptyText}>Nenhum pet perdido encontrado.</Text> : null
+          shouldSearch ? (
+            <Text style={styles.emptyText}>Nenhum pet perdido encontrado.</Text>
+          ) : null
         }
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
