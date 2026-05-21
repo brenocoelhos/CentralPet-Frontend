@@ -11,7 +11,7 @@ import {
 } from "@expo-google-fonts/lexend";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { router, Stack } from "expo-router";
 import { useEffect } from "react";
 import { StyleSheet, Text, TextInput, TouchableOpacity } from "react-native";
 
@@ -78,6 +78,21 @@ function AppStack() {
                 size={22}
                 color="#1a1a1a"
               />
+            </TouchableOpacity>
+          ),
+        }}
+      />
+
+      <Stack.Screen
+        name="mapa"
+        options={{
+          title: "Mapa",
+          presentation: "fullScreenModal",
+          animation: "slide_from_bottom",
+          headerLeft: () => null,
+          headerRight: () => (
+            <TouchableOpacity style={styles.notifBtn} onPress={() => router.back()}>
+              <Ionicons name="close" size={22} color="#1a1a1a" />
             </TouchableOpacity>
           ),
         }}

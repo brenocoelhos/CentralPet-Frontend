@@ -8,14 +8,14 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { router } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-    FlatList,
-    Platform,
-    Pressable,
-    RefreshControl,
-    StatusBar,
-    StyleSheet,
-    Text,
-    View,
+  FlatList,
+  Platform,
+  Pressable,
+  RefreshControl,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -155,6 +155,15 @@ export default function TelaPainel() {
       <FilterBar active={activeFilter} onSelect={setActiveFilter} />
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>PETS PERDIDOS NA REGIAO</Text>
+
+        <Pressable
+          onPress={() => router.push("/mapa")}
+          accessibilityRole="button"
+          accessibilityLabel="Ver mapa"
+          hitSlop={8}
+        >
+          <Text style={styles.viewMapText}>Ver mapa</Text>
+        </Pressable>
       </View>
     </>
   );
@@ -283,6 +292,11 @@ const styles = StyleSheet.create({
     color: "#888",
     letterSpacing: 0.8,
   },
+  viewMapText: {
+    fontFamily: "Lexend_600SemiBold",
+    fontSize: 13,
+    color: "#D97757",
+  },
   sectionLink: {
     fontFamily: "Lexend_600SemiBold",
     fontSize: 13,
@@ -377,7 +391,7 @@ const styles = StyleSheet.create({
 
 function mapPetToOccurrence(item: PetDashboardDto): Occurrence {
   const allImages = item.imagens?.length ? item.imagens : (item.fotoUrl ? [item.fotoUrl] : []);
-  
+
   return {
     id: item.id,
     status: "PERDIDO",
