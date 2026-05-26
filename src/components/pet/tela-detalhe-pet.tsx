@@ -3,15 +3,15 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import * as Linking from "expo-linking";
 import { useState } from "react";
 import {
-    Alert,
-    Dimensions,
-    Image,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  Dimensions,
+  Image,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -57,15 +57,8 @@ type PetDetailScreenProps = {
 // ─── Sub-components ───────────────────────────────────────────────────────────
 const StatusBadge = ({ status }: { status: "PERDIDO" | "ENCONTRADO" }) => {
   return (
-    <View
-      style={[
-        styles.badge,
-        { backgroundColor: "#FFF3E0" },
-      ]}
-    >
-      <Text style={[styles.badgeText, { color: "#E65100" }]}>
-        {status}
-      </Text>
+    <View style={[styles.badge, { backgroundColor: "#FFF3E0" }]}>
+      <Text style={[styles.badgeText, { color: "#E65100" }]}>{status}</Text>
     </View>
   );
 };
@@ -142,7 +135,8 @@ function formatDisplayDateTime(value?: string): string {
       minute: "2-digit",
       hour12: false,
     }).formatToParts(date);
-    const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
+    const get = (type: string) =>
+      parts.find((p) => p.type === type)?.value ?? "";
     return `${get("day")}/${get("month")}/${get("year")} às ${get("hour")}:${get("minute")}`;
   }
 
@@ -171,7 +165,9 @@ const PhotoCarousel = ({
           0,
           Math.min(
             photos.length - 1,
-            Math.round(e.nativeEvent.contentOffset.x / (PHOTO_WIDTH + PHOTO_GAP)),
+            Math.round(
+              e.nativeEvent.contentOffset.x / (PHOTO_WIDTH + PHOTO_GAP),
+            ),
           ),
         );
         onScroll(index);
@@ -205,7 +201,10 @@ export default function TelaDetalhePet({ item }: PetDetailScreenProps) {
     const cleanedPhone = item.ownerPhone?.replace(/\D/g, "") ?? "";
 
     if (!cleanedPhone) {
-      Alert.alert("Telefone indisponível", "Este registro não possui telefone para contato.");
+      Alert.alert(
+        "Telefone indisponível",
+        "Este registro não possui telefone para contato.",
+      );
       return;
     }
 
@@ -229,7 +228,7 @@ export default function TelaDetalhePet({ item }: PetDetailScreenProps) {
       ];
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={["right", "bottom", "left"]}>
       <StatusBar barStyle="dark-content" backgroundColor={BG} />
 
       <ScrollView
@@ -269,7 +268,9 @@ export default function TelaDetalhePet({ item }: PetDetailScreenProps) {
               <Text style={styles.metaText}>{item.neighborhood}</Text>
             </View>
             <View style={styles.metaDot} />
-            <Text style={styles.metaTime}>Publicado {formatDisplayDateTime(item.time)}</Text>
+            <Text style={styles.metaTime}>
+              Publicado {formatDisplayDateTime(item.time)}
+            </Text>
           </View>
         </View>
 
@@ -300,7 +301,14 @@ export default function TelaDetalhePet({ item }: PetDetailScreenProps) {
                   size={18}
                   color={item.castrated ? "#4CAF50" : "#D0CECA"}
                 />
-                <Text style={[styles.checkLabel, !item.castrated && styles.checkLabelOff]}>Castrado</Text>
+                <Text
+                  style={[
+                    styles.checkLabel,
+                    !item.castrated && styles.checkLabelOff,
+                  ]}
+                >
+                  Castrado
+                </Text>
               </View>
               <View style={styles.checkItem}>
                 <Ionicons
@@ -308,7 +316,14 @@ export default function TelaDetalhePet({ item }: PetDetailScreenProps) {
                   size={18}
                   color={item.vaccinated ? "#4CAF50" : "#D0CECA"}
                 />
-                <Text style={[styles.checkLabel, !item.vaccinated && styles.checkLabelOff]}>Vacinado</Text>
+                <Text
+                  style={[
+                    styles.checkLabel,
+                    !item.vaccinated && styles.checkLabelOff,
+                  ]}
+                >
+                  Vacinado
+                </Text>
               </View>
               <View style={styles.checkItem}>
                 <Ionicons
@@ -316,7 +331,14 @@ export default function TelaDetalhePet({ item }: PetDetailScreenProps) {
                   size={18}
                   color={item.reward ? "#4CAF50" : "#D0CECA"}
                 />
-                <Text style={[styles.checkLabel, !item.reward && styles.checkLabelOff]}>Recompensa</Text>
+                <Text
+                  style={[
+                    styles.checkLabel,
+                    !item.reward && styles.checkLabelOff,
+                  ]}
+                >
+                  Recompensa
+                </Text>
               </View>
             </View>
 
@@ -336,7 +358,11 @@ export default function TelaDetalhePet({ item }: PetDetailScreenProps) {
             <InfoRow
               icon="calendar-outline"
               label="Data"
-              value={item.lastSeenDate ? formatDisplayDate(item.lastSeenDate) : "Não informado"}
+              value={
+                item.lastSeenDate
+                  ? formatDisplayDate(item.lastSeenDate)
+                  : "Não informado"
+              }
             />
             <View style={styles.infoSeparator} />
             <InfoRow
@@ -359,9 +385,7 @@ export default function TelaDetalhePet({ item }: PetDetailScreenProps) {
                 <Text style={styles.ownerName}>
                   {item.ownerName ?? "Anônimo"}
                 </Text>
-                <Text style={styles.ownerSub}>
-                  Tutor(a) do pet
-                </Text>
+                <Text style={styles.ownerSub}>Tutor(a) do pet</Text>
               </View>
               {item.ownerPhone && (
                 <TouchableOpacity
@@ -667,5 +691,4 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-
 });

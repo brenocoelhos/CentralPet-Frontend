@@ -93,15 +93,25 @@ export function criarApiPets(http: ClienteHttp, routes: RotasPets) {
       return http.post<CadastroPetResponse>(routes.cadastroPet, payload);
     },
     buscaPets(params?: Partial<BuscaPetsParams>) {
-      return http.get<PaginatedResponse<PetDashboardDto>>(`${routes.buscaPets}${toBuscaPetsQuery(params)}`);
+      return http.get<PaginatedResponse<PetDashboardDto>>(
+        `${routes.buscaPets}${toBuscaPetsQuery(params)}`,
+      );
     },
     buscarPetPorId(petId: string) {
-      return http.get<PetDashboardDto>(`${routes.cadastroPet}/${encodeURIComponent(petId)}`);
+      return http.get<PetDashboardDto>(
+        `${routes.cadastroPet}/${encodeURIComponent(petId)}`,
+      );
     },
     deletePet(petId: string) {
-      return http.delete<void>(`${routes.cadastroPet}/${encodeURIComponent(petId)}`);
+      return http.delete<void>(
+        `${routes.cadastroPet}/${encodeURIComponent(petId)}`,
+      );
     },
-    async uploadImagem(petId: string, uri: string, fileName = "foto.jpg"): Promise<PetImagemDto> {
+    async uploadImagem(
+      petId: string,
+      uri: string,
+      fileName = "foto.jpg",
+    ): Promise<PetImagemDto> {
       const blob = await fetch(uri).then((r) => r.blob());
       const formData = new FormData();
       formData.append("file", blob, fileName);

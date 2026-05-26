@@ -40,7 +40,7 @@ type Occurrence = {
   raw: PetDashboardDto;
 };
 
-const FILTERS = ["Todos", "Cães", "Gatos"] as const;
+const FILTERS = ["Todos", "Cães", "Gatos", "Pássaro"] as const;
 type Filter = (typeof FILTERS)[number];
 
 const ORANGE = AppColors.brand;
@@ -115,21 +115,39 @@ export default function TelaPainel() {
     void loadDashboard(false);
   }, [loadDashboard]);
 
-  const filtered: Occurrence[] = useMemo(
-    () =>
-      activeFilter === "Todos"
-        ? occurrences
-        : activeFilter === "Cães"
-          ? occurrences.filter(
-              (o) =>
-                o.type.toLowerCase().includes("cão") ||
-                o.type.toLowerCase().includes("cach"),
-            )
-          : activeFilter === "Gatos"
-            ? occurrences.filter((o) => o.type.toLowerCase().includes("gato"))
-            : occurrences,
-    [activeFilter, occurrences],
-  );
+  const filtered: Occurrence[] = useMemo(() => {
+    const normalize = (s: string) =>
+      s
+        ?.toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+    if (activeFilter === "Todos") {
+      return occurrences;
+    }
+    if (activeFilter === "Cães") {
+      return occurrences.filter((o) => {
+        const t = normalize(o.type ?? "");
+        return t.includes("cao") || t.includes("cach");
+      });
+    }
+    if (activeFilter === "Gatos") {
+      return occurrences.filter((o) =>
+        normalize(o.type ?? "").includes("gato"),
+      );
+    }
+    if (activeFilter === "Pássaro") {
+      return occurrences.filter((o) => {
+        const t = normalize(o.type ?? "");
+        return (
+          t.includes("passar") ||
+          t.includes("ave") ||
+          t.includes("passaro") ||
+          t.includes("passaros")
+        );
+      });
+    }
+    return occurrences;
+  }, [activeFilter, occurrences]);
 
   const skeletonItems = useMemo(
     () => Array.from({ length: 4 }, (_, i) => `sk-${i}`),
@@ -170,6 +188,14 @@ export default function TelaPainel() {
       <FilterBar active={activeFilter} onSelect={setActiveFilter} />
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>PETS PERDIDOS NA REGIAO</Text>
+        <Pressable
+          onPress={() => router.push("/mapa")}
+          accessibilityRole="button"
+          accessibilityLabel="Ver mapa"
+          hitSlop={8}
+        >
+          <Text style={styles.viewMapText}>Ver mapa</Text>
+        </Pressable>
       </View>
     </>
   );
@@ -294,6 +320,11 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: "#888",
     letterSpacing: 0.8,
+  },
+  viewMapText: {
+    fontFamily: "Lexend_600SemiBold",
+    fontSize: 13,
+    color: "#D97757",
   },
   sectionLink: {
     fontFamily: "Lexend_600SemiBold",
