@@ -6,14 +6,16 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  StyleSheet,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Image,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    TouchableOpacity,
+    View,
 } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { TextoTema as Text } from "../texto-tema";
 import CampoEntrada from "./campo-entrada";
 import CampoSenha from "./campo-senha";
@@ -62,102 +64,105 @@ export default function TelaLogin() {
 
   return (
     <View style={styles.root}>
-      <KeyboardAwareScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.container}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-        enableOnAndroid={true}
-        extraScrollHeight={95}
+      <KeyboardAvoidingView
+        style={styles.keyboardContainer}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <Image
-          source={require("../../../assets/images/logo.png")}
-          style={{
-            width: 150,
-            height: 150,
-            alignSelf: "center",
-            marginBottom: 16,
-          }}
-        />
-        <View style={styles.headerWrapper}>
-          <Text style={styles.title}>Bem-vindo de volta</Text>
-          <Text style={styles.subtitle}>Entre com seu email e senha</Text>
-        </View>
-
-        <CampoEntrada
-          label="E-mail"
-          leftIconName="mail-outline"
-          placeholder="exemplo@gmail.com"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          value={email}
-          onChangeText={setEmail}
-          returnKeyType="next"
-        />
-
-        <CampoSenha
-          label="Senha"
-          leftIconName="lock-closed-outline"
-          value={password}
-          onChangeText={setPassword}
-          returnKeyType="done"
-          disabled={loading || googleLoading}
-        />
-
-        <TouchableOpacity
-          onPress={() => router.push("/esqueci-senha")}
-          activeOpacity={0.8}
-          disabled={loading || googleLoading}
-          style={styles.forgotPasswordButton}
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.container}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          <Text style={styles.forgotPasswordText}>Esqueci minha senha</Text>
-        </TouchableOpacity>
+          <Image
+            source={require("../../../assets/images/logo.png")}
+            style={{
+              width: 150,
+              height: 150,
+              alignSelf: "center",
+              marginBottom: 16,
+            }}
+          />
+          <View style={styles.headerWrapper}>
+            <Text style={styles.title}>Bem-vindo de volta</Text>
+            <Text style={styles.subtitle}>Entre com seu email e senha</Text>
+          </View>
 
-        <TouchableOpacity
-          style={styles.primaryButton}
-          onPress={handleLogin}
-          activeOpacity={0.85}
-          disabled={loading || googleLoading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#FFFFFF" />
-          ) : (
-            <View style={styles.primaryButtonContent}>
-              <Ionicons name="log-in-outline" size={18} color="#FFFFFF" />
-              <Text style={styles.primaryButtonText}>Entrar na conta</Text>
-            </View>
-          )}
-        </TouchableOpacity>
+          <CampoEntrada
+            label="E-mail"
+            leftIconName="mail-outline"
+            placeholder="exemplo@gmail.com"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            value={email}
+            onChangeText={setEmail}
+            returnKeyType="next"
+          />
 
-        <Text style={styles.separatorText}>- ou continue com -</Text>
+          <CampoSenha
+            label="Senha"
+            leftIconName="lock-closed-outline"
+            value={password}
+            onChangeText={setPassword}
+            returnKeyType="done"
+            disabled={loading || googleLoading}
+          />
 
-        <TouchableOpacity
-          style={styles.googleButton}
-          onPress={handleGoogleLogin}
-          activeOpacity={0.85}
-          disabled={loading || googleLoading}
-        >
-          {googleLoading ? (
-            <ActivityIndicator color="#D97757" />
-          ) : (
-            <View style={styles.googleButtonContent}>
-              <Ionicons name="logo-google" size={18} color="#D97757" />
-              <Text style={styles.googleButtonText}>Google</Text>
-            </View>
-          )}
-        </TouchableOpacity>
-
-        <View style={styles.signupTextRow}>
-          <Text style={styles.signupText}>Nao tem uma conta? </Text>
           <TouchableOpacity
-            onPress={() => router.push("/cadastro-usuario")}
+            onPress={() => router.push("/esqueci-senha")}
             activeOpacity={0.8}
             disabled={loading || googleLoading}
+            style={styles.forgotPasswordButton}
           >
-            <Text style={styles.signupLink}>Criar conta gratuita</Text>
+            <Text style={styles.forgotPasswordText}>Esqueci minha senha</Text>
           </TouchableOpacity>
-        </View>
-      </KeyboardAwareScrollView>
+
+          <TouchableOpacity
+            style={styles.primaryButton}
+            onPress={handleLogin}
+            activeOpacity={0.85}
+            disabled={loading || googleLoading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <View style={styles.primaryButtonContent}>
+                <Ionicons name="log-in-outline" size={18} color="#FFFFFF" />
+                <Text style={styles.primaryButtonText}>Entrar na conta</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+
+          <Text style={styles.separatorText}>- ou continue com -</Text>
+
+          <TouchableOpacity
+            style={styles.googleButton}
+            onPress={handleGoogleLogin}
+            activeOpacity={0.85}
+            disabled={loading || googleLoading}
+          >
+            {googleLoading ? (
+              <ActivityIndicator color="#D97757" />
+            ) : (
+              <View style={styles.googleButtonContent}>
+                <Ionicons name="logo-google" size={18} color="#D97757" />
+                <Text style={styles.googleButtonText}>Google</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+
+          <View style={styles.signupTextRow}>
+            <Text style={styles.signupText}>Nao tem uma conta? </Text>
+            <TouchableOpacity
+              onPress={() => router.push("/cadastro-usuario")}
+              activeOpacity={0.8}
+              disabled={loading || googleLoading}
+            >
+              <Text style={styles.signupLink}>Criar conta gratuita</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 }
@@ -166,6 +171,9 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: "#FFFFFF",
+  },
+  keyboardContainer: {
+    flex: 1,
   },
   scrollView: {
     flex: 1,

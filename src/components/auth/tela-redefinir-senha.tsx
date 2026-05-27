@@ -8,11 +8,13 @@ import { useState } from "react";
 import {
     ActivityIndicator,
     Alert,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
     StyleSheet,
     TouchableOpacity,
     View,
 } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 export default function TelaRedefinirSenha() {
   const router = useRouter();
@@ -76,72 +78,75 @@ export default function TelaRedefinirSenha() {
 
   return (
     <View style={styles.root}>
-      <KeyboardAwareScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.container}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-        enableOnAndroid={true}
-        extraScrollHeight={95}
+      <KeyboardAvoidingView
+        style={styles.keyboardContainer}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <View style={styles.iconCircle}>
-          <Ionicons name="lock-closed-outline" size={34} color="#D97757" />
-        </View>
-
-        <View style={styles.headerWrapper}>
-          <Text style={styles.title}>Nova senha</Text>
-          <Text style={styles.subtitle}>
-            Crie uma nova senha para acessar sua conta.
-          </Text>
-        </View>
-
-        <CampoSenha
-          label="Nova senha"
-          leftIconName="lock-closed-outline"
-          value={novaSenha}
-          onChangeText={setNovaSenha}
-          returnKeyType="next"
-          disabled={loading}
-        />
-
-        <CampoSenha
-          label="Confirmar nova senha"
-          leftIconName="lock-closed-outline"
-          value={confirmarSenha}
-          onChangeText={setConfirmarSenha}
-          returnKeyType="done"
-          disabled={loading}
-        />
-
-        <TouchableOpacity
-          style={styles.primaryButton}
-          onPress={handleRedefinir}
-          activeOpacity={0.85}
-          disabled={loading}
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.container}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          {loading ? (
-            <ActivityIndicator color="#FFFFFF" />
-          ) : (
-            <View style={styles.primaryButtonContent}>
-              <Ionicons
-                name="checkmark-circle-outline"
-                size={18}
-                color="#FFFFFF"
-              />
-              <Text style={styles.primaryButtonText}>Redefinir senha</Text>
-            </View>
-          )}
-        </TouchableOpacity>
+          <View style={styles.iconCircle}>
+            <Ionicons name="lock-closed-outline" size={34} color="#D97757" />
+          </View>
 
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.replace("/login")}
-          activeOpacity={0.8}
-          disabled={loading}
-        >
-          <Text style={styles.backButtonText}>Voltar para o login</Text>
-        </TouchableOpacity>
-      </KeyboardAwareScrollView>
+          <View style={styles.headerWrapper}>
+            <Text style={styles.title}>Nova senha</Text>
+            <Text style={styles.subtitle}>
+              Crie uma nova senha para acessar sua conta.
+            </Text>
+          </View>
+
+          <CampoSenha
+            label="Nova senha"
+            leftIconName="lock-closed-outline"
+            value={novaSenha}
+            onChangeText={setNovaSenha}
+            returnKeyType="next"
+            disabled={loading}
+          />
+
+          <CampoSenha
+            label="Confirmar nova senha"
+            leftIconName="lock-closed-outline"
+            value={confirmarSenha}
+            onChangeText={setConfirmarSenha}
+            returnKeyType="done"
+            disabled={loading}
+          />
+
+          <TouchableOpacity
+            style={styles.primaryButton}
+            onPress={handleRedefinir}
+            activeOpacity={0.85}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <View style={styles.primaryButtonContent}>
+                <Ionicons
+                  name="checkmark-circle-outline"
+                  size={18}
+                  color="#FFFFFF"
+                />
+                <Text style={styles.primaryButtonText}>Redefinir senha</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.replace("/login")}
+            activeOpacity={0.8}
+            disabled={loading}
+          >
+            <Text style={styles.backButtonText}>Voltar para o login</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 }
@@ -150,6 +155,9 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: "#FFFFFF",
+  },
+  keyboardContainer: {
+    flex: 1,
   },
   scrollView: {
     flex: 1,

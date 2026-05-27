@@ -15,11 +15,13 @@ import { useState } from "react";
 import {
     ActivityIndicator,
     Alert,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
     StyleSheet,
     TouchableOpacity,
     View,
 } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { TextoTema as Text } from "../texto-tema";
 import CampoEntrada from "./campo-entrada";
 import CampoSenha from "./campo-senha";
@@ -116,9 +118,7 @@ export default function TelaCadastroUsuario() {
 
         if (form.confirmarSenha) {
           newErrors.confirmarSenha =
-            form.confirmarSenha !== formatted
-              ? "As senhas não coincidem"
-              : "";
+            form.confirmarSenha !== formatted ? "As senhas não coincidem" : "";
         }
       }
 
@@ -158,7 +158,7 @@ export default function TelaCadastroUsuario() {
     if (!validaData(dataNascimento)) {
       Alert.alert(
         "Erro no Formulário",
-        "A data de nascimento é inválida ou está no futuro."
+        "A data de nascimento é inválida ou está no futuro.",
       );
       return;
     }
@@ -199,13 +199,24 @@ export default function TelaCadastroUsuario() {
         estado: form.estado.trim() || undefined,
       });
 
-      const loginResponse = await api.auth.login({ email: email.trim(), senha });
-      const token = typeof loginResponse === "string" ? loginResponse : loginResponse.token;
-      await signInWithToken(token, typeof loginResponse === "object" ? loginResponse : undefined);
+      const loginResponse = await api.auth.login({
+        email: email.trim(),
+        senha,
+      });
+      const token =
+        typeof loginResponse === "string" ? loginResponse : loginResponse.token;
+      await signInWithToken(
+        token,
+        typeof loginResponse === "object" ? loginResponse : undefined,
+      );
 
       router.replace("/painel");
     } catch (error) {
-      exibirAlertaErroApi("Falha no cadastro", error, "Nao foi possivel concluir o cadastro.");
+      exibirAlertaErroApi(
+        "Falha no cadastro",
+        error,
+        "Nao foi possivel concluir o cadastro.",
+      );
     } finally {
       setLoading(false);
     }
@@ -213,163 +224,170 @@ export default function TelaCadastroUsuario() {
 
   return (
     <View style={styles.root}>
-      <KeyboardAwareScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.container}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-        enableOnAndroid={true}
-        extraScrollHeight={95}
+      <KeyboardAvoidingView
+        style={styles.keyboardContainer}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <View style={styles.avatarWrapper}>
-          <TouchableOpacity style={styles.avatarCircle} activeOpacity={0.8}>
-            <Ionicons name="camera-outline" size={32} color="rgba(0,0,0,0.5)" />
-          </TouchableOpacity>
-          <Text style={styles.avatarLabel}>Adicionar foto</Text>
-        </View>
-
-        <CampoEntrada
-          label="Nome"
-          placeholder="Nome Completo"
-          value={form.nome}
-          onChangeText={(v) => handleChange("nome", v)}
-          autoCapitalize="words"
-          returnKeyType="next"
-        />
-
-        <View style={styles.row}>
-          <View style={styles.halfGroup}>
-            <CampoEntrada
-              label="CPF"
-              placeholder="000.000.000-00"
-              value={form.cpf}
-              onChangeText={(v) => handleChange("cpf", v)}
-              keyboardType="numeric"
-              maxLength={14}
-              returnKeyType="next"
-              errorText={errors.cpf}
-            />
-          </View>
-          <View style={styles.halfGroup}>
-            <CampoEntrada
-              label="Data do nascimento"
-              placeholder="00/00/0000"
-              value={form.dataNascimento}
-              onChangeText={(v) => handleChange("dataNascimento", v)}
-              keyboardType="numeric"
-              maxLength={10}
-              returnKeyType="next"
-              errorText={errors.dataNascimento}
-            />
-          </View>
-        </View>
-
-        <CampoEntrada
-          label="E-mail"
-          placeholder="exemplo@gmail.com"
-          value={form.email}
-          onChangeText={(v) => handleChange("email", v)}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          returnKeyType="next"
-          errorText={errors.email}
-        />
-
-        <CampoEntrada
-          label="Telefone"
-          placeholder="(00) 00000-0000"
-          value={form.telefone}
-          onChangeText={(v) => handleChange("telefone", v)}
-          keyboardType="phone-pad"
-          maxLength={15}
-          returnKeyType="next"
-          errorText={errors.telefone}
-        />
-
-        <View style={styles.row}>
-          <View style={{ flex: 3 }}>
-            <CampoEntrada
-              label="Rua"
-              placeholder="Nome da rua"
-              value={form.rua}
-              onChangeText={(v) => handleChange("rua", v)}
-              autoCapitalize="words"
-              returnKeyType="next"
-            />
-          </View>
-          <View style={{ flex: 1 }}>
-            <CampoEntrada
-              label="Número"
-              placeholder="Nº"
-              value={form.numero}
-              onChangeText={(v) => handleChange("numero", v)}
-              keyboardType="numeric"
-              returnKeyType="next"
-            />
-          </View>
-        </View>
-
-        <View style={styles.row}>
-          <View style={styles.halfGroup}>
-            <CampoEntrada
-              label="Cidade"
-              placeholder="Cidade"
-              value={form.cidade}
-              onChangeText={(v) => handleChange("cidade", v)}
-              autoCapitalize="words"
-              returnKeyType="next"
-            />
-          </View>
-          <View style={styles.halfGroup}>
-            <CampoEntrada
-              label="Estado"
-              placeholder="UF"
-              value={form.estado}
-              onChangeText={(v) => handleChange("estado", v)}
-              autoCapitalize="characters"
-              maxLength={2}
-              returnKeyType="next"
-            />
-          </View>
-        </View>
-
-        <View style={styles.row}>
-          <View style={styles.halfGroup}>
-            <CampoSenha
-              label="Senha"
-              value={form.senha}
-              onChangeText={(v) => handleChange("senha", v)}
-              returnKeyType="next"
-              errorText={errors.senha}
-              disabled={loading}
-            />
-          </View>
-
-          <View style={styles.halfGroup}>
-            <CampoSenha
-              label="Confirmar senha"
-              value={form.confirmarSenha}
-              onChangeText={(v) => handleChange("confirmarSenha", v)}
-              returnKeyType="done"
-              errorText={errors.confirmarSenha}
-              disabled={loading}
-            />
-          </View>
-        </View>
-
-        <TouchableOpacity
-          style={styles.button}
-          onPress={handleCadastro}
-          activeOpacity={0.85}
-          disabled={loading}
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.container}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          {loading ? (
-            <ActivityIndicator color="#FFFFFF" />
-          ) : (
-            <Text style={styles.buttonText}>Cadastrar</Text>
-          )}
-        </TouchableOpacity>
-      </KeyboardAwareScrollView>
+          <View style={styles.avatarWrapper}>
+            <TouchableOpacity style={styles.avatarCircle} activeOpacity={0.8}>
+              <Ionicons
+                name="camera-outline"
+                size={32}
+                color="rgba(0,0,0,0.5)"
+              />
+            </TouchableOpacity>
+            <Text style={styles.avatarLabel}>Adicionar foto</Text>
+          </View>
+
+          <CampoEntrada
+            label="Nome"
+            placeholder="Nome Completo"
+            value={form.nome}
+            onChangeText={(v) => handleChange("nome", v)}
+            autoCapitalize="words"
+            returnKeyType="next"
+          />
+
+          <View style={styles.row}>
+            <View style={styles.halfGroup}>
+              <CampoEntrada
+                label="CPF"
+                placeholder="000.000.000-00"
+                value={form.cpf}
+                onChangeText={(v) => handleChange("cpf", v)}
+                keyboardType="numeric"
+                maxLength={14}
+                returnKeyType="next"
+                errorText={errors.cpf}
+              />
+            </View>
+            <View style={styles.halfGroup}>
+              <CampoEntrada
+                label="Data do nascimento"
+                placeholder="00/00/0000"
+                value={form.dataNascimento}
+                onChangeText={(v) => handleChange("dataNascimento", v)}
+                keyboardType="numeric"
+                maxLength={10}
+                returnKeyType="next"
+                errorText={errors.dataNascimento}
+              />
+            </View>
+          </View>
+
+          <CampoEntrada
+            label="E-mail"
+            placeholder="exemplo@gmail.com"
+            value={form.email}
+            onChangeText={(v) => handleChange("email", v)}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            returnKeyType="next"
+            errorText={errors.email}
+          />
+
+          <CampoEntrada
+            label="Telefone"
+            placeholder="(00) 00000-0000"
+            value={form.telefone}
+            onChangeText={(v) => handleChange("telefone", v)}
+            keyboardType="phone-pad"
+            maxLength={15}
+            returnKeyType="next"
+            errorText={errors.telefone}
+          />
+
+          <View style={styles.row}>
+            <View style={{ flex: 3 }}>
+              <CampoEntrada
+                label="Rua"
+                placeholder="Nome da rua"
+                value={form.rua}
+                onChangeText={(v) => handleChange("rua", v)}
+                autoCapitalize="words"
+                returnKeyType="next"
+              />
+            </View>
+            <View style={{ flex: 1 }}>
+              <CampoEntrada
+                label="Número"
+                placeholder="Nº"
+                value={form.numero}
+                onChangeText={(v) => handleChange("numero", v)}
+                keyboardType="numeric"
+                returnKeyType="next"
+              />
+            </View>
+          </View>
+
+          <View style={styles.row}>
+            <View style={styles.halfGroup}>
+              <CampoEntrada
+                label="Cidade"
+                placeholder="Cidade"
+                value={form.cidade}
+                onChangeText={(v) => handleChange("cidade", v)}
+                autoCapitalize="words"
+                returnKeyType="next"
+              />
+            </View>
+            <View style={styles.halfGroup}>
+              <CampoEntrada
+                label="Estado"
+                placeholder="UF"
+                value={form.estado}
+                onChangeText={(v) => handleChange("estado", v)}
+                autoCapitalize="characters"
+                maxLength={2}
+                returnKeyType="next"
+              />
+            </View>
+          </View>
+
+          <View style={styles.row}>
+            <View style={styles.halfGroup}>
+              <CampoSenha
+                label="Senha"
+                value={form.senha}
+                onChangeText={(v) => handleChange("senha", v)}
+                returnKeyType="next"
+                errorText={errors.senha}
+                disabled={loading}
+              />
+            </View>
+
+            <View style={styles.halfGroup}>
+              <CampoSenha
+                label="Confirmar senha"
+                value={form.confirmarSenha}
+                onChangeText={(v) => handleChange("confirmarSenha", v)}
+                returnKeyType="done"
+                errorText={errors.confirmarSenha}
+                disabled={loading}
+              />
+            </View>
+          </View>
+
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleCadastro}
+            activeOpacity={0.85}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text style={styles.buttonText}>Cadastrar</Text>
+            )}
+          </TouchableOpacity>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 }
@@ -378,6 +396,9 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: "#FFFFFF",
+  },
+  keyboardContainer: {
+    flex: 1,
   },
   scrollView: {
     flex: 1,
