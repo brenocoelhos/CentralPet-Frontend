@@ -1,7 +1,14 @@
 import { AppColors, TouchTarget } from "@/constants/tema";
 import * as Location from "expo-location";
+import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import {
+    ActivityIndicator,
+    Pressable,
+    StyleSheet,
+    Text,
+    View,
+} from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -51,9 +58,24 @@ export default function TelaMapa() {
     };
   }, [coords]);
 
+  function voltarParaHome() {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+
+    router.replace("/painel");
+  }
+
   return (
-    <SafeAreaView style={styles.safe} edges={["bottom"]}>
+    <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
       <View style={styles.container}>
+        <View style={styles.header}>
+          <Pressable style={styles.homeButton} onPress={voltarParaHome}>
+            <Text style={styles.homeButtonText}>Voltar para Home</Text>
+          </Pressable>
+        </View>
+
         {loading ? (
           <View style={styles.center}>
             <ActivityIndicator />
@@ -62,7 +84,10 @@ export default function TelaMapa() {
         ) : error ? (
           <View style={styles.center}>
             <Text style={styles.errorText}>{error}</Text>
-            <Pressable style={styles.retryButton} onPress={() => void loadLocation()}>
+            <Pressable
+              style={styles.retryButton}
+              onPress={() => void loadLocation()}
+            >
               <Text style={styles.retryText}>Tentar novamente</Text>
             </Pressable>
           </View>
@@ -84,11 +109,36 @@ export default function TelaMapa() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: AppColors.surface },
   container: { flex: 1 },
+  header: {
+    position: "absolute",
+    top: 12,
+    left: 12,
+    zIndex: 2,
+  },
+  homeButton: {
+    minHeight: TouchTarget.min,
+    paddingHorizontal: 14,
+    borderRadius: 999,
+    backgroundColor: "rgba(0,0,0,0.7)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  homeButtonText: { fontFamily: "Lexend_600SemiBold", color: "#fff" },
   map: { flex: 1 },
 
-  center: { flex: 1, alignItems: "center", justifyContent: "center", gap: 12, padding: 16 },
+  center: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 12,
+    padding: 16,
+  },
   infoText: { fontFamily: "Lexend_500Medium", color: "#666" },
-  errorText: { fontFamily: "Lexend_500Medium", color: "#D94F4F", textAlign: "center" },
+  errorText: {
+    fontFamily: "Lexend_500Medium",
+    color: "#D94F4F",
+    textAlign: "center",
+  },
 
   retryButton: {
     minHeight: TouchTarget.min,
