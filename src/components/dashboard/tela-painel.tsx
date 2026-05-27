@@ -1,5 +1,11 @@
 ﻿import CartaoPet from "@/components/pet/cartao-pet";
-import { CARD_GAP, CARD_HEIGHT, CARD_IMAGE_HEIGHT, CARD_WIDTH, HORIZONTAL_PADDING } from "@/constants/layout-grid";
+import {
+  CARD_GAP,
+  CARD_HEIGHT,
+  CARD_IMAGE_HEIGHT,
+  CARD_WIDTH,
+  HORIZONTAL_PADDING,
+} from "@/constants/layout-grid";
 import { AppColors, Radius, TouchTarget } from "@/constants/tema";
 import { useAutenticacao } from "@/context/contexto-autenticacao";
 import type { PetDashboardDto } from "@/services/api/modules/pets.api";
@@ -9,15 +15,12 @@ import { router } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   FlatList,
-  Platform,
   Pressable,
   RefreshControl,
-  StatusBar,
   StyleSheet,
   Text,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Occurrence = {
@@ -37,7 +40,7 @@ type Occurrence = {
   raw: PetDashboardDto;
 };
 
-const FILTERS = ["Todos", "Cães", "Gatos"] as const;
+const FILTERS = ["Todos", "Cães", "Gatos", "Pássaro"] as const;
 type Filter = (typeof FILTERS)[number];
 
 const ORANGE = AppColors.brand;
@@ -89,7 +92,12 @@ export default function TelaPainel() {
         const result = await getApi().pets.buscaPets();
         setOccurrences(result.content.map(mapPetToOccurrence));
       } catch (error) {
-        setErrorMessage(extrairMensagemErroApi(error, "Nao foi possivel carregar o dashboard."));
+        setErrorMessage(
+          extrairMensagemErroApi(
+            error,
+            "Nao foi possivel carregar o dashboard.",
+          ),
+        );
       } finally {
         setLoading(false);
         setRefreshing(false);
@@ -107,19 +115,44 @@ export default function TelaPainel() {
     void loadDashboard(false);
   }, [loadDashboard]);
 
-  const filtered: Occurrence[] = useMemo(
-    () =>
-      activeFilter === "Todos"
-        ? occurrences
-        : activeFilter === "Cães"
-          ? occurrences.filter((o) => o.type.toLowerCase().includes("cão") || o.type.toLowerCase().includes("cach"))
-          : activeFilter === "Gatos"
-            ? occurrences.filter((o) => o.type.toLowerCase().includes("gato"))
-            : occurrences,
-    [activeFilter, occurrences],
-  );
+  const filtered: Occurrence[] = useMemo(() => {
+    const normalize = (s: string) =>
+      s
+        ?.toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+    if (activeFilter === "Todos") {
+      return occurrences;
+    }
+    if (activeFilter === "Cães") {
+      return occurrences.filter((o) => {
+        const t = normalize(o.type ?? "");
+        return t.includes("cao") || t.includes("cach");
+      });
+    }
+    if (activeFilter === "Gatos") {
+      return occurrences.filter((o) =>
+        normalize(o.type ?? "").includes("gato"),
+      );
+    }
+    if (activeFilter === "Pássaro") {
+      return occurrences.filter((o) => {
+        const t = normalize(o.type ?? "");
+        return (
+          t.includes("passar") ||
+          t.includes("ave") ||
+          t.includes("passaro") ||
+          t.includes("passaros")
+        );
+      });
+    }
+    return occurrences;
+  }, [activeFilter, occurrences]);
 
-  const skeletonItems = useMemo(() => Array.from({ length: 4 }, (_, i) => `sk-${i}`), []);
+  const skeletonItems = useMemo(
+    () => Array.from({ length: 4 }, (_, i) => `sk-${i}`),
+    [],
+  );
 
   const renderOccurrenceCard = ({ item }: { item: Occurrence }) => (
     <View style={styles.itemWrapper}>
@@ -155,7 +188,6 @@ export default function TelaPainel() {
       <FilterBar active={activeFilter} onSelect={setActiveFilter} />
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>PETS PERDIDOS NA REGIAO</Text>
-
         <Pressable
           onPress={() => router.push("/mapa")}
           accessibilityRole="button"
@@ -197,9 +229,7 @@ export default function TelaPainel() {
   );
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="dark-content" backgroundColor={BG} />
-
+    <View style={styles.safe}>
       <FlatList
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
@@ -240,7 +270,7 @@ export default function TelaPainel() {
           <Text style={styles.fabText}>Realizar cadastro</Text>
         </Pressable>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -251,15 +281,14 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
   scrollContent: {
     paddingHorizontal: HORIZONTAL_PADDING,
-    paddingTop: Platform.OS === "android" ? 12 : 8,
+    paddingTop: 8,
   },
 
   // Filters
   filterContainer: { flexDirection: "row", paddingBottom: 16, gap: 8 },
   filterBtn: {
-    minHeight: TouchTarget.min,
-    paddingHorizontal: 18,
-    paddingVertical: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
     borderRadius: 20,
     borderWidth: 1.5,
     borderColor: "#D9D3CF",
@@ -390,7 +419,11 @@ const styles = StyleSheet.create({
 });
 
 function mapPetToOccurrence(item: PetDashboardDto): Occurrence {
-  const allImages = item.imagens?.length ? item.imagens : (item.fotoUrl ? [item.fotoUrl] : []);
+  const allImages = item.imagens?.length
+    ? item.imagens
+    : item.fotoUrl
+      ? [item.fotoUrl]
+      : [];
 
   return {
     id: item.id,

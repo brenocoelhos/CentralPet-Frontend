@@ -8,16 +8,16 @@ import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    TouchableOpacity,
-    Vibration,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  Vibration,
+  View,
 } from "react-native";
 import { EntradaTextoTema } from "../entrada-texto-tema";
 import { TextoTema as Text } from "../texto-tema";
@@ -41,7 +41,10 @@ function SelectField({
   const [open, setOpen] = useState(false);
   return (
     <View style={styles.half}>
-      <Text style={styles.label}>{label}{required && <Text style={styles.requiredMark}> *</Text>}</Text>
+      <Text style={styles.label}>
+        {label}
+        {required && <Text style={styles.requiredMark}> *</Text>}
+      </Text>
       <Pressable style={styles.select} onPress={() => setOpen(true)}>
         <Text style={styles.selectText}>{value}</Text>
         <Text style={styles.chevron}>▾</Text>
@@ -77,14 +80,20 @@ function NotLoggedInGate() {
       </View>
       <Text style={styles.gateTitle}>Acesso restrito</Text>
       <Text style={styles.gateDescription}>
-        Você precisa ter uma conta para cadastrar um pet desaparecido. Faça login ou crie sua conta para continuar.
+        Você precisa ter uma conta para cadastrar um pet desaparecido. Faça
+        login ou crie sua conta para continuar.
       </Text>
       <TouchableOpacity
         style={styles.gateButton}
         activeOpacity={0.85}
         onPress={() => router.replace("/login")}
       >
-        <Ionicons name="log-in-outline" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
+        <Ionicons
+          name="log-in-outline"
+          size={20}
+          color="#FFFFFF"
+          style={{ marginRight: 8 }}
+        />
         <Text style={styles.gateButtonText}>Entrar ou criar conta</Text>
       </TouchableOpacity>
     </View>
@@ -117,7 +126,10 @@ export default function TelaCadastroPet() {
   const pickPhoto = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
-      Alert.alert("Permissão necessária", "Precisamos de acesso à sua galeria para adicionar fotos.");
+      Alert.alert(
+        "Permissão necessária",
+        "Precisamos de acesso à sua galeria para adicionar fotos.",
+      );
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -189,7 +201,8 @@ export default function TelaCadastroPet() {
         (typeof me.id === "string" && me.id.trim()) ||
         (typeof me.uid === "string" && me.uid.trim()) ||
         user.uid;
-      const tutorName = user.displayName?.trim() || user.email?.split("@")[0] || user.uid;
+      const tutorName =
+        user.displayName?.trim() || user.email?.split("@")[0] || user.uid;
 
       const nowBrasilia = (() => {
         const b = new Date(Date.now() - 3 * 60 * 60 * 1000);
@@ -215,9 +228,10 @@ export default function TelaCadastroPet() {
         recompensa: hasReward,
       });
 
-      const petId = typeof cadastroResponse === "object" && cadastroResponse?.id
-        ? String(cadastroResponse.id)
-        : null;
+      const petId =
+        typeof cadastroResponse === "object" && cadastroResponse?.id
+          ? String(cadastroResponse.id)
+          : null;
 
       if (petId) {
         await Promise.all(
@@ -232,7 +246,11 @@ export default function TelaCadastroPet() {
       router.replace("/painel");
     } catch (error) {
       Vibration.vibrate([0, 40, 30, 40]);
-      exibirAlertaErroApi("Erro no cadastro", error, "Nao foi possivel cadastrar o pet.");
+      exibirAlertaErroApi(
+        "Erro no cadastro",
+        error,
+        "Nao foi possivel cadastrar o pet.",
+      );
     } finally {
       setLoading(false);
     }
@@ -257,15 +275,26 @@ export default function TelaCadastroPet() {
           >
             {photos.map((uri, i) => (
               <View key={i} style={styles.photoThumb}>
-                <Image source={{ uri }} style={styles.photoThumbImg} contentFit="cover" />
-                <Pressable style={styles.photoRemove} onPress={() => removePhoto(i)}>
+                <Image
+                  source={{ uri }}
+                  style={styles.photoThumbImg}
+                  contentFit="cover"
+                />
+                <Pressable
+                  style={styles.photoRemove}
+                  onPress={() => removePhoto(i)}
+                >
                   <Ionicons name="close-circle" size={20} color="#FFF" />
                 </Pressable>
               </View>
             ))}
             {photos.length < 6 && (
               <Pressable style={styles.photoAdd} onPress={pickPhoto}>
-                <Ionicons name="camera-outline" size={26} color="rgba(0,0,0,0.4)" />
+                <Ionicons
+                  name="camera-outline"
+                  size={26}
+                  color="rgba(0,0,0,0.4)"
+                />
                 <Text style={styles.photoAddLabel}>
                   {photos.length === 0 ? "Adicionar fotos" : "Mais fotos"}
                 </Text>
@@ -276,7 +305,9 @@ export default function TelaCadastroPet() {
 
         <View style={styles.row}>
           <View style={styles.half}>
-            <Text style={styles.label}>Nome <Text style={styles.requiredMark}>*</Text></Text>
+            <Text style={styles.label}>
+              Nome <Text style={styles.requiredMark}>*</Text>
+            </Text>
             <EntradaTextoTema
               placeholder="Ex: Rex"
               value={name}
@@ -296,7 +327,9 @@ export default function TelaCadastroPet() {
 
         <View style={styles.row}>
           <View style={styles.half}>
-            <Text style={styles.label}>Raça <Text style={styles.requiredMark}>*</Text></Text>
+            <Text style={styles.label}>
+              Raça <Text style={styles.requiredMark}>*</Text>
+            </Text>
             <EntradaTextoTema
               placeholder="Ex: Labrador"
               value={breed}
@@ -325,7 +358,9 @@ export default function TelaCadastroPet() {
             onChange={setSize}
           />
           <View style={styles.half}>
-            <Text style={styles.label}>Data do desaparecimento <Text style={styles.requiredMark}>*</Text></Text>
+            <Text style={styles.label}>
+              Data do desaparecimento <Text style={styles.requiredMark}>*</Text>
+            </Text>
             <EntradaTextoTema
               placeholder="dd/mm/aaaa"
               value={disappearanceDate}
@@ -343,8 +378,12 @@ export default function TelaCadastroPet() {
             style={styles.checkboxItem}
             onPress={() => setCastrated((v) => !v)}
           >
-            <View style={[styles.checkbox, castrated && styles.checkboxChecked]}>
-              {castrated && <Ionicons name="checkmark" size={12} color="#FFF" />}
+            <View
+              style={[styles.checkbox, castrated && styles.checkboxChecked]}
+            >
+              {castrated && (
+                <Ionicons name="checkmark" size={12} color="#FFF" />
+              )}
             </View>
             <Text style={styles.checkboxLabel}>Castrado</Text>
           </Pressable>
@@ -353,8 +392,12 @@ export default function TelaCadastroPet() {
             style={styles.checkboxItem}
             onPress={() => setVaccinated((v) => !v)}
           >
-            <View style={[styles.checkbox, vaccinated && styles.checkboxChecked]}>
-              {vaccinated && <Ionicons name="checkmark" size={12} color="#FFF" />}
+            <View
+              style={[styles.checkbox, vaccinated && styles.checkboxChecked]}
+            >
+              {vaccinated && (
+                <Ionicons name="checkmark" size={12} color="#FFF" />
+              )}
             </View>
             <Text style={styles.checkboxLabel}>Vacinado</Text>
           </Pressable>
@@ -363,16 +406,21 @@ export default function TelaCadastroPet() {
             style={styles.checkboxItem}
             onPress={() => setHasReward((v) => !v)}
           >
-            <View style={[styles.checkbox, hasReward && styles.checkboxChecked]}>
-              {hasReward && <Ionicons name="checkmark" size={12} color="#FFF" />}
+            <View
+              style={[styles.checkbox, hasReward && styles.checkboxChecked]}
+            >
+              {hasReward && (
+                <Ionicons name="checkmark" size={12} color="#FFF" />
+              )}
             </View>
             <Text style={styles.checkboxLabel}>Tem recompensa</Text>
           </Pressable>
         </View>
 
-
         <View>
-          <Text style={styles.label}>Local do desaparecimento <Text style={styles.requiredMark}>*</Text></Text>
+          <Text style={styles.label}>
+            Local do desaparecimento <Text style={styles.requiredMark}>*</Text>
+          </Text>
           <EntradaTextoTema
             placeholder="Bairro, cidade"
             value={location}
@@ -411,7 +459,9 @@ export default function TelaCadastroPet() {
         </View>
 
         <View>
-          <Text style={styles.label}>Telefone <Text style={styles.requiredMark}>*</Text></Text>
+          <Text style={styles.label}>
+            Telefone <Text style={styles.requiredMark}>*</Text>
+          </Text>
           <EntradaTextoTema
             placeholder="(00) 00000-0000"
             value={phone}
@@ -428,7 +478,9 @@ export default function TelaCadastroPet() {
           onPress={handleSubmit}
           disabled={loading}
         >
-          <Text style={styles.submitButtonText}>{loading ? "Enviando..." : "Cadastrar"}</Text>
+          <Text style={styles.submitButtonText}>
+            {loading ? "Enviando..." : "Cadastrar"}
+          </Text>
         </Pressable>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -582,7 +634,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#5A4F44",
     fontWeight: "500",
-  },  
+  },
 
   submitButton: {
     backgroundColor: "#D4735A",

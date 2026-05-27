@@ -91,7 +91,10 @@ function AppStack() {
           animation: "slide_from_bottom",
           headerLeft: () => null,
           headerRight: () => (
-            <TouchableOpacity style={styles.notifBtn} onPress={() => router.back()}>
+            <TouchableOpacity
+              style={styles.notifBtn}
+              onPress={() => router.back()}
+            >
               <Ionicons name="close" size={22} color="#1a1a1a" />
             </TouchableOpacity>
           ),
