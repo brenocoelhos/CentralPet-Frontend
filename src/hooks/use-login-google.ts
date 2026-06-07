@@ -5,49 +5,27 @@ import * as WebBrowser from "expo-web-browser";
 import { useMemo, useState } from "react";
 import { Alert, Platform } from "react-native";
 
-
 WebBrowser.maybeCompleteAuthSession();
 
-const googleClientConfig = {
-  androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
-  iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
-  webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
-};
+const IOS_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;
+const ANDROID_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID;
+const WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
 
-export function useLoginGoogle(onSuccess?: () => void) {
-  const [loading, setLoading] = useState(false);
+const HAS_CONFIG = !!(IOS_CLIENT_ID || ANDROID_CLIENT_ID || WEB_CLIENT_ID);
+
+// Hook interno usado apenas quando há config disponível
+function useGoogleAuthWithConfig(onSuccess?: () => void) {
   const { signInWithToken } = useAutenticacao();
+  const [loading, setLoading] = useState(false);
 
-  const missingGoogleConfigKeys = useMemo(() => {
-    if (Platform.OS === "ios") {
-      return googleClientConfig.iosClientId ? [] : ["iosClientId"];
-    }
-    if (Platform.OS === "android") {
-      return googleClientConfig.androidClientId ? [] : ["androidClientId"];
-    }
-    // web
-    return googleClientConfig.webClientId ? [] : ["webClientId"];
-  }, []);
-
-  // Fluxo nativo: o SDK calcula automaticamente a redirectUri como
-  // com.googleusercontent.apps.{id}:/oauth2callback para iOS/Android.
-  // Não é necessário cadastrar nada extra no Google Cloud Console.
   const [request, , promptAsync] = Google.useAuthRequest({
-    iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
-    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
-    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+    iosClientId: IOS_CLIENT_ID,
+    androidClientId: ANDROID_CLIENT_ID,
+    webClientId: WEB_CLIENT_ID,
     scopes: ["openid", "profile", "email"],
   });
 
   const handleGoogleLogin = async () => {
-    if (missingGoogleConfigKeys.length > 0) {
-      Alert.alert(
-        "Google Login nao configurado",
-        `Defina as variaveis ${missingGoogleConfigKeys.join(", ")} para habilitar o Google Sign-In.`,
-      );
-      return;
-    }
-
     if (!request) {
       Alert.alert(
         "Google Login indisponivel",
@@ -72,7 +50,6 @@ export function useLoginGoogle(onSuccess?: () => void) {
             `Erro: ${oauthError}${requestRedirectUri ? `\nredirect_uri usado: ${requestRedirectUri}` : ""}`,
           );
         }
-
         return;
       }
 
@@ -99,6 +76,43 @@ export function useLoginGoogle(onSuccess?: () => void) {
       setLoading(false);
     }
   };
+
+  return { handleGoogleLogin, loading };
+}
+
+// Hook stub usado quando não há config — nunca chama useAuthRequest
+function useGoogleAuthStub() {
+  const missingKey =
+    Platform.OS === "ios"
+      ? "EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID"
+      : Platform.OS === "android"
+        ? "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID"
+        : "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID";
+
+  const handleGoogleLogin = () => {
+    Alert.alert(
+      "Google Login nao configurado",
+      `Defina a variavel ${missingKey} no arquivo .env para habilitar o Google Sign-In.`,
+    );
+  };
+
+  return { handleGoogleLogin, loading: false };
+}
+
+// Hook público — escolhe qual implementação usar em tempo de módulo (não em render)
+const useGoogleAuthImpl = HAS_CONFIG
+  ? useGoogleAuthWithConfig
+  : useGoogleAuthStub;
+
+export function useLoginGoogle(onSuccess?: () => void) {
+  const { handleGoogleLogin, loading } = useGoogleAuthImpl(onSuccess);
+
+  const missingGoogleConfigKeys = useMemo(() => {
+    if (Platform.OS === "ios") return IOS_CLIENT_ID ? [] : ["iosClientId"];
+    if (Platform.OS === "android")
+      return ANDROID_CLIENT_ID ? [] : ["androidClientId"];
+    return WEB_CLIENT_ID ? [] : ["webClientId"];
+  }, []);
 
   return {
     handleGoogleLogin,

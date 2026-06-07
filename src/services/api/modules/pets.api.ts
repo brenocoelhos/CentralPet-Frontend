@@ -1,4 +1,5 @@
-﻿import type { ClienteHttp } from "../cliente-http";
+﻿import { Platform } from "react-native";
+import type { ClienteHttp } from "../cliente-http";
 import type { RotasPets } from "../rotas";
 
 export type PetImagemDto = {
@@ -112,9 +113,32 @@ export function criarApiPets(http: ClienteHttp, routes: RotasPets) {
       uri: string,
       fileName = "foto.jpg",
     ): Promise<PetImagemDto> {
-      const blob = await fetch(uri).then((r) => r.blob());
       const formData = new FormData();
-      formData.append("file", blob, fileName);
+
+      // Como o frontend agora manda tudo em JPEG, ele vai cair no valor padrão certinho.
+      // E se você decidir não comprimir alguma foto no futuro, o suporte a outras extensões já está garantido aqui.
+      const extensao = fileName.split(".").pop()?.toLowerCase() || "jpg";
+      let mimeType = "image/jpeg";
+      if (extensao === "png") mimeType = "image/png";
+      else if (extensao === "webp") mimeType = "image/webp";
+      else if (extensao === "heic") mimeType = "image/heic";
+      else if (extensao === "heif") mimeType = "image/heif";
+
+      // Tratamento específico para iOS não bugar a URI
+      let imageUri = uri;
+      if (Platform.OS === "ios") {
+        imageUri = uri.replace("file://", "");
+      }
+
+      const fileObject = {
+        uri: imageUri,
+        name: fileName,
+        type: mimeType,
+      };
+
+      // Limpa o objeto para o React Native empacotar corretamente
+      formData.append("file", JSON.parse(JSON.stringify(fileObject)));
+
       return http.uploadFormData<PetImagemDto>(
         `/auth/pets/${encodeURIComponent(petId)}/imagens`,
         formData,

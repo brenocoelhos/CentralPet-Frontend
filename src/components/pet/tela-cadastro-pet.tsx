@@ -4,6 +4,7 @@ import { exibirAlertaErroApi } from "@/utils/alerta-erro-api";
 import { maskDate, maskPhone } from "@/utils/validadores";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
+import * as ImageManipulator from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -133,14 +134,39 @@ export default function TelaCadastroPet() {
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ["images"],
       allowsMultipleSelection: true,
-      quality: 0.8,
+      quality: 1, // Solicitamos a melhor qualidade inicialmente para manipular depois
       selectionLimit: 6,
     });
+
     if (!result.canceled) {
-      const uris = result.assets.map((a) => a.uri);
-      setPhotos((prev) => [...prev, ...uris].slice(0, 6));
+      setLoading(true); // Bloqueia o botão enquanto processa as fotos gigantes do iPhone
+      try {
+        const processadas: string[] = [];
+
+        for (const asset of result.assets) {
+          // O ImageManipulator padroniza e comprime tudo!
+          const manipResult = await ImageManipulator.manipulateAsync(
+            asset.uri,
+            [{ resize: { width: 1080 } }], // Limita a largura a 1080px (ideal para mobile)
+            {
+              compress: 0.7, // Comprime a qualidade para 70% (tira todo o peso excedente)
+              format: ImageManipulator.SaveFormat.JPEG, // Força tudo a virar JPEG
+            },
+          );
+          processadas.push(manipResult.uri);
+        }
+
+        setPhotos((prev) => [...prev, ...processadas].slice(0, 6));
+      } catch (error) {
+        Alert.alert(
+          "Erro",
+          "Não foi possível processar as imagens selecionadas.",
+        );
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -233,12 +259,41 @@ export default function TelaCadastroPet() {
           ? String(cadastroResponse.id)
           : null;
 
+      console.log(
+        "CADASTRO RESPONSE:",
+        JSON.stringify(cadastroResponse, null, 2),
+      );
+      console.log("PET ID EXTRAIDO:", petId);
+      console.log("TOTAL PHOTOS:", photos.length);
+
       if (petId) {
-        await Promise.all(
-          photos.map((uri, index) =>
-            apiClient.pets.uploadImagem(petId, uri, `foto-${index + 1}.jpg`),
-          ),
-        );
+        for (let index = 0; index < photos.length; index++) {
+          const uri = photos[index];
+          // Como agora padronizamos no frontend, o arquivo enviado é sempre JPEG
+          const fileName = `foto-${index + 1}.jpeg`;
+
+          console.log(`INICIANDO UPLOAD ${index + 1}/${photos.length}`);
+
+          try {
+            const uploadResult = await apiClient.pets.uploadImagem(
+              petId,
+              uri,
+              fileName,
+            );
+
+            console.log(
+              `UPLOAD ${index + 1} OK:`,
+              JSON.stringify(uploadResult, null, 2),
+            );
+          } catch (uploadError: any) {
+            console.log(
+              `UPLOAD ${index + 1} FALHOU (Backend retornou erro, mas a imagem pode ter sido salva)`,
+            );
+            console.log("STATUS:", uploadError?.status);
+          }
+        }
+      } else {
+        console.log("PET ID NAO VEIO. UPLOAD NAO SERA FEITO.");
       }
 
       Vibration.vibrate(20);

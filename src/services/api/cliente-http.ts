@@ -9,13 +9,35 @@ export type OpcoesRequisicao = {
 
 export type ClienteHttp = {
   request<T>(path: string, options?: OpcoesRequisicao): Promise<T>;
-  get<T>(path: string, options?: Omit<OpcoesRequisicao, "method" | "body">): Promise<T>;
-  post<T>(path: string, body?: unknown, options?: Omit<OpcoesRequisicao, "method" | "body">): Promise<T>;
-  put<T>(path: string, body?: unknown, options?: Omit<OpcoesRequisicao, "method" | "body">): Promise<T>;
-  patch<T>(path: string, body?: unknown, options?: Omit<OpcoesRequisicao, "method" | "body">): Promise<T>;
-  delete<T>(path: string, options?: Omit<OpcoesRequisicao, "method" | "body">): Promise<T>;
+  get<T>(
+    path: string,
+    options?: Omit<OpcoesRequisicao, "method" | "body">,
+  ): Promise<T>;
+  post<T>(
+    path: string,
+    body?: unknown,
+    options?: Omit<OpcoesRequisicao, "method" | "body">,
+  ): Promise<T>;
+  put<T>(
+    path: string,
+    body?: unknown,
+    options?: Omit<OpcoesRequisicao, "method" | "body">,
+  ): Promise<T>;
+  patch<T>(
+    path: string,
+    body?: unknown,
+    options?: Omit<OpcoesRequisicao, "method" | "body">,
+  ): Promise<T>;
+  delete<T>(
+    path: string,
+    options?: Omit<OpcoesRequisicao, "method" | "body">,
+  ): Promise<T>;
   /** Envia FormData sem definir Content-Type (o fetch define o boundary automaticamente). */
-  uploadFormData<T>(path: string, formData: FormData, options?: Omit<OpcoesRequisicao, "method" | "body">): Promise<T>;
+  uploadFormData<T>(
+    path: string,
+    formData: FormData,
+    options?: Omit<OpcoesRequisicao, "method" | "body">,
+  ): Promise<T>;
 };
 
 const DEFAULT_HEADERS = {
@@ -41,7 +63,10 @@ export class ErroApi extends Error {
 }
 
 export function criarClienteHttp(baseUrl: string): ClienteHttp {
-  async function request<T>(path: string, options: OpcoesRequisicao = {}): Promise<T> {
+  async function request<T>(
+    path: string,
+    options: OpcoesRequisicao = {},
+  ): Promise<T> {
     const { method = "GET", body, headers, signal } = options;
 
     const response = await fetch(toUrl(baseUrl, path), {
@@ -79,7 +104,10 @@ export function criarClienteHttp(baseUrl: string): ClienteHttp {
       method: "POST",
       signal,
       // Não definir Content-Type: o fetch inclui o boundary correto automaticamente
-      headers: { ...headers },
+      headers: {
+        Accept: "application/json",
+        ...headers,
+      },
       body: formData,
     });
 
@@ -100,9 +128,12 @@ export function criarClienteHttp(baseUrl: string): ClienteHttp {
   return {
     request,
     get: (path, options) => request(path, { ...options, method: "GET" }),
-    post: (path, body, options) => request(path, { ...options, method: "POST", body }),
-    put: (path, body, options) => request(path, { ...options, method: "PUT", body }),
-    patch: (path, body, options) => request(path, { ...options, method: "PATCH", body }),
+    post: (path, body, options) =>
+      request(path, { ...options, method: "POST", body }),
+    put: (path, body, options) =>
+      request(path, { ...options, method: "PUT", body }),
+    patch: (path, body, options) =>
+      request(path, { ...options, method: "PATCH", body }),
     delete: (path, options) => request(path, { ...options, method: "DELETE" }),
     uploadFormData,
   };
