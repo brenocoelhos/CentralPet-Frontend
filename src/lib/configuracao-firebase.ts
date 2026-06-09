@@ -1,5 +1,12 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getApp, getApps, initializeApp, type FirebaseApp } from "firebase/app";
-import { getAuth, type Auth } from "firebase/auth";
+import { getAuth, initializeAuth, type Auth } from "firebase/auth";
+import { Platform } from "react-native";
+
+const { getReactNativePersistence } =
+  require("@firebase/auth/dist/rn/index.js") as {
+    getReactNativePersistence: (storage: typeof AsyncStorage) => unknown;
+  };
 
 export const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
@@ -10,11 +17,17 @@ export const firebaseConfig = {
   appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
 };
 
+export const firebaseMessagingVapidKey =
+  process.env.EXPO_PUBLIC_FIREBASE_VAPID_KEY;
+
 export const missingFirebaseConfigKeys = Object.entries(firebaseConfig)
   .filter(([, value]) => !value)
   .map(([key]) => key);
 
 export const hasFirebaseConfig = missingFirebaseConfigKeys.length === 0;
+
+export const hasFirebaseMessagingConfig =
+  hasFirebaseConfig && Boolean(firebaseMessagingVapidKey);
 
 export const app: FirebaseApp | null = hasFirebaseConfig
   ? getApps().length
@@ -27,7 +40,17 @@ function createAuthInstance(): Auth | null {
     return null;
   }
 
-  return getAuth(app);
+  if (Platform.OS === "web") {
+    return getAuth(app);
+  }
+
+  try {
+    return initializeAuth(app, {
+      persistence: getReactNativePersistence(AsyncStorage) as never,
+    });
+  } catch {
+    return getAuth(app);
+  }
 }
 
 export const auth = createAuthInstance();

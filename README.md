@@ -90,6 +90,7 @@ EXPO_PUBLIC_FIREBASE_PROJECT_ID=
 EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=
 EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
 EXPO_PUBLIC_FIREBASE_APP_ID=
+EXPO_PUBLIC_FIREBASE_VAPID_KEY=
 EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID=
 EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID=
 EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID=
@@ -114,8 +115,11 @@ Configuracoes utilizadas:
 - `storageBucket`
 - `messagingSenderId`
 - `appId`
+- `vapidKey` para Firebase Messaging no web
 
 Se alguma dessas variaveis nao estiver definida, a inicializacao do Firebase fica incompleta.
+
+Para notificacoes web, o projeto usa Firebase Cloud Messaging com o service worker em `public/firebase-messaging-sw.js`.
 
 ## Login com Google
 
@@ -131,13 +135,13 @@ Para habilitar login com Google:
 - O usuario precisa estar logado para cadastrar um animal.
 - O cadastro exige no minimo 2 fotos.
 - Campos obrigatorios:
-	- Nome
-	- Especie
-	- Raca
-	- Data do desaparecimento
-	- Local do desaparecimento
-	- Seu nome
-	- Telefone
+  - Nome
+  - Especie
+  - Raca
+  - Data do desaparecimento
+  - Local do desaparecimento
+  - Seu nome
+  - Telefone
 
 ## Padrao de organizacao
 
