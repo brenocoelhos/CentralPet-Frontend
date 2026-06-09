@@ -531,9 +531,7 @@ export default function TelaCadastroPet() {
         {/* Linha 4: CEP e Data de Desaparecimento */}
         <View style={styles.rowUnderAutocomplete}>
           <View style={styles.half}>
-            <TextoTema style={styles.label}>
-              CEP {latitude !== null ? "✓ Localizado" : "(preencha para obter localização)"}
-            </TextoTema>
+            <TextoTema style={styles.label}>CEP</TextoTema>
             <View style={{ justifyContent: "center" }}>
               <EntradaTextoTema
                 placeholder="00000-000"
