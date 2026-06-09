@@ -9,18 +9,18 @@ import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    Vibration,
-    View
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  Vibration,
+  View
 } from "react-native";
 import { EntradaTextoTema } from "../entrada-texto-tema";
 import { TextoTema } from "../texto-tema";
@@ -59,7 +59,13 @@ function SelectField({
         <Text style={styles.selectText}>{value}</Text>
         <Text style={styles.chevron}>▾</Text>
       </Pressable>
-      <Modal visible={open} transparent animationType="fade">
+      <Modal
+        visible={open}
+        transparent
+        animationType="fade"
+        presentationStyle="overFullScreen"
+        statusBarTranslucent
+      >
         <Pressable style={styles.modalOverlay} onPress={() => setOpen(false)}>
           <View style={styles.modalBox}>
             {options.map((opt) => (
@@ -433,7 +439,7 @@ export default function TelaCadastroPet() {
         </View>
 
         {/* Linha 1: Nome e Espécie (Autocomplete) */}
-        <View style={styles.row}>
+        <View style={[styles.row, styles.rowAutocomplete]}>
           <View style={styles.half}>
             <TextoTema style={styles.label}>Nome <TextoTema style={styles.requiredMark}>*</TextoTema></TextoTema>
             <EntradaTextoTema
@@ -479,7 +485,7 @@ export default function TelaCadastroPet() {
         </View>
 
         {/* Linha 2: Raça (Opcional agora) e Cor */}
-        <View style={styles.row}>
+        <View style={styles.rowUnderAutocomplete}>
           <View style={styles.half}>
             <TextoTema style={styles.label}>Raça</TextoTema>
             <EntradaTextoTema
@@ -503,7 +509,7 @@ export default function TelaCadastroPet() {
         </View>
 
         {/* Linha 3: Porte e Idade */}
-        <View style={styles.row}>
+        <View style={styles.rowUnderAutocomplete}>
           <SelectField
             label="Porte"
             value={size}
@@ -523,7 +529,7 @@ export default function TelaCadastroPet() {
         </View>
 
         {/* Linha 4: CEP e Data de Desaparecimento */}
-        <View style={styles.row}>
+        <View style={styles.rowUnderAutocomplete}>
           <View style={styles.half}>
             <TextoTema style={styles.label}>
               CEP {latitude !== null ? "✓ Localizado" : "(preencha para obter localização)"}
@@ -652,7 +658,7 @@ export default function TelaCadastroPet() {
 
 const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: "#FFFFFF" },
-  content: { padding: 16, paddingBottom: 40, gap: 14 },
+  content: { padding: 16, paddingBottom: 40, gap: 14, overflow: "visible" },
   photoCarousel: { flexDirection: "row", gap: 10, paddingVertical: 4 },
   photoThumb: { width: 90, height: 90, borderRadius: 12, overflow: "hidden" },
   photoThumbImg: { width: 90, height: 90 },
@@ -663,8 +669,10 @@ const styles = StyleSheet.create({
     alignItems: "center", justifyContent: "center", gap: 4,
   },
   photoAddLabel: { fontSize: 11, color: "#8A7B6B", textAlign: "center" },
-  row: { flexDirection: "row", gap: 10, zIndex: 10 },
-  half: { flex: 1, position: "relative" },
+  row: { flexDirection: "row", gap: 10, position: "relative", overflow: "visible" },
+  rowAutocomplete: { zIndex: 50 },
+  rowUnderAutocomplete: { flexDirection: "row", gap: 10, position: "relative", zIndex: 1 },
+  half: { flex: 1, position: "relative", overflow: "visible" },
   label: { fontSize: 12, color: "#5A4F44", marginBottom: 4, fontWeight: "500" },
   requiredMark: { color: "#D94F4F", fontWeight: "600" },
   input: {
@@ -700,13 +708,40 @@ const styles = StyleSheet.create({
   },
   selectText: { fontSize: 13, color: "#3D3228" },
   chevron: { fontSize: 14, color: "#8A7B6B" },
-  modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.28)", justifyContent: "center", alignItems: "center" },
-  modalBox: {
-    backgroundColor: "#FFF", borderRadius: 14, width: 220, overflow: "hidden",
-    elevation: 8, boxShadow: "0px 4px 10px rgba(0,0,0,0.15)",
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.40)",
+    justifyContent: "center",
+    alignItems: "center",
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    zIndex: 20000,
+    elevation: 30,
   },
-  modalOption: { paddingVertical: 13, paddingHorizontal: 20, borderBottomWidth: 1, borderBottomColor: "#F0EBE3" },
-  modalOptionText: { fontSize: 14, color: "#3D3228" },
+  modalBox: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 14,
+    width: "84%",
+    maxWidth: 320,
+    overflow: "hidden",
+    zIndex: 20001,
+    elevation: 40,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+  },
+  modalOption: {
+    paddingVertical: 13,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F0EBE3",
+    backgroundColor: "#FFFFFF",
+  },
+  modalOptionText: { fontSize: 14, color: "#3D3228", fontFamily: "Lexend_500Medium" },
   checkboxRow: { flexDirection: "row", flexWrap: "wrap", gap: 20, paddingLeft: 5 },
   checkboxItem: { flexDirection: "row", alignItems: "center", gap: 8 },
   checkbox: {
