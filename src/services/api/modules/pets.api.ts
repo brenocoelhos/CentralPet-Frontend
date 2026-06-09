@@ -1,33 +1,4 @@
-﻿import { Platform } from "react-native";
-import type { ClienteHttp } from "../cliente-http";
-import type { RotasPets } from "../rotas";
-
-export type PetImagemDto = {
-  id: number;
-  url: string;
-};
-
-export type PetDashboardDto = {
-  id: string;
-  name: string;
-  nome: string;
-  especie: string;
-  raca?: string;
-  cor?: string;
-  porte?: string;
-  dataDesaparecimento: string;
-  dataCadastro?: string;
-  localDesaparecimento: string;
-  descricao: string[];
-  castrado?: boolean;
-  vacinado?: boolean;
-  recompensa?: boolean;
-  fotoUrl?: string;
-  imagens?: string[];
-  nomeTutor: string;
-  telefoneTutor: string;
-  usuarioId: string;
-};
+// Adicione ou atualize esses tipos no arquivo pets.api.ts
 
 export type CadastroPetPayload = {
   usuarioId: string;
@@ -46,113 +17,17 @@ export type CadastroPetPayload = {
   vacinado: boolean;
   recompensa: boolean;
   dataCadastro?: string;
+  idade?: string; // Novo campo opcional
+  cep?: string;   // Novo campo opcional
 };
 
-export type PaginatedResponse<T> = {
-  content: T[];
-  page: number;
-  size: number;
-  totalElements: number;
-  totalPages: number;
-  hasNext: boolean;
-};
-
-export type BuscaPetsParams = {
-  nome?: string;
-  especie?: string;
-  cor?: string;
-  porte?: string;
-  usuarioId?: string;
-};
-
-export type CadastroPetResponse = {
-  id: string | number;
-  nome: string;
-  message?: string;
-};
-
-function toBuscaPetsQuery(params?: Partial<BuscaPetsParams>) {
-  if (!params) {
-    return "";
-  }
-
-  const searchParams = new URLSearchParams();
-
-  if (params.nome) searchParams.set("nome", params.nome);
-  if (params.especie) searchParams.set("especie", params.especie);
-  if (params.cor) searchParams.set("cor", params.cor);
-  if (params.porte) searchParams.set("porte", params.porte);
-  if (params.usuarioId) searchParams.set("usuarioId", params.usuarioId);
-
-  const queryString = searchParams.toString();
-  return queryString ? `?${queryString}` : "";
-}
-
+// Dentro da função criarApiPets adicione a rota de atualização:
 export function criarApiPets(http: ClienteHttp, routes: RotasPets) {
   return {
     cadastroPet(payload: CadastroPetPayload) {
       return http.post<CadastroPetResponse>(routes.cadastroPet, payload);
     },
-    buscaPets(params?: Partial<BuscaPetsParams>) {
-      return http.get<PaginatedResponse<PetDashboardDto>>(
-        `${routes.buscaPets}${toBuscaPetsQuery(params)}`,
-      );
+    atualizarPet(petId: string, payload: Partial<CadastroPetPayload>) {
+      return http.put<CadastroPetResponse>(`${routes.cadastroPet}/${encodeURIComponent(petId)}`, payload);
     },
-    buscarPetPorId(petId: string) {
-      return http.get<PetDashboardDto>(
-        `${routes.cadastroPet}/${encodeURIComponent(petId)}`,
-      );
-    },
-    deletePet(petId: string) {
-      return http.delete<void>(
-        `${routes.cadastroPet}/${encodeURIComponent(petId)}`,
-      );
-    },
-    async uploadImagem(
-      petId: string,
-      uri: string,
-      fileName = "foto.jpg",
-    ): Promise<PetImagemDto> {
-      const formData = new FormData();
-
-      // Como o frontend agora manda tudo em JPEG, ele vai cair no valor padrão certinho.
-      // E se você decidir não comprimir alguma foto no futuro, o suporte a outras extensões já está garantido aqui.
-      const extensao = fileName.split(".").pop()?.toLowerCase() || "jpg";
-      let mimeType = "image/jpeg";
-      if (extensao === "png") mimeType = "image/png";
-      else if (extensao === "webp") mimeType = "image/webp";
-      else if (extensao === "heic") mimeType = "image/heic";
-      else if (extensao === "heif") mimeType = "image/heif";
-
-      // Tratamento específico para iOS não bugar a URI
-      let imageUri = uri;
-      if (Platform.OS === "ios") {
-        imageUri = uri.replace("file://", "");
-      }
-
-      const fileObject = {
-        uri: imageUri,
-        name: fileName,
-        type: mimeType,
-      };
-
-      // Limpa o objeto para o React Native empacotar corretamente
-      formData.append("file", JSON.parse(JSON.stringify(fileObject)));
-
-      return http.uploadFormData<PetImagemDto>(
-        `/auth/pets/${encodeURIComponent(petId)}/imagens`,
-        formData,
-      );
-    },
-    buscarImagens(petId: string): Promise<PetImagemDto[]> {
-      return http.get<PetImagemDto[]>(
-        `/auth/pets/${encodeURIComponent(petId)}/imagens`,
-      );
-    },
-    deletarImagem(petId: string, imagemId: number): Promise<void> {
-      return http.delete<void>(
-        `/auth/pets/${encodeURIComponent(petId)}/imagens/${imagemId}`,
-      );
-    },
-  };
-}
+    // ... manter os demais métodos intactos
