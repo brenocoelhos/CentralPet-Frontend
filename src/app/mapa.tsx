@@ -4,13 +4,22 @@ import { router } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import {
     ActivityIndicator,
+    Platform,
     Pressable,
     StyleSheet,
     Text,
     View,
 } from "react-native";
-import MapView, { Marker } from "react-native-maps";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+let MapView: any = View;
+let Marker: any = () => null;
+
+if (Platform.OS !== "web") {
+  const maps = require("react-native-maps");
+  MapView = maps.default;
+  Marker = maps.Marker;
+}
 
 type Coords = { latitude: number; longitude: number };
 
