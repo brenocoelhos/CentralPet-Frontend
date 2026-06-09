@@ -1,3 +1,5 @@
+// src/utils/validadores.ts
+
 function onlyNumbers(value: string): string {
   return value.replace(/\D/g, "");
 }
@@ -27,6 +29,11 @@ export function maskPhone(value: string): string {
   return digits
     .replace(/(\d{2})(\d)/, "($1) $2")
     .replace(/(\d{5})(\d{1,4})$/, "$1-$2");
+}
+
+export function maskCEP(value: string): string {
+  const digits = onlyNumbers(value).slice(0, 8);
+  return digits.replace(/(\d{5})(\d)/, "$1-$2");
 }
 
 export function validaCPF(cpf: string): boolean {
