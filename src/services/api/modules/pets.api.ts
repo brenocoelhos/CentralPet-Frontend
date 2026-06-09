@@ -48,6 +48,8 @@ export type CadastroPetPayload = {
   vacinado: boolean;
   recompensa: boolean;
   dataCadastro?: string;
+  latitude?: number;
+  longitude?: number;
 };
 
 export type AtualizarPetPayload = Partial<Omit<CadastroPetPayload, "usuarioId">>;

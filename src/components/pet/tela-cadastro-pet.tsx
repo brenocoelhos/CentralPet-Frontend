@@ -1,29 +1,29 @@
 import { useAutenticacao } from "@/context/contexto-autenticacao";
 import { criarApi } from "@/services/api";
 import { exibirAlertaErroApi } from "@/utils/alerta-erro-api";
-import { maskDate, maskPhone, maskCEP, validaData } from "@/utils/validadores";
+import { maskCEP, maskDate, maskPhone, validaData } from "@/utils/validadores";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import * as ImageManipulator from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import { useState, useEffect } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import {
-  Alert,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  Vibration,
-  View,
-  ActivityIndicator,
-  FlatList,
+    ActivityIndicator,
+    Alert,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    Vibration,
+    View
 } from "react-native";
 import { EntradaTextoTema } from "../entrada-texto-tema";
-import { TextoTema as Text } from "../texto-tema";
+import { TextoTema } from "../texto-tema";
 
 // Lista rica para o autocomplete de espécies conhecidas
 const ALL_SPECIES = [
@@ -88,17 +88,17 @@ function NotLoggedInGate() {
       <View style={styles.gateIconWrap}>
         <Ionicons name="lock-closed-outline" size={48} color="#D97757" />
       </View>
-      <Text style={styles.gateTitle}>Acesso restrito</Text>
-      <Text style={styles.gateDescription}>
+      <TextoTema style={styles.gateTitle}>Acesso restrito</TextoTema>
+      <TextoTema style={styles.gateDescription}>
         Você precisa ter uma conta para cadastrar ou editar um pet desaparecido. Faça
         login ou crie sua conta para continuar.
-      </Text>
+      </TextoTema>
       <TouchableOpacity
         style={styles.gateButton}
         onPress={() => router.replace("/login")}
       >
         <Ionicons name="log-in-outline" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
-        <Text style={styles.gateButtonText}>Entrar ou criar conta</Text>
+        <TextoTema style={styles.gateButtonText}>Entrar ou criar conta</TextoTema>
       </TouchableOpacity>
     </View>
   );
@@ -126,6 +126,8 @@ export default function TelaCadastroPet() {
   const [cep, setCep] = useState("");
   const [disappearanceDate, setDisappearanceDate] = useState("");
   const [location, setLocation] = useState("");
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
   const [descriptionChips, setDescriptionChips] = useState<string[]>([]);
   const [descriptionInput, setDescriptionInput] = useState("");
   const [phone, setPhone] = useState("");
@@ -199,7 +201,7 @@ export default function TelaCadastroPet() {
     }
   };
 
-  // Buscar CEP automaticamente no ViaCEP
+  // Buscar CEP → endereço (ViaCEP) + lat/lng (Google Geocoding)
   const handleCepChange = async (value: string) => {
     const masked = maskCEP(value);
     setCep(masked);
@@ -210,10 +212,31 @@ export default function TelaCadastroPet() {
         setFetchingCep(true);
         const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
         const data = await response.json();
-        
+
         if (!data.erro) {
           const enderecoFormatado = `${data.logradouro ? data.logradouro + ", " : ""}${data.bairro ? data.bairro + " - " : ""}${data.localidade}/${data.uf}`;
           setLocation(enderecoFormatado);
+
+          // Geocodificar com Google para obter lat/lng
+          const geoKey = process.env.EXPO_PUBLIC_GOOGLE_GEOCODING_API_KEY;
+          if (geoKey) {
+            try {
+              const geoQuery = encodeURIComponent(
+                `${data.logradouro || ""} ${data.bairro || ""} ${data.localidade} ${data.uf} Brasil`.trim()
+              );
+              const geoResponse = await fetch(
+                `https://maps.googleapis.com/maps/api/geocode/json?address=${geoQuery}&key=${geoKey}`
+              );
+              const geoData = await geoResponse.json();
+              if (geoData.status === "OK" && geoData.results.length > 0) {
+                const loc = geoData.results[0].geometry.location;
+                setLatitude(loc.lat);
+                setLongitude(loc.lng);
+              }
+            } catch (geoErr) {
+              console.log("Erro ao geocodificar:", geoErr);
+            }
+          }
         } else {
           Alert.alert("Aviso", "CEP não encontrado.");
         }
@@ -331,6 +354,8 @@ export default function TelaCadastroPet() {
         recompensa: hasReward,
         idade: idade.trim() || undefined,
         cep: cep.replace(/\D/g, "") || undefined,
+        latitude: latitude ?? undefined,
+        longitude: longitude ?? undefined,
       };
 
       let petId = id || null;
@@ -388,7 +413,7 @@ export default function TelaCadastroPet() {
       >
         {/* Carousel de Fotos */}
         <View>
-          <Text style={styles.label}>Fotos ({photos.length}/6) <Text style={styles.requiredMark}>*</Text></Text>
+          <TextoTema style={styles.label}>Fotos ({photos.length}/6) <TextoTema style={styles.requiredMark}>*</TextoTema></TextoTema>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.photoCarousel}>
             {photos.map((uri, i) => (
               <View key={i} style={styles.photoThumb}>
@@ -410,7 +435,7 @@ export default function TelaCadastroPet() {
         {/* Linha 1: Nome e Espécie (Autocomplete) */}
         <View style={styles.row}>
           <View style={styles.half}>
-            <Text style={styles.label}>Nome <Text style={styles.requiredMark}>*</Text></Text>
+            <TextoTema style={styles.label}>Nome <TextoTema style={styles.requiredMark}>*</TextoTema></TextoTema>
             <EntradaTextoTema
               placeholder="Ex: Rex"
               value={name}
@@ -419,30 +444,34 @@ export default function TelaCadastroPet() {
               placeholderTextColor="#B0A89A"
             />
           </View>
-          
-          <View style={styles.half}>
-            <Text style={styles.label}>Espécie <Text style={styles.requiredMark}>*</Text></Text>
+
+          <View style={[styles.half, { zIndex: 999 }]}>
+            <TextoTema style={styles.label}>Espécie <TextoTema style={styles.requiredMark}>*</TextoTema></TextoTema>
             <EntradaTextoTema
               placeholder="Digite a espécie..."
               value={species}
               onChangeText={handleSpeciesChange}
               onFocus={() => species.length > 0 && setShowSpeciesSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowSpeciesSuggestions(false), 150)}
               style={styles.input}
               placeholderTextColor="#B0A89A"
             />
             {showSpeciesSuggestions && filteredSpecies.length > 0 && (
               <View style={styles.autocompleteContainer}>
-                {filteredSpecies.slice(0, 4).map((item) => (
-                  <TouchableOpacity
+                {filteredSpecies.slice(0, 5).map((item) => (
+                  <Pressable
                     key={item}
-                    style={styles.autocompleteItem}
+                    style={({ pressed }) => [
+                      styles.autocompleteItem,
+                      pressed && { backgroundColor: "#F5EDE6" },
+                    ]}
                     onPress={() => {
                       setSpecies(item);
                       setShowSpeciesSuggestions(false);
                     }}
                   >
                     <Text style={styles.autocompleteText}>{item}</Text>
-                  </TouchableOpacity>
+                  </Pressable>
                 ))}
               </View>
             )}
@@ -452,7 +481,7 @@ export default function TelaCadastroPet() {
         {/* Linha 2: Raça (Opcional agora) e Cor */}
         <View style={styles.row}>
           <View style={styles.half}>
-            <Text style={styles.label}>Raça</Text>
+            <TextoTema style={styles.label}>Raça</TextoTema>
             <EntradaTextoTema
               placeholder="Ex: Vira-lata"
               value={breed}
@@ -462,7 +491,7 @@ export default function TelaCadastroPet() {
             />
           </View>
           <View style={styles.half}>
-            <Text style={styles.label}>Cor</Text>
+            <TextoTema style={styles.label}>Cor</TextoTema>
             <EntradaTextoTema
               placeholder="Ex: Caramelo"
               value={color}
@@ -496,7 +525,9 @@ export default function TelaCadastroPet() {
         {/* Linha 4: CEP e Data de Desaparecimento */}
         <View style={styles.row}>
           <View style={styles.half}>
-            <Text style={styles.label}>CEP (Localização ViaCEP)</Text>
+            <TextoTema style={styles.label}>
+              CEP {latitude !== null ? "✓ Localizado" : "(preencha para obter localização)"}
+            </TextoTema>
             <View style={{ justifyContent: "center" }}>
               <EntradaTextoTema
                 placeholder="00000-000"
@@ -511,7 +542,7 @@ export default function TelaCadastroPet() {
             </View>
           </View>
           <View style={styles.half}>
-            <Text style={styles.label}>Data Desaparecimento <Text style={styles.requiredMark}>*</Text></Text>
+            <TextoTema style={styles.label}>Data Desaparecimento <TextoTema style={styles.requiredMark}>*</TextoTema></TextoTema>
             <EntradaTextoTema
               placeholder="dd/mm/aaaa"
               value={disappearanceDate}
@@ -530,27 +561,27 @@ export default function TelaCadastroPet() {
             <View style={[styles.checkbox, castrated && styles.checkboxChecked]}>
               {castrated && <Ionicons name="checkmark" size={12} color="#FFF" />}
             </View>
-            <Text style={styles.checkboxLabel}>Castrado</Text>
+            <TextoTema style={styles.checkboxLabel}>Castrado</TextoTema>
           </Pressable>
 
           <Pressable style={styles.checkboxItem} onPress={() => setVaccinated((v) => !v)}>
             <View style={[styles.checkbox, vaccinated && styles.checkboxChecked]}>
               {vaccinated && <Ionicons name="checkmark" size={12} color="#FFF" />}
             </View>
-            <Text style={styles.checkboxLabel}>Vacinado</Text>
+            <TextoTema style={styles.checkboxLabel}>Vacinado</TextoTema>
           </Pressable>
 
           <Pressable style={styles.checkboxItem} onPress={() => setHasReward((v) => !v)}>
             <View style={[styles.checkbox, hasReward && styles.checkboxChecked]}>
               {hasReward && <Ionicons name="checkmark" size={12} color="#FFF" />}
             </View>
-            <Text style={styles.checkboxLabel}>Tem recompensa</Text>
+            <TextoTema style={styles.checkboxLabel}>Tem recompensa</TextoTema>
           </Pressable>
         </View>
 
         {/* Endereço completo */}
         <View>
-          <Text style={styles.label}>Local do desaparecimento (Endereço/Bairro) <Text style={styles.requiredMark}>*</Text></Text>
+          <TextoTema style={styles.label}>Local do desaparecimento (Endereço/Bairro) <TextoTema style={styles.requiredMark}>*</TextoTema></TextoTema>
           <EntradaTextoTema
             placeholder="Ex: Bairro, Cidade ou preencha via CEP acima"
             value={location}
@@ -558,11 +589,16 @@ export default function TelaCadastroPet() {
             style={styles.input}
             placeholderTextColor="#B0A89A"
           />
+          {latitude !== null && longitude !== null && (
+            <Text style={styles.geoTagText}>
+              📍 {latitude.toFixed(6)}, {longitude.toFixed(6)}
+            </Text>
+          )}
         </View>
 
         {/* Descrições em Chips */}
         <View>
-          <Text style={styles.label}>Características / Descrição</Text>
+          <TextoTema style={styles.label}>Características / Descrição</TextoTema>
           <EntradaTextoTema
             placeholder="Digite marcas, coleira e aperte Concluído"
             value={descriptionInput}
@@ -587,7 +623,7 @@ export default function TelaCadastroPet() {
 
         {/* Telefone para Contato */}
         <View>
-          <Text style={styles.label}>Telefone de Contato <Text style={styles.requiredMark}>*</Text></Text>
+          <TextoTema style={styles.label}>Telefone de Contato <TextoTema style={styles.requiredMark}>*</TextoTema></TextoTema>
           <EntradaTextoTema
             placeholder="(00) 00000-0000"
             value={phone}
@@ -637,13 +673,18 @@ const styles = StyleSheet.create({
     fontSize: 13, color: "#3D3228", textAlignVertical: "center",
   },
   autocompleteContainer: {
-    position: "absolute", top: 62, left: 0, right: 0,
+    position: "absolute", top: 44, left: 0, right: 0,
     backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#DDD5CA",
-    borderRadius: 8, zIndex: 999, elevation: 5,
-    boxShadow: "0px 3px 6px rgba(0,0,0,0.1)",
+    borderRadius: 8, zIndex: 9999, elevation: 10,
+    shadowColor: "#000", shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12, shadowRadius: 6,
   },
-  autocompleteItem: { padding: 10, borderBottomWidth: 1, borderBottomColor: "#F5F2EC" },
-  autocompleteText: { fontSize: 13, color: "#3D3228" },
+  autocompleteItem: {
+    padding: 11, borderBottomWidth: 1, borderBottomColor: "#F5F2EC",
+    backgroundColor: "#FFFFFF",
+  },
+  autocompleteText: { fontSize: 13, color: "#3D3228", fontFamily: "Lexend_400Regular" },
+  geoTagText: { fontSize: 11, color: "#6B9E5E", marginTop: 4, fontFamily: "Lexend_400Regular" },
   cepLoader: { position: "absolute", right: 12, top: 10 },
   chipsContainer: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 8 },
   chip: {
