@@ -117,10 +117,6 @@ export default function TelaCadastroPet() {
 
   const { user, token } = useAutenticacao();
 
-  if (!user) {
-    return <NotLoggedInGate />;
-  }
-
   const [name, setName] = useState("");
   const [species, setSpecies] = useState("");
   const [filteredSpecies, setFilteredSpecies] = useState<string[]>([]);
@@ -191,6 +187,10 @@ export default function TelaCadastroPet() {
       carregarDadosPet();
     }
   }, [isEditing, id, token]);
+
+  if (!user) {
+    return <NotLoggedInGate />;
+  }
 
   // Manipular autocomplete da Espécie
   const handleSpeciesChange = (text: string) => {
@@ -417,25 +417,87 @@ export default function TelaCadastroPet() {
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Carousel de Fotos */}
-        <View>
-          <TextoTema style={styles.label}>Fotos ({photos.length}/6) <TextoTema style={styles.requiredMark}>*</TextoTema></TextoTema>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.photoCarousel}>
-            {photos.map((uri, i) => (
-              <View key={i} style={styles.photoThumb}>
-                <Image source={{ uri }} style={styles.photoThumbImg} contentFit="cover" />
-                <Pressable style={styles.photoRemove} onPress={() => removePhoto(i)}>
-                  <Ionicons name="close-circle" size={20} color="#FFF" />
-                </Pressable>
+        {/* Fotos */}
+        <View style={styles.photoSection}>
+          <View style={styles.photoHeader}>
+            <View style={styles.photoHeaderText}>
+              <TextoTema style={styles.photoTitle}>
+                Fotos do pet <TextoTema style={styles.requiredMark}>*</TextoTema>
+              </TextoTema>
+              <Text style={styles.photoSubtitle}>
+                Escolha uma foto principal e adicione mais ângulos para facilitar a identificação.
+              </Text>
+            </View>
+
+            <View style={styles.photoCounter}>
+              <Ionicons name="images-outline" size={14} color="#D97757" />
+              <Text style={styles.photoCounterText}>{photos.length}/6</Text>
+            </View>
+          </View>
+
+          {photos[0] ? (
+            <View style={styles.photoHero}>
+              <Image source={{ uri: photos[0] }} style={styles.photoHeroImg} contentFit="cover" />
+              <View style={styles.photoHeroOverlay}>
+                <View style={styles.photoMainBadge}>
+                  <Ionicons name="star" size={12} color="#FFFFFF" />
+                  <Text style={styles.photoMainBadgeText}>Foto principal</Text>
+                </View>
               </View>
-            ))}
+              <Pressable
+                style={styles.photoRemoveHero}
+                onPress={() => removePhoto(0)}
+                accessibilityRole="button"
+                accessibilityLabel="Remover foto principal"
+              >
+                <Ionicons name="close" size={18} color="#FFFFFF" />
+              </Pressable>
+            </View>
+          ) : (
+            <Pressable
+              style={styles.photoHeroEmpty}
+              onPress={pickPhoto}
+              accessibilityRole="button"
+              accessibilityLabel="Adicionar fotos do pet"
+            >
+              <View style={styles.photoHeroIcon}>
+                <Ionicons name="camera-outline" size={30} color="#D97757" />
+              </View>
+              <Text style={styles.photoHeroEmptyTitle}>Adicionar fotos</Text>
+              <Text style={styles.photoHeroEmptyText}>Mínimo de 2 fotos para publicar</Text>
+            </Pressable>
+          )}
+
+          <View style={styles.photoGrid}>
+            {photos.slice(1).map((uri, i) => {
+              const photoIndex = i + 1;
+              return (
+                <View key={`${uri}-${photoIndex}`} style={styles.photoThumb}>
+                  <Image source={{ uri }} style={styles.photoThumbImg} contentFit="cover" />
+                  <Pressable
+                    style={styles.photoRemove}
+                    onPress={() => removePhoto(photoIndex)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Remover foto ${photoIndex + 1}`}
+                  >
+                    <Ionicons name="close" size={14} color="#FFFFFF" />
+                  </Pressable>
+                </View>
+              );
+            })}
+
             {photos.length < 6 && (
-              <Pressable style={styles.photoAdd} onPress={pickPhoto}>
-                <Ionicons name="camera-outline" size={26} color="rgba(0,0,0,0.4)" />
+              <Pressable
+                style={styles.photoAdd}
+                onPress={pickPhoto}
+                accessibilityRole="button"
+                accessibilityLabel="Adicionar mais fotos"
+              >
+                <Ionicons name="add" size={22} color="#D97757" />
                 <Text style={styles.photoAddLabel}>Adicionar</Text>
               </Pressable>
             )}
-          </ScrollView>
+          </View>
         </View>
 
         {/* Linha 1: Nome e Espécie (Autocomplete) */}
@@ -657,16 +719,152 @@ export default function TelaCadastroPet() {
 const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: "#FFFFFF" },
   content: { padding: 16, paddingBottom: 40, gap: 14, overflow: "visible" },
-  photoCarousel: { flexDirection: "row", gap: 10, paddingVertical: 4 },
-  photoThumb: { width: 90, height: 90, borderRadius: 12, overflow: "hidden" },
-  photoThumbImg: { width: 90, height: 90 },
-  photoRemove: { position: "absolute", top: 4, right: 4 },
-  photoAdd: {
-    width: 90, height: 90, borderRadius: 12, borderWidth: 2,
-    borderColor: "#D4C9B8", borderStyle: "dashed", backgroundColor: "#F0E9DF",
-    alignItems: "center", justifyContent: "center", gap: 4,
+  photoSection: {
+    backgroundColor: "#F8F3ED",
+    borderWidth: 1,
+    borderColor: "#EAE0D3",
+    borderRadius: 18,
+    padding: 12,
+    gap: 12,
   },
-  photoAddLabel: { fontSize: 11, color: "#8A7B6B", textAlign: "center" },
+  photoHeader: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  photoHeaderText: { flex: 1 },
+  photoTitle: {
+    fontSize: 15,
+    color: "#2A241E",
+    fontFamily: "Lexend_700Bold",
+    marginBottom: 3,
+  },
+  photoSubtitle: {
+    fontSize: 11,
+    lineHeight: 16,
+    color: "#8A7B6B",
+    fontFamily: "Lexend_400Regular",
+  },
+  photoCounter: {
+    minHeight: 30,
+    borderRadius: 15,
+    paddingHorizontal: 10,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E9DDD0",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+  },
+  photoCounterText: {
+    fontSize: 12,
+    color: "#5A4F44",
+    fontFamily: "Lexend_700Bold",
+  },
+  photoHero: {
+    height: 190,
+    borderRadius: 16,
+    overflow: "hidden",
+    backgroundColor: "#E8E0D6",
+  },
+  photoHeroImg: { width: "100%", height: "100%" },
+  photoHeroOverlay: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    padding: 10,
+    backgroundColor: "rgba(0,0,0,0.24)",
+  },
+  photoMainBadge: {
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    borderRadius: 14,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    backgroundColor: "rgba(217,119,87,0.94)",
+  },
+  photoMainBadgeText: {
+    fontSize: 11,
+    color: "#FFFFFF",
+    fontFamily: "Lexend_700Bold",
+  },
+  photoRemoveHero: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "rgba(0,0,0,0.46)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  photoHeroEmpty: {
+    minHeight: 176,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: "#D7C6B7",
+    borderStyle: "dashed",
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 18,
+    gap: 7,
+  },
+  photoHeroIcon: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    backgroundColor: "#FBECE5",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 2,
+  },
+  photoHeroEmptyTitle: {
+    fontSize: 15,
+    color: "#2A241E",
+    fontFamily: "Lexend_700Bold",
+  },
+  photoHeroEmptyText: {
+    fontSize: 11,
+    color: "#8A7B6B",
+    fontFamily: "Lexend_400Regular",
+  },
+  photoGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  photoThumb: {
+    width: 72,
+    height: 72,
+    borderRadius: 12,
+    overflow: "hidden",
+    backgroundColor: "#E8E0D6",
+  },
+  photoThumbImg: { width: "100%", height: "100%" },
+  photoRemove: {
+    position: "absolute",
+    top: 5,
+    right: 5,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: "rgba(0,0,0,0.48)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  photoAdd: {
+    width: 72, height: 72, borderRadius: 12, borderWidth: 1.5,
+    borderColor: "#D7C6B7", borderStyle: "dashed", backgroundColor: "#FFFFFF",
+    alignItems: "center", justifyContent: "center", gap: 3,
+  },
+  photoAddLabel: {
+    fontSize: 10,
+    color: "#8A7B6B",
+    textAlign: "center",
+    fontFamily: "Lexend_600SemiBold",
+  },
   row: { flexDirection: "row", gap: 10, position: "relative", overflow: "visible" },
   rowAutocomplete: { zIndex: 50 },
   rowUnderAutocomplete: { flexDirection: "row", gap: 10, position: "relative", zIndex: 1 },
