@@ -1,13 +1,13 @@
 import { useAutenticacao } from "@/context/contexto-autenticacao";
 import { criarApi } from "@/services/api";
 import { exibirAlertaErroApi } from "@/utils/alerta-erro-api";
-import { maskCEP, maskDate, maskPhone, validaData } from "@/utils/validadores";
+import { maskCEP, maskDate, maskPhone } from "@/utils/validadores";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import * as ImageManipulator from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -24,6 +24,7 @@ import {
 } from "react-native";
 import { EntradaTextoTema } from "../entrada-texto-tema";
 import { TextoTema } from "../texto-tema";
+import type { PetDashboardDto } from "@/services/api/modules/pets.api";
 
 // Lista rica para o autocomplete de espécies conhecidas
 const ALL_SPECIES = [
@@ -34,6 +35,12 @@ const ALL_SPECIES = [
 ];
 
 const SIZE_OPTIONS = ["Pequeno", "Médio", "Grande"];
+
+type PetPhoto = {
+  uri: string;
+  file?: Blob;
+  isLocal?: boolean;
+};
 
 function SelectField({
   label,
@@ -112,8 +119,9 @@ function NotLoggedInGate() {
 
 export default function TelaCadastroPet() {
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id?: string }>(); // Se houver 'id', vira tela de EDIÇÃO
+  const { id, pet } = useLocalSearchParams<{ id?: string; pet?: string }>(); // Se houver 'id', vira tela de EDIÇÃO
   const isEditing = !!id;
+  const petInicial = useMemo(() => parsePetParam(pet), [pet]);
 
   const { user, token } = useAutenticacao();
 
@@ -136,49 +144,61 @@ export default function TelaCadastroPet() {
   const [castrated, setCastrated] = useState(false);
   const [vaccinated, setVaccinated] = useState(false);
   const [hasReward, setHasReward] = useState(false);
-  const [photos, setPhotos] = useState<string[]>([]);
+  const [photos, setPhotos] = useState<PetPhoto[]>([]);
   const [loading, setLoading] = useState(false);
   const [fetchingCep, setFetchingCep] = useState(false);
+  const [cepInvalido, setCepInvalido] = useState(false);
+  const [cepError, setCepError] = useState("");
+  const [dateError, setDateError] = useState("");
 
-  // Carregar dados iniciais em modo de EDIÇÃO
+  const preencherDadosPet = (petData: PetDashboardDto) => {
+    setName(petData.nome || "");
+    setSpecies(petData.especie || "");
+    setBreed(petData.raca || "");
+    setColor(petData.cor || "");
+    setSize(petData.porte === "Medio" ? "Médio" : petData.porte || "Médio");
+    setIdade((petData as any).idade || "");
+    setCep((petData as any).cep || "");
+    setCepInvalido(false);
+    setCepError("");
+    setDateError("");
+    setLocation(petData.localDesaparecimento || "");
+    setDescriptionChips(petData.descricao || []);
+    setPhone(maskPhone(petData.telefoneTutor || ""));
+    setCastrated(!!petData.castrado);
+    setVaccinated(!!petData.vacinado);
+    setHasReward(!!petData.recompensa);
+
+    if (petData.imagens && petData.imagens.length > 0) {
+      setPhotos(petData.imagens.map((uri) => ({ uri })));
+    } else if (petData.fotoUrl) {
+      setPhotos([{ uri: petData.fotoUrl }]);
+    }
+
+    if (petData.dataDesaparecimento) {
+      const parts = petData.dataDesaparecimento.split("T")[0].split("-");
+      if (parts.length === 3) {
+        setDisappearanceDate(`${parts[2]}/${parts[1]}/${parts[0]}`);
+      }
+    }
+  };
+
+  // Carregar dados iniciais em modo de edição
   useEffect(() => {
+    if (isEditing && petInicial) {
+      preencherDadosPet(petInicial);
+      return;
+    }
+
     if (isEditing && token && id) {
       const carregarDadosPet = async () => {
         try {
           setLoading(true);
           const apiClient = criarApi({ token });
           const petData = await apiClient.pets.buscarPetPorId(id);
-          
-          setName(petData.nome || "");
-          setSpecies(petData.especie || "");
-          setBreed(petData.raca || "");
-          setColor(petData.cor || "");
-          setSize(petData.porte === "Medio" ? "Médio" : petData.porte || "Médio");
-          setIdade((petData as any).idade || "");
-          setCep((petData as any).cep || "");
-          setLocation(petData.localDesaparecimento || "");
-          setDescriptionChips(petData.descricao || []);
-          setPhone(maskPhone(petData.telefoneTutor || ""));
-          setCastrated(!!petData.castrado);
-          setVaccinated(!!petData.vacinado);
-          setHasReward(!!petData.recompensa);
-          
-          // Se existirem imagens associadas na API, preenchemos
-          if (petData.imagens && petData.imagens.length > 0) {
-            setPhotos(petData.imagens);
-          } else if (petData.fotoUrl) {
-            setPhotos([petData.fotoUrl]);
-          }
-
-          // Converter a data vinda da API (AAAA-MM-DD) para formato visual (DD/MM/AAAA)
-          if (petData.dataDesaparecimento) {
-            const parts = petData.dataDesaparecimento.split("T")[0].split("-");
-            if (parts.length === 3) {
-              setDisappearanceDate(`${parts[2]}/${parts[1]}/${parts[0]}`);
-            }
-          }
+          preencherDadosPet(petData);
         } catch (error) {
-          Alert.alert("Erro", "Não foi possível carregar os dados do pet.");
+          Alert.alert("Erro", "Nao foi possivel carregar os dados do pet.");
           router.back();
         } finally {
           setLoading(false);
@@ -186,8 +206,7 @@ export default function TelaCadastroPet() {
       };
       carregarDadosPet();
     }
-  }, [isEditing, id, token]);
-
+  }, [isEditing, id, token, petInicial]);
   if (!user) {
     return <NotLoggedInGate />;
   }
@@ -211,6 +230,8 @@ export default function TelaCadastroPet() {
   const handleCepChange = async (value: string) => {
     const masked = maskCEP(value);
     setCep(masked);
+    setCepInvalido(false);
+    setCepError("");
 
     const cleanCep = value.replace(/\D/g, "");
     if (cleanCep.length === 8) {
@@ -244,9 +265,12 @@ export default function TelaCadastroPet() {
             }
           }
         } else {
-          Alert.alert("Aviso", "CEP não encontrado.");
+          setCepInvalido(true);
+          setCepError("Informe um CEP valido.");
         }
       } catch (err) {
+        setCepInvalido(true);
+        setCepError("Nao foi possivel validar esse CEP.");
         console.log("Erro ao buscar ViaCEP:", err);
       } finally {
         setFetchingCep(false);
@@ -255,11 +279,14 @@ export default function TelaCadastroPet() {
   };
 
   const pickPhoto = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("Permissão necessária", "Precisamos de acesso à sua galeria.");
-      return;
+    if (Platform.OS !== "web") {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permissao necessaria", "Precisamos de acesso a sua galeria.");
+        return;
+      }
     }
+
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
       allowsMultipleSelection: true,
@@ -270,18 +297,27 @@ export default function TelaCadastroPet() {
     if (!result.canceled) {
       setLoading(true);
       try {
-        const processadas: string[] = [];
+        const processadas: PetPhoto[] = [];
         for (const asset of result.assets) {
+          if (Platform.OS === "web") {
+            processadas.push({
+              uri: asset.uri,
+              file: (asset as ImagePicker.ImagePickerAsset & { file?: Blob }).file,
+              isLocal: true,
+            });
+            continue;
+          }
+
           const manipResult = await ImageManipulator.manipulateAsync(
             asset.uri,
             [{ resize: { width: 1080 } }],
             { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG },
           );
-          processadas.push(manipResult.uri);
+          processadas.push({ uri: manipResult.uri, isLocal: true });
         }
         setPhotos((prev) => [...prev, ...processadas].slice(0, 6));
       } catch (error) {
-        Alert.alert("Erro", "Não foi possível processar as imagens.");
+        Alert.alert("Erro", "Nao foi possivel processar as imagens.");
       } finally {
         setLoading(false);
       }
@@ -304,25 +340,53 @@ export default function TelaCadastroPet() {
     setDescriptionChips((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const validateCepField = () => {
+    const cleanCep = cep.replace(/\D/g, "");
+    if (!cep.trim()) {
+      setCepError("");
+      return true;
+    }
+    if (cleanCep.length !== 8 || cepInvalido) {
+      setCepError("Informe um CEP valido.");
+      return false;
+    }
+    setCepError("");
+    return true;
+  };
+
+  const validateDisappearanceDateField = () => {
+    if (!disappearanceDate.trim()) {
+      setDateError("");
+      return true;
+    }
+    if (!validaDataDesaparecimento(disappearanceDate)) {
+      setDateError("Use uma data de hoje ou dos ultimos 5 anos.");
+      return false;
+    }
+    setDateError("");
+    return true;
+  };
+
   const handleSubmit = async () => {
     if (!token) {
       Alert.alert("Sessão expirada", "Entre novamente para continuar.");
       return;
     }
-    if (photos.length < 2) {
-      Alert.alert("Fotos obrigatórias", "Adicione pelo menos 2 fotos do animal.");
+    if (photos.length < 1) {
+      Alert.alert("Foto obrigatória", "Adicione pelo menos 1 foto do animal.");
       return;
     }
     // Removido !breed (Raça) da validação de obrigatoriedade
     if (!name || !species || !disappearanceDate || !location || !phone) {
-      Alert.alert("Campos obrigatórios", "Preencha todos os campos obrigatórios marcados com *.");
+      Alert.alert("Campos obrigatorios", "Preencha todos os campos obrigatorios marcados com *.");
       return;
     }
-    if (!validaData(disappearanceDate)) {
-      Alert.alert("Data inválida", "A data de desaparecimento inserida não é válida ou está no futuro.");
+    if (!validateCepField()) {
       return;
     }
-
+    if (!validateDisappearanceDateField()) {
+      return;
+    }
     try {
       setLoading(true);
       const apiClient = criarApi({ token });
@@ -377,12 +441,18 @@ export default function TelaCadastroPet() {
 
       // Faz upload de novas fotos adicionadas locais (que começam com 'file://' ou 'ph://')
       if (petId) {
-        const novasFotos = photos.filter(p => p.startsWith("file:") || p.startsWith("ph:"));
+        const novasFotos = photos.filter((photo) =>
+          photo.isLocal ||
+          photo.uri.startsWith("file:") ||
+          photo.uri.startsWith("ph:") ||
+          photo.uri.startsWith("blob:") ||
+          photo.uri.startsWith("data:")
+        );
         for (let index = 0; index < novasFotos.length; index++) {
-          const uri = novasFotos[index];
+          const photo = novasFotos[index];
           const fileName = `foto-${Date.now()}-${index + 1}.jpeg`;
           try {
-            await apiClient.pets.uploadImagem(petId, uri, fileName);
+            await apiClient.pets.uploadImagem(petId, photo.uri, fileName, photo.file);
           } catch (uploadError) {
             console.log(`Upload da imagem ${index + 1} falhou.`);
           }
@@ -437,7 +507,7 @@ export default function TelaCadastroPet() {
 
           {photos[0] ? (
             <View style={styles.photoHero}>
-              <Image source={{ uri: photos[0] }} style={styles.photoHeroImg} contentFit="cover" />
+              <Image source={{ uri: photos[0].uri }} style={styles.photoHeroImg} contentFit="cover" />
               <View style={styles.photoHeroOverlay}>
                 <View style={styles.photoMainBadge}>
                   <Ionicons name="star" size={12} color="#FFFFFF" />
@@ -464,16 +534,16 @@ export default function TelaCadastroPet() {
                 <Ionicons name="camera-outline" size={30} color="#D97757" />
               </View>
               <Text style={styles.photoHeroEmptyTitle}>Adicionar fotos</Text>
-              <Text style={styles.photoHeroEmptyText}>Mínimo de 2 fotos para publicar</Text>
+              <Text style={styles.photoHeroEmptyText}>Adicione pelo menos 1 foto para publicar</Text>
             </Pressable>
           )}
 
           <View style={styles.photoGrid}>
-            {photos.slice(1).map((uri, i) => {
+            {photos.slice(1).map((photo, i) => {
               const photoIndex = i + 1;
               return (
-                <View key={`${uri}-${photoIndex}`} style={styles.photoThumb}>
-                  <Image source={{ uri }} style={styles.photoThumbImg} contentFit="cover" />
+                <View key={`${photo.uri}-${photoIndex}`} style={styles.photoThumb}>
+                  <Image source={{ uri: photo.uri }} style={styles.photoThumbImg} contentFit="cover" />
                   <Pressable
                     style={styles.photoRemove}
                     onPress={() => removePhoto(photoIndex)}
@@ -599,6 +669,7 @@ export default function TelaCadastroPet() {
                 placeholder="00000-000"
                 value={cep}
                 onChangeText={handleCepChange}
+                onBlur={validateCepField}
                 style={styles.input}
                 keyboardType="numeric"
                 maxLength={9}
@@ -606,18 +677,24 @@ export default function TelaCadastroPet() {
               />
               {fetchingCep && <ActivityIndicator size="small" color="#D4735A" style={styles.cepLoader} />}
             </View>
+            {cepError ? <Text style={styles.fieldErrorText}>{cepError}</Text> : null}
           </View>
           <View style={styles.half}>
             <TextoTema style={styles.label}>Data Desaparecimento <TextoTema style={styles.requiredMark}>*</TextoTema></TextoTema>
             <EntradaTextoTema
               placeholder="dd/mm/aaaa"
               value={disappearanceDate}
-              onChangeText={(value) => setDisappearanceDate(maskDate(value))}
+              onChangeText={(value) => {
+                setDisappearanceDate(maskDate(value));
+                setDateError("");
+              }}
+              onBlur={validateDisappearanceDateField}
               style={styles.input}
               keyboardType="numeric"
               maxLength={10}
               placeholderTextColor="#B0A89A"
             />
+            {dateError ? <Text style={styles.fieldErrorText}>{dateError}</Text> : null}
           </View>
         </View>
 
@@ -876,6 +953,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12, height: 40, backgroundColor: "#FFFFFF",
     fontSize: 13, color: "#3D3228", textAlignVertical: "center",
   },
+  fieldErrorText: {
+    color: "#D94F4F",
+    fontSize: 11,
+    marginTop: 4,
+    fontFamily: "Lexend_500Medium",
+  },
   autocompleteContainer: {
     position: "absolute", top: 44, left: 0, right: 0,
     backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#DDD5CA",
@@ -964,4 +1047,40 @@ const styles = StyleSheet.create({
 function toApiDate(maskedDate: string) {
   const [day, month, year] = maskedDate.split("/");
   return `${year}-${month}-${day}`;
+}
+
+function parsePetParam(value?: string): PetDashboardDto | null {
+  if (!value) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(decodeURIComponent(value)) as PetDashboardDto;
+  } catch {
+    return null;
+  }
+}
+
+function validaDataDesaparecimento(dataStr: string): boolean {
+  if (!/^\d{2}\/\d{2}\/\d{4}$/.test(dataStr)) return false;
+
+  const [dia, mes, ano] = dataStr.split("/").map(Number);
+  const data = new Date(ano, mes - 1, dia);
+
+  if (
+    data.getFullYear() !== ano ||
+    data.getMonth() !== mes - 1 ||
+    data.getDate() !== dia
+  ) {
+    return false;
+  }
+
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+  data.setHours(0, 0, 0, 0);
+
+  const limiteAntigo = new Date(hoje);
+  limiteAntigo.setFullYear(limiteAntigo.getFullYear() - 5);
+
+  return data <= hoje && data >= limiteAntigo;
 }

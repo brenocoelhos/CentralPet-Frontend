@@ -1,5 +1,4 @@
 ﻿import { useAutenticacao } from "@/context/contexto-autenticacao";
-import { useLoginGoogle } from "@/hooks/use-login-google";
 import { api } from "@/services/api";
 import { exibirAlertaErroApi } from "@/utils/alerta-erro-api";
 import { Ionicons } from "@expo/vector-icons";
@@ -26,9 +25,6 @@ export default function TelaLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const { handleGoogleLogin, loading: googleLoading } = useLoginGoogle(() =>
-    router.replace("/painel"),
-  );
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -105,13 +101,13 @@ export default function TelaLogin() {
             value={password}
             onChangeText={setPassword}
             returnKeyType="done"
-            disabled={loading || googleLoading}
+            disabled={loading}
           />
 
           <TouchableOpacity
             onPress={() => router.push("/esqueci-senha")}
             activeOpacity={0.8}
-            disabled={loading || googleLoading}
+            disabled={loading}
             style={styles.forgotPasswordButton}
           >
             <Text style={styles.forgotPasswordText}>Esqueci minha senha</Text>
@@ -121,7 +117,7 @@ export default function TelaLogin() {
             style={styles.primaryButton}
             onPress={handleLogin}
             activeOpacity={0.85}
-            disabled={loading || googleLoading}
+            disabled={loading}
           >
             {loading ? (
               <ActivityIndicator color="#FFFFFF" />
@@ -133,30 +129,12 @@ export default function TelaLogin() {
             )}
           </TouchableOpacity>
 
-          <Text style={styles.separatorText}>- ou continue com -</Text>
-
-          <TouchableOpacity
-            style={styles.googleButton}
-            onPress={handleGoogleLogin}
-            activeOpacity={0.85}
-            disabled={loading || googleLoading}
-          >
-            {googleLoading ? (
-              <ActivityIndicator color="#D97757" />
-            ) : (
-              <View style={styles.googleButtonContent}>
-                <Ionicons name="logo-google" size={18} color="#D97757" />
-                <Text style={styles.googleButtonText}>Google</Text>
-              </View>
-            )}
-          </TouchableOpacity>
-
           <View style={styles.signupTextRow}>
             <Text style={styles.signupText}>Nao tem uma conta? </Text>
             <TouchableOpacity
               onPress={() => router.push("/cadastro-usuario")}
               activeOpacity={0.8}
-              disabled={loading || googleLoading}
+              disabled={loading}
             >
               <Text style={styles.signupLink}>Criar conta gratuita</Text>
             </TouchableOpacity>
@@ -223,31 +201,6 @@ const styles = StyleSheet.create({
   primaryButtonText: {
     fontSize: 15,
     color: "#FFFFFF",
-    fontWeight: "bold",
-    marginLeft: 8,
-  },
-  separatorText: {
-    marginTop: 14,
-    textAlign: "center",
-    fontSize: 12,
-    color: "#7D7568",
-  },
-  googleButton: {
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#D97757",
-    borderRadius: 50,
-    paddingVertical: 16,
-    alignItems: "center",
-    marginTop: 10,
-  },
-  googleButtonContent: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  googleButtonText: {
-    fontSize: 15,
-    color: "#D97757",
     fontWeight: "bold",
     marginLeft: 8,
   },

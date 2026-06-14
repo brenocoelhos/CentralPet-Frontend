@@ -1,4 +1,5 @@
 ﻿import Ionicons from "@expo/vector-icons/Ionicons";
+import type { ReactNode } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 type PetCardVariant = "dashboard" | "search";
@@ -15,6 +16,7 @@ type PetCardProps = {
   cardStyle?: object;
   imageHeight: number;
   accentColor?: string;
+  nameRightAccessory?: ReactNode;
 };
 
 export default function CartaoPet({
@@ -29,6 +31,7 @@ export default function CartaoPet({
   cardStyle,
   imageHeight,
   accentColor = "#D97757",
+  nameRightAccessory,
 }: PetCardProps) {
   const isDashboard = variant === "dashboard";
   const statusColor = accentColor;
@@ -63,12 +66,19 @@ export default function CartaoPet({
       </View>
 
       <View style={styles.infoBox}>
-        <Text
-          style={[styles.name, isDashboard ? styles.nameDashboard : styles.nameSearch]}
-          numberOfLines={1}
-        >
-          {name}
-        </Text>
+        <View style={styles.nameRow}>
+          <Text
+            style={[
+              styles.name,
+              isDashboard ? styles.nameDashboard : styles.nameSearch,
+              nameRightAccessory ? styles.nameWithAccessory : null,
+            ]}
+            numberOfLines={1}
+          >
+            {name}
+          </Text>
+          {nameRightAccessory}
+        </View>
 
         <Text
           style={[styles.breed, isDashboard ? styles.breedDashboard : styles.breedSearch]}
@@ -143,6 +153,15 @@ const styles = StyleSheet.create({
   },
   name: {
     color: "#1a1a1a",
+  },
+  nameRow: {
+    minHeight: 24,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  nameWithAccessory: {
+    flex: 1,
   },
   nameDashboard: {
     fontFamily: "Lexend_700Bold",
