@@ -426,7 +426,7 @@ function mapPetToOccurrence(item: PetDashboardDto): Occurrence {
       : [];
 
   return {
-    id: item.id,
+    id: String(item.id),
     status: "PERDIDO",
     time: item.dataDesaparecimento,
     name: item.nome,

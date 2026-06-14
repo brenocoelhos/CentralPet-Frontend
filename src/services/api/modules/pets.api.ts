@@ -8,7 +8,7 @@ export type PetImagemDto = {
 };
 
 export type PetDashboardDto = {
-  id: string;
+  id: string | number;
   name: string;
   nome: string;
   especie: string;
@@ -28,6 +28,9 @@ export type PetDashboardDto = {
   nomeTutor: string;
   telefoneTutor: string;
   usuarioId: string;
+  cep?: string;
+  latitude?: number;
+  longitude?: number;
 };
 
 export type CadastroPetPayload = {
@@ -48,6 +51,7 @@ export type CadastroPetPayload = {
   vacinado: boolean;
   recompensa: boolean;
   dataCadastro?: string;
+  cep?: string;
   latitude?: number;
   longitude?: number;
 };

@@ -176,7 +176,7 @@ export default function TelaBusca() {
         data={shouldSearch ? sortedPets : []}
         numColumns={2}
         columnWrapperStyle={styles.cardRow}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => String(item.id)}
         renderItem={renderPetCard}
         ListHeaderComponent={listHeader}
         ListEmptyComponent={

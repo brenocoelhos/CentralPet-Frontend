@@ -244,25 +244,16 @@ export default function TelaCadastroPet() {
           const enderecoFormatado = `${data.logradouro ? data.logradouro + ", " : ""}${data.bairro ? data.bairro + " - " : ""}${data.localidade}/${data.uf}`;
           setLocation(enderecoFormatado);
 
-          // Geocodificar com Google para obter lat/lng
-          const geoKey = process.env.EXPO_PUBLIC_GOOGLE_GEOCODING_API_KEY;
-          if (geoKey) {
-            try {
-              const geoQuery = encodeURIComponent(
-                `${data.logradouro || ""} ${data.bairro || ""} ${data.localidade} ${data.uf} Brasil`.trim()
-              );
-              const geoResponse = await fetch(
-                `https://maps.googleapis.com/maps/api/geocode/json?address=${geoQuery}&key=${geoKey}`
-              );
-              const geoData = await geoResponse.json();
-              if (geoData.status === "OK" && geoData.results.length > 0) {
-                const loc = geoData.results[0].geometry.location;
-                setLatitude(loc.lat);
-                setLongitude(loc.lng);
-              }
-            } catch (geoErr) {
-              console.log("Erro ao geocodificar:", geoErr);
+          try {
+            const coords = await geocodificarEndereco(
+              `${data.logradouro || ""} ${data.bairro || ""} ${data.localidade} ${data.uf} Brasil`.trim(),
+            );
+            if (coords) {
+              setLatitude(coords.latitude);
+              setLongitude(coords.longitude);
             }
+          } catch (geoErr) {
+            console.log("Erro ao geocodificar:", geoErr);
           }
         } else {
           setCepInvalido(true);
@@ -1083,4 +1074,41 @@ function validaDataDesaparecimento(dataStr: string): boolean {
   limiteAntigo.setFullYear(limiteAntigo.getFullYear() - 5);
 
   return data <= hoje && data >= limiteAntigo;
+}
+
+async function geocodificarEndereco(
+  endereco: string,
+): Promise<{ latitude: number; longitude: number } | null> {
+  if (!endereco.trim()) {
+    return null;
+  }
+
+  const geoKey = process.env.EXPO_PUBLIC_GOOGLE_GEOCODING_API_KEY;
+  const geoQuery = encodeURIComponent(endereco);
+
+  if (geoKey) {
+    const geoResponse = await fetch(
+      `https://maps.googleapis.com/maps/api/geocode/json?address=${geoQuery}&key=${geoKey}`,
+    );
+    const geoData = await geoResponse.json();
+    if (geoData.status === "OK" && geoData.results.length > 0) {
+      const loc = geoData.results[0].geometry.location;
+      return { latitude: loc.lat, longitude: loc.lng };
+    }
+  }
+
+  const fallbackResponse = await fetch(
+    `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${geoQuery}`,
+  );
+  const fallbackData = await fallbackResponse.json();
+  const firstResult = Array.isArray(fallbackData) ? fallbackData[0] : null;
+
+  if (!firstResult?.lat || !firstResult?.lon) {
+    return null;
+  }
+
+  return {
+    latitude: Number(firstResult.lat),
+    longitude: Number(firstResult.lon),
+  };
 }

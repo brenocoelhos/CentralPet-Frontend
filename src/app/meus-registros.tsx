@@ -80,7 +80,7 @@ export default function MeusRegistrosRoute() {
     void loadPets(false);
   }, [loadPets]);
 
-  const handleDelete = async (id: string, nome: string) => {
+  const handleDelete = async (id: string | number, nome: string) => {
     if (!token) {
       Alert.alert(
         "Sessao expirada",
@@ -92,8 +92,8 @@ export default function MeusRegistrosRoute() {
     const deleteRegistro = async () => {
       try {
         Vibration.vibrate(35);
-        await criarApi({ token }).pets.deletePet(id);
-        setPets((prev) => prev.filter((p) => p.id !== id));
+        await criarApi({ token }).pets.deletePet(String(id));
+        setPets((prev) => prev.filter((p) => String(p.id) !== String(id)));
         Vibration.vibrate(20);
       } catch {
         Vibration.vibrate([0, 40, 30, 40]);
@@ -127,7 +127,7 @@ export default function MeusRegistrosRoute() {
     router.push({
       pathname: "/cadastro-pet",
       params: {
-        id: pet.id,
+        id: String(pet.id),
         pet: encodeURIComponent(JSON.stringify(pet)),
       },
     });
@@ -259,7 +259,7 @@ export default function MeusRegistrosRoute() {
         contentContainerStyle={styles.listContent}
         data={pets}
         numColumns={2}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => String(item.id)}
         renderItem={renderCard}
         columnWrapperStyle={styles.gridRow}
         refreshControl={
