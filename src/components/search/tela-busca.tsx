@@ -16,6 +16,7 @@ import {
   FlatList,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   View,
 } from "react-native";
@@ -23,16 +24,27 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { EntradaTextoTema } from "../entrada-texto-tema";
 import { TextoTema as Text } from "../texto-tema";
 
+const SPECIES_FILTERS = [
+  { label: "Cachorro", group: "CACHORRO" },
+  { label: "Gato", group: "GATO" },
+  { label: "Ave", group: "AVE" },
+  { label: "Outros", group: "OUTROS" },
+] as const;
+
+type SpeciesFilterGroup = (typeof SPECIES_FILTERS)[number]["group"];
+
 export default function TelaBusca() {
   const { getApi } = useAutenticacao();
   const [query, setQuery] = useState("");
+  const [selectedSpecies, setSelectedSpecies] = useState<SpeciesFilterGroup | null>(null);
   const [sortByRecent, setSortByRecent] = useState(true);
   const [loading, setLoading] = useState(false);
   const [pets, setPets] = useState<PetDashboardDto[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
 
-  const shouldSearch = hasSearched && query.trim().length > 0;
+  const hasActiveFilters = query.trim().length > 0 || !!selectedSpecies;
+  const shouldSearch = hasSearched && hasActiveFilters;
 
   const sortedPets = useMemo(() => {
     return [...pets].sort((left, right) => {
@@ -47,16 +59,19 @@ export default function TelaBusca() {
     });
   }, [pets, sortByRecent]);
 
-  const handleSearch = async () => {
+  const handleSearch = async (species = selectedSpecies) => {
     const term = query.trim();
-    if (!term) return;
+    if (!term && !species) return;
 
     setHasSearched(true);
 
     try {
       setLoading(true);
       setErrorMessage(null);
-      const result = await getApi().pets.buscaPets({ nome: term });
+      const result = await getApi().pets.buscaPets({
+        termo: term || undefined,
+        grupoEspecie: species ?? undefined,
+      });
       setPets(result.content);
     } catch (error) {
       setPets([]);
@@ -68,11 +83,24 @@ export default function TelaBusca() {
 
   const handleQueryChange = (value: string) => {
     setQuery(value);
-    if (!value.trim()) {
+    if (!value.trim() && !selectedSpecies) {
       setPets([]);
       setHasSearched(false);
       setErrorMessage(null);
     }
+  };
+
+  const handleSpeciesChange = (species: SpeciesFilterGroup | null) => {
+    setSelectedSpecies(species);
+
+    if (query.trim() || species) {
+      void handleSearch(species);
+      return;
+    }
+
+    setPets([]);
+    setHasSearched(false);
+    setErrorMessage(null);
   };
 
   const renderPetCard = ({ item }: { item: PetDashboardDto }) => {
@@ -109,7 +137,7 @@ export default function TelaBusca() {
             placeholderTextColor="#9D988D"
             value={query}
             onChangeText={handleQueryChange}
-            onSubmitEditing={handleSearch}
+            onSubmitEditing={() => void handleSearch()}
             returnKeyType="search"
             style={styles.input}
           />
@@ -117,10 +145,10 @@ export default function TelaBusca() {
         <Pressable
           style={[
             styles.searchButton,
-            !query.trim() && styles.searchButtonDisabled,
+            !hasActiveFilters && styles.searchButtonDisabled,
           ]}
-          onPress={handleSearch}
-          disabled={!query.trim() || loading}
+          onPress={() => void handleSearch()}
+          disabled={!hasActiveFilters || loading}
           accessibilityRole="button"
           accessibilityLabel="Buscar pets"
         >
@@ -128,11 +156,57 @@ export default function TelaBusca() {
         </Pressable>
       </View>
 
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.speciesList}
+      >
+        <Pressable
+          style={[
+            styles.speciesChip,
+            !selectedSpecies && styles.speciesChipActive,
+          ]}
+          onPress={() => handleSpeciesChange(null)}
+          accessibilityRole="button"
+          accessibilityLabel="Buscar todas as especies"
+        >
+          <Text
+            style={[
+              styles.speciesChipText,
+              !selectedSpecies && styles.speciesChipTextActive,
+            ]}
+          >
+            Todos
+          </Text>
+        </Pressable>
+        {SPECIES_FILTERS.map(({ label, group }) => {
+          const isActive = selectedSpecies === group;
+          return (
+            <Pressable
+              key={group}
+              style={[styles.speciesChip, isActive && styles.speciesChipActive]}
+              onPress={() => handleSpeciesChange(isActive ? null : group)}
+              accessibilityRole="button"
+              accessibilityLabel={`Buscar especie ${label}`}
+            >
+              <Text
+                style={[
+                  styles.speciesChipText,
+                  isActive && styles.speciesChipTextActive,
+                ]}
+              >
+                {label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+
       <View style={styles.resultsRow}>
         <Text style={styles.resultsLabel}>
           {shouldSearch
             ? `${sortedPets.length} pets perdidos encontrados`
-            : "Digite para buscar"}
+            : "Digite ou escolha uma especie"}
         </Text>
         <Pressable
           style={styles.sortButton}
@@ -158,7 +232,7 @@ export default function TelaBusca() {
           <Text style={styles.errorText}>{errorMessage}</Text>
           <Pressable
             style={styles.retryButton}
-            onPress={handleSearch}
+            onPress={() => void handleSearch()}
             accessibilityRole="button"
             accessibilityLabel="Tentar buscar novamente"
           >
@@ -253,6 +327,32 @@ const styles = StyleSheet.create({
     color: "#37332D",
     fontSize: 15,
     paddingVertical: Platform.select({ ios: 10, android: 7 }),
+  },
+  speciesList: {
+    gap: 8,
+    paddingRight: 4,
+  },
+  speciesChip: {
+    minHeight: 34,
+    paddingHorizontal: 12,
+    borderRadius: Radius.pill,
+    borderWidth: 1,
+    borderColor: "#DDD5C9",
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  speciesChipActive: {
+    borderColor: AppColors.brand,
+    backgroundColor: "#FFF0E9",
+  },
+  speciesChipText: {
+    color: "#5C544A",
+    fontSize: 12,
+    fontFamily: "Lexend_600SemiBold",
+  },
+  speciesChipTextActive: {
+    color: AppColors.brand,
   },
   resultsRow: {
     marginTop: 2,

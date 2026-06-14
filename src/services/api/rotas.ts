@@ -33,6 +33,7 @@ export type RotasApi = {
   auth: RotasAutenticacao;
   pets: RotasPets;
   notificacoes: RotasNotificacoes;
+  perfil: RotasPerfil;
 };
 
 export const rotasApi: RotasApi = {
@@ -52,5 +53,9 @@ export const rotasApi: RotasApi = {
   },
   notificacoes: {
     registrarToken: "/notificacoes/token",
+  },
+  perfil: {
+    get: "/auth/me",
+    update: "/auth/perfil",
   },
 };

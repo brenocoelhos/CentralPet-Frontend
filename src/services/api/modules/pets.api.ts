@@ -68,10 +68,14 @@ export type PaginatedResponse<T> = {
 };
 
 export type BuscaPetsParams = {
+  termo?: string;
   nome?: string;
   especie?: string;
+  grupoEspecie?: string;
+  raca?: string;
   cor?: string;
   porte?: string;
+  bairro?: string;
   usuarioId?: string;
 };
 
@@ -88,10 +92,14 @@ function toBuscaPetsQuery(params?: Partial<BuscaPetsParams>) {
 
   const searchParams = new URLSearchParams();
 
+  if (params.termo) searchParams.set("termo", params.termo);
   if (params.nome) searchParams.set("nome", params.nome);
   if (params.especie) searchParams.set("especie", params.especie);
+  if (params.grupoEspecie) searchParams.set("grupoEspecie", params.grupoEspecie);
+  if (params.raca) searchParams.set("raca", params.raca);
   if (params.cor) searchParams.set("cor", params.cor);
   if (params.porte) searchParams.set("porte", params.porte);
+  if (params.bairro) searchParams.set("bairro", params.bairro);
   if (params.usuarioId) searchParams.set("usuarioId", params.usuarioId);
 
   const queryString = searchParams.toString();
