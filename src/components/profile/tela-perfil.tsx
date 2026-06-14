@@ -1,24 +1,30 @@
 ﻿import { AppColors, Radius, TouchTarget } from "@/constants/tema";
 import { useAutenticacao } from "@/context/contexto-autenticacao";
 import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
+import * as ImageManipulator from "expo-image-manipulator";
+import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Pressable,
-    RefreshControl,
-    ScrollView,
-    StyleSheet,
-    Switch,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { TextoTema as Text } from "../texto-tema";
 
 function parseCidadeEstado(endereco?: string): string | null {
   if (!endereco) return null;
-  const parts = endereco.split(",").map((s) => s.trim()).filter(Boolean);
+  const parts = endereco
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
   if (parts.length >= 2) {
     return `${parts[parts.length - 2]}, ${parts[parts.length - 1]}`;
   }
@@ -27,14 +33,19 @@ function parseCidadeEstado(endereco?: string): string | null {
 
 export default function TelaPerfil() {
   const router = useRouter();
-  const { user, initializing, logout, getApi } = useAutenticacao();
+  const { user, initializing, logout, getApi, updateUser } = useAutenticacao();
   const profileName =
     user?.displayName?.trim() || user?.email?.split("@")[0] || "Usuario";
 
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
-  const [stats, setStats] = useState({ registros: 0, encontrados: 0, avistamentos: 0 });
+  const [stats, setStats] = useState({
+    registros: 0,
+    encontrados: 0,
+    avistamentos: 0,
+  });
   const [statsLoading, setStatsLoading] = useState(false);
   const [statsError, setStatsError] = useState<string | null>(null);
+  const [uploadingFoto, setUploadingFoto] = useState(false);
 
   const loadStats = useCallback(async () => {
     if (!user) return;
@@ -67,6 +78,57 @@ export default function TelaPerfil() {
     }
   };
 
+  const handlePickProfileImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert(
+        "Permissão necessária",
+        "Precisamos de acesso à sua galeria para alterar a foto.",
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true, // Permite ao utilizador cortar a imagem
+      aspect: [1, 1], // Força um quadrado perfeito
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      try {
+        setUploadingFoto(true);
+        const asset = result.assets[0];
+
+        // Reduz a resolução para poupar largura de banda e tempo
+        const manipResult = await ImageManipulator.manipulateAsync(
+          asset.uri,
+          [{ resize: { width: 500, height: 500 } }],
+          { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG },
+        );
+
+        const api = getApi();
+        // Chama a nova função do perfil.api.ts
+        const response = await (api as any).perfil.uploadFoto(manipResult.uri);
+
+        // Atualiza a imagem no contexto (aparece na hora)
+        updateUser({ fotoPerfil: response.fotoPerfil });
+      } catch (error: any) {
+        console.error("=== ERRO AO SUBIR FOTO DE PERFIL ===");
+        console.error("Mensagem:", error.message);
+        if (error.status) console.error("Status da API:", error.status);
+        if (error.data) console.error("Resposta da API:", error.data);
+
+        Alert.alert(
+          "Erro",
+          "Não foi possível atualizar a foto de perfil. Tente novamente.",
+        );
+      } finally {
+        setUploadingFoto(false);
+      }
+    }
+  };
+
   if (initializing) {
     return (
       <View style={styles.centered}>
@@ -92,10 +154,38 @@ export default function TelaPerfil() {
       {/* Header */}
       <View style={styles.topSection}>
         <View style={styles.avatarWrapper}>
-          <View style={styles.avatarCircle}>
-            <Ionicons name="person-outline" size={36} color="#8A7060" />
-          </View>
-          <Text style={styles.avatarName}>{user ? profileName : "Visitante"}</Text>
+          <TouchableOpacity
+            style={styles.avatarCircle}
+            onPress={handlePickProfileImage}
+            disabled={!user || uploadingFoto}
+            activeOpacity={0.8}
+          >
+            {user?.fotoPerfil ? (
+              <Image
+                source={{ uri: user.fotoPerfil }}
+                style={styles.avatarImage}
+                contentFit="cover"
+              />
+            ) : (
+              <Ionicons name="person-outline" size={36} color="#8A7060" />
+            )}
+
+            {uploadingFoto && (
+              <View style={styles.uploadingOverlay}>
+                <ActivityIndicator color="#FFFFFF" size="small" />
+              </View>
+            )}
+
+            {user && !uploadingFoto && (
+              <View style={styles.editBadge}>
+                <Ionicons name="camera" size={14} color="#FFFFFF" />
+              </View>
+            )}
+          </TouchableOpacity>
+
+          <Text style={styles.avatarName}>
+            {user ? profileName : "Visitante"}
+          </Text>
           {user?.email && <Text style={styles.avatarEmail}>{user.email}</Text>}
           {cidadeEstado && (
             <View style={styles.locationRow}>
@@ -140,7 +230,9 @@ export default function TelaPerfil() {
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Text style={[styles.statValue, styles.statValueGreen]}>{stats.encontrados}</Text>
+              <Text style={[styles.statValue, styles.statValueGreen]}>
+                {stats.encontrados}
+              </Text>
               <Text style={styles.statLabel}>Encontrados</Text>
             </View>
             <View style={styles.statDivider} />
@@ -152,7 +244,10 @@ export default function TelaPerfil() {
           {statsError ? (
             <View style={styles.statsErrorWrap}>
               <Text style={styles.statsErrorText}>{statsError}</Text>
-              <Pressable style={styles.retryButton} onPress={() => void loadStats()}>
+              <Pressable
+                style={styles.retryButton}
+                onPress={() => void loadStats()}
+              >
                 <Text style={styles.retryButtonText}>Tentar novamente</Text>
               </Pressable>
             </View>
@@ -168,8 +263,12 @@ export default function TelaPerfil() {
             <Ionicons name="medkit-outline" size={20} color="#B8B8B8" />
           </View>
           <View style={styles.menuTextWrap}>
-            <Text style={[styles.menuTitle, styles.menuTextDisabled]}>Saude do pet</Text>
-            <Text style={[styles.menuDescription, styles.menuTextDisabled]}>Vacinas, consultas, vermifugo e lembretes (em breve)</Text>
+            <Text style={[styles.menuTitle, styles.menuTextDisabled]}>
+              Saude do pet
+            </Text>
+            <Text style={[styles.menuDescription, styles.menuTextDisabled]}>
+              Vacinas, consultas, vermifugo e lembretes (em breve)
+            </Text>
           </View>
           <Ionicons name="chevron-forward" size={18} color="#D0D0D0" />
         </View>
@@ -185,14 +284,30 @@ export default function TelaPerfil() {
           accessibilityRole="button"
           accessibilityLabel="Abrir meus registros"
         >
-          <View style={[styles.menuIconWrap, !user && styles.menuIconWrapDisabled]}>
-            <Ionicons name="document-text-outline" size={20} color={user ? "#8A7060" : "#B8B8B8"} />
+          <View
+            style={[styles.menuIconWrap, !user && styles.menuIconWrapDisabled]}
+          >
+            <Ionicons
+              name="document-text-outline"
+              size={20}
+              color={user ? "#8A7060" : "#B8B8B8"}
+            />
           </View>
           <View style={styles.menuTextWrap}>
-            <Text style={[styles.menuTitle, !user && styles.menuTextDisabled]}>Meus registros</Text>
-            <Text style={[styles.menuDescription, !user && styles.menuTextDisabled]}>Veja seu historico e atividades</Text>
+            <Text style={[styles.menuTitle, !user && styles.menuTextDisabled]}>
+              Meus registros
+            </Text>
+            <Text
+              style={[styles.menuDescription, !user && styles.menuTextDisabled]}
+            >
+              Veja seu historico e atividades
+            </Text>
           </View>
-          <Ionicons name="chevron-forward" size={18} color={user ? "#B7AE9F" : "#D0D0D0"} />
+          <Ionicons
+            name="chevron-forward"
+            size={18}
+            color={user ? "#B7AE9F" : "#D0D0D0"}
+          />
         </TouchableOpacity>
 
         <View style={styles.menuDivider} />
@@ -206,14 +321,30 @@ export default function TelaPerfil() {
           accessibilityRole="button"
           accessibilityLabel="Abrir contatos de emergencia"
         >
-          <View style={[styles.menuIconWrap, !user && styles.menuIconWrapDisabled]}>
-            <Ionicons name="call-outline" size={20} color={user ? "#8A7060" : "#B8B8B8"} />
+          <View
+            style={[styles.menuIconWrap, !user && styles.menuIconWrapDisabled]}
+          >
+            <Ionicons
+              name="call-outline"
+              size={20}
+              color={user ? "#8A7060" : "#B8B8B8"}
+            />
           </View>
           <View style={styles.menuTextWrap}>
-            <Text style={[styles.menuTitle, !user && styles.menuTextDisabled]}>Contatos de emergência</Text>
-            <Text style={[styles.menuDescription, !user && styles.menuTextDisabled]}>Vet, abrigos e pessoas de confiança</Text>
+            <Text style={[styles.menuTitle, !user && styles.menuTextDisabled]}>
+              Contatos de emergência
+            </Text>
+            <Text
+              style={[styles.menuDescription, !user && styles.menuTextDisabled]}
+            >
+              Vet, abrigos e pessoas de confiança
+            </Text>
           </View>
-          <Ionicons name="chevron-forward" size={18} color={user ? "#B7AE9F" : "#D0D0D0"} />
+          <Ionicons
+            name="chevron-forward"
+            size={18}
+            color={user ? "#B7AE9F" : "#D0D0D0"}
+          />
         </TouchableOpacity>
 
         <View style={styles.menuDivider} />
@@ -224,26 +355,54 @@ export default function TelaPerfil() {
           activeOpacity={user ? 0.85 : 1}
           disabled={!user}
         >
-          <View style={[styles.menuIconWrap, !user && styles.menuIconWrapDisabled]}>
-            <Ionicons name="eye-outline" size={20} color={user ? "#8A7060" : "#B8B8B8"} />
+          <View
+            style={[styles.menuIconWrap, !user && styles.menuIconWrapDisabled]}
+          >
+            <Ionicons
+              name="eye-outline"
+              size={20}
+              color={user ? "#8A7060" : "#B8B8B8"}
+            />
           </View>
           <View style={styles.menuTextWrap}>
-            <Text style={[styles.menuTitle, !user && styles.menuTextDisabled]}>Histórico de avistamentos</Text>
-            <Text style={[styles.menuDescription, !user && styles.menuTextDisabled]}>Reportes que você enviou</Text>
+            <Text style={[styles.menuTitle, !user && styles.menuTextDisabled]}>
+              Histórico de avistamentos
+            </Text>
+            <Text
+              style={[styles.menuDescription, !user && styles.menuTextDisabled]}
+            >
+              Reportes que você enviou
+            </Text>
           </View>
-          <Ionicons name="chevron-forward" size={18} color={user ? "#B7AE9F" : "#D0D0D0"} />
+          <Ionicons
+            name="chevron-forward"
+            size={18}
+            color={user ? "#B7AE9F" : "#D0D0D0"}
+          />
         </TouchableOpacity>
 
         <View style={styles.menuDivider} />
 
         {/* Notificações com toggle */}
         <View style={[styles.menuItem, !user && styles.menuItemDisabled]}>
-          <View style={[styles.menuIconWrap, !user && styles.menuIconWrapDisabled]}>
-            <Ionicons name="notifications-outline" size={20} color={user ? "#8A7060" : "#B8B8B8"} />
+          <View
+            style={[styles.menuIconWrap, !user && styles.menuIconWrapDisabled]}
+          >
+            <Ionicons
+              name="notifications-outline"
+              size={20}
+              color={user ? "#8A7060" : "#B8B8B8"}
+            />
           </View>
           <View style={styles.menuTextWrap}>
-            <Text style={[styles.menuTitle, !user && styles.menuTextDisabled]}>Notificações</Text>
-            <Text style={[styles.menuDescription, !user && styles.menuTextDisabled]}>Alertas de pets na região</Text>
+            <Text style={[styles.menuTitle, !user && styles.menuTextDisabled]}>
+              Notificações
+            </Text>
+            <Text
+              style={[styles.menuDescription, !user && styles.menuTextDisabled]}
+            >
+              Alertas de pets na região
+            </Text>
           </View>
           <Switch
             value={notificationsEnabled}
@@ -266,14 +425,30 @@ export default function TelaPerfil() {
           accessibilityRole="button"
           accessibilityLabel="Sair da conta"
         >
-          <View style={[styles.menuIconWrap, !user && styles.menuIconWrapDisabled]}>
-            <Ionicons name="log-out-outline" size={20} color={user ? "#8A7060" : "#B8B8B8"} />
+          <View
+            style={[styles.menuIconWrap, !user && styles.menuIconWrapDisabled]}
+          >
+            <Ionicons
+              name="log-out-outline"
+              size={20}
+              color={user ? "#8A7060" : "#B8B8B8"}
+            />
           </View>
           <View style={styles.menuTextWrap}>
-            <Text style={[styles.menuTitle, !user && styles.menuTextDisabled]}>Sair</Text>
-            <Text style={[styles.menuDescription, !user && styles.menuTextDisabled]}>Encerrar sessao da conta atual</Text>
+            <Text style={[styles.menuTitle, !user && styles.menuTextDisabled]}>
+              Sair
+            </Text>
+            <Text
+              style={[styles.menuDescription, !user && styles.menuTextDisabled]}
+            >
+              Encerrar sessao da conta atual
+            </Text>
           </View>
-          <Ionicons name="chevron-forward" size={18} color={user ? "#B7AE9F" : "#D0D0D0"} />
+          <Ionicons
+            name="chevron-forward"
+            size={18}
+            color={user ? "#B7AE9F" : "#D0D0D0"}
+          />
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -311,6 +486,36 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 12,
+    position: "relative",
+  },
+  avatarImage: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+  },
+  editBadge: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    backgroundColor: AppColors.brand,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#FFFFFF",
+  },
+  uploadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    borderRadius: 44,
+    justifyContent: "center",
+    alignItems: "center",
   },
   avatarName: {
     fontSize: 20,

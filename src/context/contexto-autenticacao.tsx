@@ -1,17 +1,25 @@
-﻿import { auth, hasFirebaseConfig, missingFirebaseConfigKeys } from "@/lib/firebase";
+﻿import {
+  auth,
+  hasFirebaseConfig,
+  missingFirebaseConfigKeys,
+} from "@/lib/firebase";
 import { criarApi } from "@/services/api";
 import type { LoginResponse } from "@/services/api/modules/autenticacao.api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { onAuthStateChanged, signOut, type User as FirebaseUser } from "firebase/auth";
 import {
-    createContext,
-    useCallback,
-    useContext,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-    type PropsWithChildren,
+  onAuthStateChanged,
+  signOut,
+  type User as FirebaseUser,
+} from "firebase/auth";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type PropsWithChildren,
 } from "react";
 import { AppState, Platform } from "react-native";
 
@@ -26,6 +34,7 @@ export type UsuarioAutenticado = {
   email?: string;
   displayName?: string;
   endereco?: string;
+  fotoPerfil?: string; // NOVO CAMPO
   emailVerified?: boolean;
   provider: "jwt" | "firebase";
 };
@@ -36,9 +45,13 @@ type ValorContextoAutenticacao = {
   initializing: boolean;
   hasFirebaseConfig: boolean;
   missingConfigKeys: string[];
-  signInWithToken: (token: string, loginPayload?: LoginResponse) => Promise<void>;
+  signInWithToken: (
+    token: string,
+    loginPayload?: LoginResponse,
+  ) => Promise<void>;
   getApi: () => ReturnType<typeof criarApi>;
   logout: () => Promise<void>;
+  updateUser: (data: Partial<UsuarioAutenticado>) => void; // NOVA FUNÇÃO
 };
 
 const AuthContext = createContext<ValorContextoAutenticacao | null>(null);
@@ -58,6 +71,11 @@ export function ProvedorAutenticacao({ children }: PropsWithChildren) {
 
   const updateActivity = useCallback(() => {
     void AsyncStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now()));
+  }, []);
+
+  // Permite atualizar dados locais sem recarregar tudo
+  const updateUser = useCallback((data: Partial<UsuarioAutenticado>) => {
+    setUser((prev) => (prev ? { ...prev, ...data } : null));
   }, []);
 
   useEffect(() => {
@@ -130,26 +148,36 @@ export function ProvedorAutenticacao({ children }: PropsWithChildren) {
     };
   }, []);
 
-  const signInWithToken = useCallback(async (nextToken: string, loginPayload?: LoginResponse) => {
-    let currentUser: UsuarioAutenticado;
+  const signInWithToken = useCallback(
+    async (nextToken: string, loginPayload?: any) => {
+      let currentUser: UsuarioAutenticado;
 
-    if (loginPayload && typeof loginPayload === "object" && "token" in loginPayload) {
-      const fromPayload = normalizeLoginPayload(loginPayload, nextToken);
-      currentUser = fromPayload ?? (await fetchJwtUser(nextToken));
-    } else {
-      currentUser = await fetchJwtUser(nextToken);
-    }
+      if (
+        loginPayload &&
+        typeof loginPayload === "object" &&
+        "token" in loginPayload
+      ) {
+        const fromPayload = normalizeLoginPayload(loginPayload, nextToken);
+        currentUser = fromPayload ?? (await fetchJwtUser(nextToken));
+      } else {
+        currentUser = await fetchJwtUser(nextToken);
+      }
 
-    await AsyncStorage.multiSet([
-      [TOKEN_STORAGE_KEY, nextToken],
-      [USER_ID_STORAGE_KEY, currentUser.id],
-      [LAST_ACTIVITY_KEY, String(Date.now())],
-    ]);
-    setToken(nextToken);
-    setUser(currentUser);
-  }, []);
+      await AsyncStorage.multiSet([
+        [TOKEN_STORAGE_KEY, nextToken],
+        [USER_ID_STORAGE_KEY, currentUser.id],
+        [LAST_ACTIVITY_KEY, String(Date.now())],
+      ]);
+      setToken(nextToken);
+      setUser(currentUser);
+    },
+    [],
+  );
 
-  const getApi = useCallback(() => criarApi({ token: token ?? undefined }), [token]);
+  const getApi = useCallback(
+    () => criarApi({ token: token ?? undefined }),
+    [token],
+  );
 
   const logout = useCallback(async () => {
     if (token) {
@@ -180,7 +208,10 @@ export function ProvedorAutenticacao({ children }: PropsWithChildren) {
     const sub = AppState.addEventListener("change", async (nextState) => {
       if (nextState === "active" && tokenRef.current) {
         const lastStr = await AsyncStorage.getItem(LAST_ACTIVITY_KEY);
-        if (lastStr && Date.now() - parseInt(lastStr, 10) > INACTIVITY_TIMEOUT_MS) {
+        if (
+          lastStr &&
+          Date.now() - parseInt(lastStr, 10) > INACTIVITY_TIMEOUT_MS
+        ) {
           await forceLogout();
         } else {
           updateActivity();
@@ -240,8 +271,9 @@ export function ProvedorAutenticacao({ children }: PropsWithChildren) {
       signInWithToken,
       getApi,
       logout,
+      updateUser,
     }),
-    [initializing, logout, getApi, signInWithToken, token, user],
+    [initializing, logout, getApi, signInWithToken, token, user, updateUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -278,7 +310,9 @@ function mapFirebaseUser(user: FirebaseUser): UsuarioAutenticado {
   };
 }
 
-function normalizeApiUser(payload: Record<string, unknown>): UsuarioAutenticado | null {
+function normalizeApiUser(
+  payload: Record<string, unknown>,
+): UsuarioAutenticado | null {
   const id =
     readString(payload.id) ??
     readString(payload.usuarioId) ??
@@ -299,7 +333,11 @@ function normalizeApiUser(payload: Record<string, unknown>): UsuarioAutenticado 
     email: readString(payload.email),
     displayName,
     endereco: readString(payload.endereco),
-    emailVerified: typeof payload.emailVerified === "boolean" ? payload.emailVerified : undefined,
+    fotoPerfil: readString(payload.fotoPerfil),
+    emailVerified:
+      typeof payload.emailVerified === "boolean"
+        ? payload.emailVerified
+        : undefined,
     provider: "jwt",
   };
 }
@@ -309,7 +347,14 @@ function readString(value: unknown): string | undefined {
 }
 
 function normalizeLoginPayload(
-  payload: { token: string; nome?: string; email?: string; id?: string; usuarioId?: string },
+  payload: {
+    token: string;
+    nome?: string;
+    email?: string;
+    id?: string;
+    usuarioId?: string;
+    fotoPerfil?: string;
+  },
   _token: string,
 ): UsuarioAutenticado | null {
   const id = payload.id ?? payload.usuarioId;
@@ -323,10 +368,15 @@ function normalizeLoginPayload(
     uid: id,
     email: payload.email,
     displayName: payload.nome,
+    fotoPerfil: payload.fotoPerfil,
     provider: "jwt",
   };
 }
 
 async function clearStoredSession() {
-  await AsyncStorage.multiRemove([TOKEN_STORAGE_KEY, USER_ID_STORAGE_KEY, LAST_ACTIVITY_KEY]);
+  await AsyncStorage.multiRemove([
+    TOKEN_STORAGE_KEY,
+    USER_ID_STORAGE_KEY,
+    LAST_ACTIVITY_KEY,
+  ]);
 }
