@@ -25,6 +25,8 @@ type DetailItem = {
   reward?: boolean;
   lastSeenDate?: string;
   lastSeenAddress?: string;
+  latitude?: number;
+  longitude?: number;
   color?: string;
   castrated?: boolean;
   vaccinated?: boolean;
@@ -146,7 +148,7 @@ function mapPetToDetailItem(item: PetDashboardDto): DetailItem {
   const photos = item.imagens?.length ? item.imagens : item.fotoUrl ? [item.fotoUrl] : undefined;
 
   return {
-    id: item.id,
+    id: String(item.id),
     status: hasFoundKeyword ? "ENCONTRADO" : "PERDIDO",
     time: item.dataCadastro ?? item.dataDesaparecimento,
     name: item.nome,
@@ -163,6 +165,8 @@ function mapPetToDetailItem(item: PetDashboardDto): DetailItem {
     reward: item.recompensa ?? false,
     lastSeenDate: item.dataDesaparecimento,
     lastSeenAddress: item.localDesaparecimento,
+    latitude: item.latitude,
+    longitude: item.longitude,
     color: item.cor,
     castrated: item.castrado ?? false,
     vaccinated: item.vacinado ?? false,

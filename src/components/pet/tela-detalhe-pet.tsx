@@ -1,7 +1,8 @@
 ﻿import { Radius, TouchTarget } from "@/constants/tema";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import * as Linking from "expo-linking";
-import { useState } from "react";
+import { router } from "expo-router";
+import { useEffect, useState } from "react";
 import {
   Alert,
   Dimensions,
@@ -14,6 +15,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Svg, { Circle, G, Line, Path, Rect } from "react-native-svg";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Occurrence = {
@@ -34,6 +36,8 @@ type Occurrence = {
   reward?: boolean;
   lastSeenDate?: string;
   lastSeenAddress?: string;
+  latitude?: number;
+  longitude?: number;
   color?: string;
   castrated?: boolean;
   vaccinated?: boolean;
@@ -93,6 +97,161 @@ const SectionTitle = ({ title }: { title: string }) => (
   <Text style={styles.sectionTitle}>{title}</Text>
 );
 
+type HugeIconElement = readonly [
+  string,
+  { readonly [key: string]: string | number },
+];
+
+const MAPS_ICON: readonly HugeIconElement[] = [
+  [
+    "path",
+    {
+      d: "M5.25345 4.19584L4.02558 4.90813C3.03739 5.48137 2.54329 5.768 2.27164 6.24483C2 6.72165 2 7.30233 2 8.46368V16.6283C2 18.1542 2 18.9172 2.34226 19.3418C2.57001 19.6244 2.88916 19.8143 3.242 19.8773C3.77226 19.9719 4.42148 19.5953 5.71987 18.8421C6.60156 18.3306 7.45011 17.7994 8.50487 17.9435C8.98466 18.009 9.44231 18.2366 10.3576 18.6917L14.1715 20.588C14.9964 20.9982 15.004 21 15.9214 21H18C19.8856 21 20.8284 21 21.4142 20.4013C22 19.8026 22 18.8389 22 16.9117V10.1715C22 8.24423 22 7.2806 21.4142 6.68188C20.8284 6.08316 19.8856 6.08316 18 6.08316H15.9214C15.004 6.08316 14.9964 6.08139 14.1715 5.6712L10.8399 4.01463C9.44884 3.32297 8.75332 2.97714 8.01238 3.00117C7.27143 3.02521 6.59877 3.41542 5.25345 4.19584Z",
+      stroke: "currentColor",
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      strokeWidth: "1.5",
+    },
+  ],
+  [
+    "path",
+    {
+      d: "M8 3L8 17.5",
+      stroke: "currentColor",
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      strokeWidth: "1.5",
+    },
+  ],
+  [
+    "path",
+    {
+      d: "M15 6.5L15 20.5",
+      stroke: "currentColor",
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      strokeWidth: "1.5",
+    },
+  ],
+];
+
+const HUGE_ICON_COMPONENTS: Record<string, any> = {
+  path: Path,
+  circle: Circle,
+  rect: Rect,
+  line: Line,
+  g: G,
+};
+
+function HugeIcon({
+  icon,
+  size,
+  color,
+  strokeWidth,
+}: {
+  icon: readonly HugeIconElement[];
+  size: number;
+  color: string;
+  strokeWidth?: number;
+}) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      {icon.map(([tag, attrs], index) => {
+        const Component = HUGE_ICON_COMPONENTS[tag.toLowerCase()];
+        if (!Component) return null;
+
+        return (
+          <Component
+            {...attrs}
+            key={`${tag}-${index}`}
+            stroke={attrs.stroke === "currentColor" ? color : attrs.stroke}
+            fill={attrs.fill === "currentColor" ? color : attrs.fill}
+            strokeWidth={strokeWidth ?? attrs.strokeWidth}
+          />
+        );
+      })}
+    </Svg>
+  );
+}
+
+const LastSeenMapButton = ({
+  name,
+  address,
+  latitude,
+  longitude,
+}: {
+  name: string;
+  address?: string;
+  latitude?: number;
+  longitude?: number;
+}) => {
+  const [resolvedCoordinate, setResolvedCoordinate] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    if (typeof latitude === "number" && typeof longitude === "number") {
+      setResolvedCoordinate({ latitude, longitude });
+      return;
+    }
+
+    if (!address?.trim()) {
+      setResolvedCoordinate(null);
+      return;
+    }
+
+    const resolveAddress = async () => {
+      const coords = await geocodificarEndereco(address);
+      if (mounted) {
+        setResolvedCoordinate(coords);
+      }
+    };
+
+    void resolveAddress();
+
+    return () => {
+      mounted = false;
+    };
+  }, [address, latitude, longitude]);
+
+  const openMap = async () => {
+    if (!resolvedCoordinate && !address?.trim()) {
+      Alert.alert("Mapa indisponivel", "Nao encontramos um endereco para abrir no mapa.");
+      return;
+    }
+
+    router.push({
+      pathname: "/mapa",
+      params: {
+        nome: name,
+        endereco: address ?? "",
+        latitude: resolvedCoordinate ? String(resolvedCoordinate.latitude) : "",
+        longitude: resolvedCoordinate ? String(resolvedCoordinate.longitude) : "",
+      },
+    });
+  };
+
+  return (
+    <TouchableOpacity
+      style={styles.mapButton}
+      activeOpacity={0.85}
+      onPress={() => void openMap()}
+      accessibilityRole="button"
+      accessibilityLabel={`Abrir mapa do ultimo avistamento de ${name}`}
+    >
+      <HugeIcon
+        icon={MAPS_ICON}
+        size={22}
+        color={ORANGE}
+        strokeWidth={1.8}
+      />
+    </TouchableOpacity>
+  );
+};
+
 function formatDisplayDate(value?: string): string {
   if (!value) {
     return "";
@@ -117,6 +276,36 @@ function formatDisplayDate(value?: string): string {
   }
 
   return value;
+}
+
+async function geocodificarEndereco(
+  endereco: string,
+): Promise<{ latitude: number; longitude: number } | null> {
+  const cleanAddress = endereco.trim();
+  if (!cleanAddress) {
+    return null;
+  }
+
+  try {
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(
+        `${cleanAddress} Brasil`,
+      )}`,
+    );
+    const data = await response.json();
+    const firstResult = Array.isArray(data) ? data[0] : null;
+
+    if (!firstResult?.lat || !firstResult?.lon) {
+      return null;
+    }
+
+    return {
+      latitude: Number(firstResult.lat),
+      longitude: Number(firstResult.lon),
+    };
+  } catch {
+    return null;
+  }
 }
 
 function formatDisplayDateTime(value?: string): string {
@@ -365,11 +554,21 @@ export default function TelaDetalhePet({ item }: PetDetailScreenProps) {
               }
             />
             <View style={styles.infoSeparator} />
-            <InfoRow
-              icon="location-outline"
-              label="Endereço"
-              value={item.lastSeenAddress ?? item.neighborhood}
-            />
+            <View style={styles.lastSeenLocationRow}>
+              <View style={styles.lastSeenAddress}>
+                <InfoRow
+                  icon="location-outline"
+                  label="Endereço"
+                  value={item.lastSeenAddress ?? item.neighborhood}
+                />
+              </View>
+              <LastSeenMapButton
+                name={item.name}
+                address={item.lastSeenAddress ?? item.neighborhood}
+                latitude={item.latitude}
+                longitude={item.longitude}
+              />
+            </View>
           </View>
         </View>
 
@@ -657,7 +856,26 @@ const styles = StyleSheet.create({
     backgroundColor: "#E0DBD6",
     marginVertical: 10,
   },
-
+  lastSeenLocationRow: {
+    flexDirection: "row",
+    alignItems: "stretch",
+    gap: 10,
+  },
+  lastSeenAddress: {
+    flex: 1,
+    minWidth: 0,
+    justifyContent: "center",
+  },
+  mapButton: {
+    width: TouchTarget.min,
+    height: TouchTarget.min,
+    borderRadius: Radius.round,
+    borderWidth: 1,
+    borderColor: "#F0C9BA",
+    backgroundColor: "#FFF7F2",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   // Owner
   ownerRow: {
     flexDirection: "row",

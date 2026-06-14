@@ -38,11 +38,7 @@ export default function TelaPerfil() {
     user?.displayName?.trim() || user?.email?.split("@")[0] || "Usuario";
 
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
-  const [stats, setStats] = useState({
-    registros: 0,
-    encontrados: 0,
-    avistamentos: 0,
-  });
+  const [stats, setStats] = useState({ registros: 0, encontrados: 0 });
   const [statsLoading, setStatsLoading] = useState(false);
   const [statsError, setStatsError] = useState<string | null>(null);
   const [uploadingFoto, setUploadingFoto] = useState(false);
@@ -235,11 +231,6 @@ export default function TelaPerfil() {
               </Text>
               <Text style={styles.statLabel}>Encontrados</Text>
             </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{stats.avistamentos}</Text>
-              <Text style={styles.statLabel}>Avistamentos</Text>
-            </View>
           </View>
           {statsError ? (
             <View style={styles.statsErrorWrap}>
@@ -294,14 +285,8 @@ export default function TelaPerfil() {
             />
           </View>
           <View style={styles.menuTextWrap}>
-            <Text style={[styles.menuTitle, !user && styles.menuTextDisabled]}>
-              Meus registros
-            </Text>
-            <Text
-              style={[styles.menuDescription, !user && styles.menuTextDisabled]}
-            >
-              Veja seu historico e atividades
-            </Text>
+            <Text style={[styles.menuTitle, !user && styles.menuTextDisabled]}>Meus registros</Text>
+            <Text style={[styles.menuDescription, !user && styles.menuTextDisabled]}>Veja e edite seus pets cadastrados</Text>
           </View>
           <Ionicons
             name="chevron-forward"
@@ -355,30 +340,14 @@ export default function TelaPerfil() {
           activeOpacity={user ? 0.85 : 1}
           disabled={!user}
         >
-          <View
-            style={[styles.menuIconWrap, !user && styles.menuIconWrapDisabled]}
-          >
-            <Ionicons
-              name="eye-outline"
-              size={20}
-              color={user ? "#8A7060" : "#B8B8B8"}
-            />
+          <View style={[styles.menuIconWrap, !user && styles.menuIconWrapDisabled]}>
+            <Ionicons name="eye-outline" size={20} color={user ? "#8A7060" : "#B8B8B8"} />
           </View>
           <View style={styles.menuTextWrap}>
-            <Text style={[styles.menuTitle, !user && styles.menuTextDisabled]}>
-              Histórico de avistamentos
-            </Text>
-            <Text
-              style={[styles.menuDescription, !user && styles.menuTextDisabled]}
-            >
-              Reportes que você enviou
-            </Text>
+            <Text style={[styles.menuTitle, !user && styles.menuTextDisabled]}>Histórico de avistamentos</Text>
+            <Text style={[styles.menuDescription, !user && styles.menuTextDisabled]}>Reportes que você enviou</Text>
           </View>
-          <Ionicons
-            name="chevron-forward"
-            size={18}
-            color={user ? "#B7AE9F" : "#D0D0D0"}
-          />
+          <Ionicons name="chevron-forward" size={18} color={user ? "#B7AE9F" : "#D0D0D0"} />
         </TouchableOpacity>
 
         <View style={styles.menuDivider} />

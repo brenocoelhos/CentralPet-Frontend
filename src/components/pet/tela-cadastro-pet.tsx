@@ -1,13 +1,13 @@
 import { useAutenticacao } from "@/context/contexto-autenticacao";
 import { criarApi } from "@/services/api";
 import { exibirAlertaErroApi } from "@/utils/alerta-erro-api";
-import { maskCEP, maskDate, maskPhone, validaData } from "@/utils/validadores";
+import { maskCEP, maskDate, maskPhone } from "@/utils/validadores";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import * as ImageManipulator from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -24,6 +24,7 @@ import {
 } from "react-native";
 import { EntradaTextoTema } from "../entrada-texto-tema";
 import { TextoTema } from "../texto-tema";
+import type { PetDashboardDto } from "@/services/api/modules/pets.api";
 
 // Lista rica para o autocomplete de espécies conhecidas
 const ALL_SPECIES = [
@@ -34,6 +35,12 @@ const ALL_SPECIES = [
 ];
 
 const SIZE_OPTIONS = ["Pequeno", "Médio", "Grande"];
+
+type PetPhoto = {
+  uri: string;
+  file?: Blob;
+  isLocal?: boolean;
+};
 
 function SelectField({
   label,
@@ -112,14 +119,11 @@ function NotLoggedInGate() {
 
 export default function TelaCadastroPet() {
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id?: string }>(); // Se houver 'id', vira tela de EDIÇÃO
+  const { id, pet } = useLocalSearchParams<{ id?: string; pet?: string }>(); // Se houver 'id', vira tela de EDIÇÃO
   const isEditing = !!id;
+  const petInicial = useMemo(() => parsePetParam(pet), [pet]);
 
   const { user, token } = useAutenticacao();
-
-  if (!user) {
-    return <NotLoggedInGate />;
-  }
 
   const [name, setName] = useState("");
   const [species, setSpecies] = useState("");
@@ -140,49 +144,61 @@ export default function TelaCadastroPet() {
   const [castrated, setCastrated] = useState(false);
   const [vaccinated, setVaccinated] = useState(false);
   const [hasReward, setHasReward] = useState(false);
-  const [photos, setPhotos] = useState<string[]>([]);
+  const [photos, setPhotos] = useState<PetPhoto[]>([]);
   const [loading, setLoading] = useState(false);
   const [fetchingCep, setFetchingCep] = useState(false);
+  const [cepInvalido, setCepInvalido] = useState(false);
+  const [cepError, setCepError] = useState("");
+  const [dateError, setDateError] = useState("");
 
-  // Carregar dados iniciais em modo de EDIÇÃO
+  const preencherDadosPet = (petData: PetDashboardDto) => {
+    setName(petData.nome || "");
+    setSpecies(petData.especie || "");
+    setBreed(petData.raca || "");
+    setColor(petData.cor || "");
+    setSize(petData.porte === "Medio" ? "Médio" : petData.porte || "Médio");
+    setIdade((petData as any).idade || "");
+    setCep((petData as any).cep || "");
+    setCepInvalido(false);
+    setCepError("");
+    setDateError("");
+    setLocation(petData.localDesaparecimento || "");
+    setDescriptionChips(petData.descricao || []);
+    setPhone(maskPhone(petData.telefoneTutor || ""));
+    setCastrated(!!petData.castrado);
+    setVaccinated(!!petData.vacinado);
+    setHasReward(!!petData.recompensa);
+
+    if (petData.imagens && petData.imagens.length > 0) {
+      setPhotos(petData.imagens.map((uri) => ({ uri })));
+    } else if (petData.fotoUrl) {
+      setPhotos([{ uri: petData.fotoUrl }]);
+    }
+
+    if (petData.dataDesaparecimento) {
+      const parts = petData.dataDesaparecimento.split("T")[0].split("-");
+      if (parts.length === 3) {
+        setDisappearanceDate(`${parts[2]}/${parts[1]}/${parts[0]}`);
+      }
+    }
+  };
+
+  // Carregar dados iniciais em modo de edição
   useEffect(() => {
+    if (isEditing && petInicial) {
+      preencherDadosPet(petInicial);
+      return;
+    }
+
     if (isEditing && token && id) {
       const carregarDadosPet = async () => {
         try {
           setLoading(true);
           const apiClient = criarApi({ token });
           const petData = await apiClient.pets.buscarPetPorId(id);
-          
-          setName(petData.nome || "");
-          setSpecies(petData.especie || "");
-          setBreed(petData.raca || "");
-          setColor(petData.cor || "");
-          setSize(petData.porte === "Medio" ? "Médio" : petData.porte || "Médio");
-          setIdade((petData as any).idade || "");
-          setCep((petData as any).cep || "");
-          setLocation(petData.localDesaparecimento || "");
-          setDescriptionChips(petData.descricao || []);
-          setPhone(maskPhone(petData.telefoneTutor || ""));
-          setCastrated(!!petData.castrado);
-          setVaccinated(!!petData.vacinado);
-          setHasReward(!!petData.recompensa);
-          
-          // Se existirem imagens associadas na API, preenchemos
-          if (petData.imagens && petData.imagens.length > 0) {
-            setPhotos(petData.imagens);
-          } else if (petData.fotoUrl) {
-            setPhotos([petData.fotoUrl]);
-          }
-
-          // Converter a data vinda da API (AAAA-MM-DD) para formato visual (DD/MM/AAAA)
-          if (petData.dataDesaparecimento) {
-            const parts = petData.dataDesaparecimento.split("T")[0].split("-");
-            if (parts.length === 3) {
-              setDisappearanceDate(`${parts[2]}/${parts[1]}/${parts[0]}`);
-            }
-          }
+          preencherDadosPet(petData);
         } catch (error) {
-          Alert.alert("Erro", "Não foi possível carregar os dados do pet.");
+          Alert.alert("Erro", "Nao foi possivel carregar os dados do pet.");
           router.back();
         } finally {
           setLoading(false);
@@ -190,7 +206,10 @@ export default function TelaCadastroPet() {
       };
       carregarDadosPet();
     }
-  }, [isEditing, id, token]);
+  }, [isEditing, id, token, petInicial]);
+  if (!user) {
+    return <NotLoggedInGate />;
+  }
 
   // Manipular autocomplete da Espécie
   const handleSpeciesChange = (text: string) => {
@@ -211,6 +230,8 @@ export default function TelaCadastroPet() {
   const handleCepChange = async (value: string) => {
     const masked = maskCEP(value);
     setCep(masked);
+    setCepInvalido(false);
+    setCepError("");
 
     const cleanCep = value.replace(/\D/g, "");
     if (cleanCep.length === 8) {
@@ -223,30 +244,24 @@ export default function TelaCadastroPet() {
           const enderecoFormatado = `${data.logradouro ? data.logradouro + ", " : ""}${data.bairro ? data.bairro + " - " : ""}${data.localidade}/${data.uf}`;
           setLocation(enderecoFormatado);
 
-          // Geocodificar com Google para obter lat/lng
-          const geoKey = process.env.EXPO_PUBLIC_GOOGLE_GEOCODING_API_KEY;
-          if (geoKey) {
-            try {
-              const geoQuery = encodeURIComponent(
-                `${data.logradouro || ""} ${data.bairro || ""} ${data.localidade} ${data.uf} Brasil`.trim()
-              );
-              const geoResponse = await fetch(
-                `https://maps.googleapis.com/maps/api/geocode/json?address=${geoQuery}&key=${geoKey}`
-              );
-              const geoData = await geoResponse.json();
-              if (geoData.status === "OK" && geoData.results.length > 0) {
-                const loc = geoData.results[0].geometry.location;
-                setLatitude(loc.lat);
-                setLongitude(loc.lng);
-              }
-            } catch (geoErr) {
-              console.log("Erro ao geocodificar:", geoErr);
+          try {
+            const coords = await geocodificarEndereco(
+              `${data.logradouro || ""} ${data.bairro || ""} ${data.localidade} ${data.uf} Brasil`.trim(),
+            );
+            if (coords) {
+              setLatitude(coords.latitude);
+              setLongitude(coords.longitude);
             }
+          } catch (geoErr) {
+            console.log("Erro ao geocodificar:", geoErr);
           }
         } else {
-          Alert.alert("Aviso", "CEP não encontrado.");
+          setCepInvalido(true);
+          setCepError("Informe um CEP valido.");
         }
       } catch (err) {
+        setCepInvalido(true);
+        setCepError("Nao foi possivel validar esse CEP.");
         console.log("Erro ao buscar ViaCEP:", err);
       } finally {
         setFetchingCep(false);
@@ -255,11 +270,14 @@ export default function TelaCadastroPet() {
   };
 
   const pickPhoto = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("Permissão necessária", "Precisamos de acesso à sua galeria.");
-      return;
+    if (Platform.OS !== "web") {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permissao necessaria", "Precisamos de acesso a sua galeria.");
+        return;
+      }
     }
+
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
       allowsMultipleSelection: true,
@@ -270,18 +288,27 @@ export default function TelaCadastroPet() {
     if (!result.canceled) {
       setLoading(true);
       try {
-        const processadas: string[] = [];
+        const processadas: PetPhoto[] = [];
         for (const asset of result.assets) {
+          if (Platform.OS === "web") {
+            processadas.push({
+              uri: asset.uri,
+              file: (asset as ImagePicker.ImagePickerAsset & { file?: Blob }).file,
+              isLocal: true,
+            });
+            continue;
+          }
+
           const manipResult = await ImageManipulator.manipulateAsync(
             asset.uri,
             [{ resize: { width: 1080 } }],
             { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG },
           );
-          processadas.push(manipResult.uri);
+          processadas.push({ uri: manipResult.uri, isLocal: true });
         }
         setPhotos((prev) => [...prev, ...processadas].slice(0, 6));
       } catch (error) {
-        Alert.alert("Erro", "Não foi possível processar as imagens.");
+        Alert.alert("Erro", "Nao foi possivel processar as imagens.");
       } finally {
         setLoading(false);
       }
@@ -304,25 +331,53 @@ export default function TelaCadastroPet() {
     setDescriptionChips((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const validateCepField = () => {
+    const cleanCep = cep.replace(/\D/g, "");
+    if (!cep.trim()) {
+      setCepError("");
+      return true;
+    }
+    if (cleanCep.length !== 8 || cepInvalido) {
+      setCepError("Informe um CEP valido.");
+      return false;
+    }
+    setCepError("");
+    return true;
+  };
+
+  const validateDisappearanceDateField = () => {
+    if (!disappearanceDate.trim()) {
+      setDateError("");
+      return true;
+    }
+    if (!validaDataDesaparecimento(disappearanceDate)) {
+      setDateError("Use uma data de hoje ou dos ultimos 5 anos.");
+      return false;
+    }
+    setDateError("");
+    return true;
+  };
+
   const handleSubmit = async () => {
     if (!token) {
       Alert.alert("Sessão expirada", "Entre novamente para continuar.");
       return;
     }
-    if (photos.length < 2) {
-      Alert.alert("Fotos obrigatórias", "Adicione pelo menos 2 fotos do animal.");
+    if (photos.length < 1) {
+      Alert.alert("Foto obrigatória", "Adicione pelo menos 1 foto do animal.");
       return;
     }
     // Removido !breed (Raça) da validação de obrigatoriedade
     if (!name || !species || !disappearanceDate || !location || !phone) {
-      Alert.alert("Campos obrigatórios", "Preencha todos os campos obrigatórios marcados com *.");
+      Alert.alert("Campos obrigatorios", "Preencha todos os campos obrigatorios marcados com *.");
       return;
     }
-    if (!validaData(disappearanceDate)) {
-      Alert.alert("Data inválida", "A data de desaparecimento inserida não é válida ou está no futuro.");
+    if (!validateCepField()) {
       return;
     }
-
+    if (!validateDisappearanceDateField()) {
+      return;
+    }
     try {
       setLoading(true);
       const apiClient = criarApi({ token });
@@ -377,12 +432,18 @@ export default function TelaCadastroPet() {
 
       // Faz upload de novas fotos adicionadas locais (que começam com 'file://' ou 'ph://')
       if (petId) {
-        const novasFotos = photos.filter(p => p.startsWith("file:") || p.startsWith("ph:"));
+        const novasFotos = photos.filter((photo) =>
+          photo.isLocal ||
+          photo.uri.startsWith("file:") ||
+          photo.uri.startsWith("ph:") ||
+          photo.uri.startsWith("blob:") ||
+          photo.uri.startsWith("data:")
+        );
         for (let index = 0; index < novasFotos.length; index++) {
-          const uri = novasFotos[index];
+          const photo = novasFotos[index];
           const fileName = `foto-${Date.now()}-${index + 1}.jpeg`;
           try {
-            await apiClient.pets.uploadImagem(petId, uri, fileName);
+            await apiClient.pets.uploadImagem(petId, photo.uri, fileName, photo.file);
           } catch (uploadError) {
             console.log(`Upload da imagem ${index + 1} falhou.`);
           }
@@ -417,25 +478,87 @@ export default function TelaCadastroPet() {
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Carousel de Fotos */}
-        <View>
-          <TextoTema style={styles.label}>Fotos ({photos.length}/6) <TextoTema style={styles.requiredMark}>*</TextoTema></TextoTema>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.photoCarousel}>
-            {photos.map((uri, i) => (
-              <View key={i} style={styles.photoThumb}>
-                <Image source={{ uri }} style={styles.photoThumbImg} contentFit="cover" />
-                <Pressable style={styles.photoRemove} onPress={() => removePhoto(i)}>
-                  <Ionicons name="close-circle" size={20} color="#FFF" />
-                </Pressable>
+        {/* Fotos */}
+        <View style={styles.photoSection}>
+          <View style={styles.photoHeader}>
+            <View style={styles.photoHeaderText}>
+              <TextoTema style={styles.photoTitle}>
+                Fotos do pet <TextoTema style={styles.requiredMark}>*</TextoTema>
+              </TextoTema>
+              <Text style={styles.photoSubtitle}>
+                Escolha uma foto principal e adicione mais ângulos para facilitar a identificação.
+              </Text>
+            </View>
+
+            <View style={styles.photoCounter}>
+              <Ionicons name="images-outline" size={14} color="#D97757" />
+              <Text style={styles.photoCounterText}>{photos.length}/6</Text>
+            </View>
+          </View>
+
+          {photos[0] ? (
+            <View style={styles.photoHero}>
+              <Image source={{ uri: photos[0].uri }} style={styles.photoHeroImg} contentFit="cover" />
+              <View style={styles.photoHeroOverlay}>
+                <View style={styles.photoMainBadge}>
+                  <Ionicons name="star" size={12} color="#FFFFFF" />
+                  <Text style={styles.photoMainBadgeText}>Foto principal</Text>
+                </View>
               </View>
-            ))}
+              <Pressable
+                style={styles.photoRemoveHero}
+                onPress={() => removePhoto(0)}
+                accessibilityRole="button"
+                accessibilityLabel="Remover foto principal"
+              >
+                <Ionicons name="close" size={18} color="#FFFFFF" />
+              </Pressable>
+            </View>
+          ) : (
+            <Pressable
+              style={styles.photoHeroEmpty}
+              onPress={pickPhoto}
+              accessibilityRole="button"
+              accessibilityLabel="Adicionar fotos do pet"
+            >
+              <View style={styles.photoHeroIcon}>
+                <Ionicons name="camera-outline" size={30} color="#D97757" />
+              </View>
+              <Text style={styles.photoHeroEmptyTitle}>Adicionar fotos</Text>
+              <Text style={styles.photoHeroEmptyText}>Adicione pelo menos 1 foto para publicar</Text>
+            </Pressable>
+          )}
+
+          <View style={styles.photoGrid}>
+            {photos.slice(1).map((photo, i) => {
+              const photoIndex = i + 1;
+              return (
+                <View key={`${photo.uri}-${photoIndex}`} style={styles.photoThumb}>
+                  <Image source={{ uri: photo.uri }} style={styles.photoThumbImg} contentFit="cover" />
+                  <Pressable
+                    style={styles.photoRemove}
+                    onPress={() => removePhoto(photoIndex)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Remover foto ${photoIndex + 1}`}
+                  >
+                    <Ionicons name="close" size={14} color="#FFFFFF" />
+                  </Pressable>
+                </View>
+              );
+            })}
+
             {photos.length < 6 && (
-              <Pressable style={styles.photoAdd} onPress={pickPhoto}>
-                <Ionicons name="camera-outline" size={26} color="rgba(0,0,0,0.4)" />
+              <Pressable
+                style={styles.photoAdd}
+                onPress={pickPhoto}
+                accessibilityRole="button"
+                accessibilityLabel="Adicionar mais fotos"
+              >
+                <Ionicons name="add" size={22} color="#D97757" />
                 <Text style={styles.photoAddLabel}>Adicionar</Text>
               </Pressable>
             )}
-          </ScrollView>
+          </View>
         </View>
 
         {/* Linha 1: Nome e Espécie (Autocomplete) */}
@@ -537,6 +660,7 @@ export default function TelaCadastroPet() {
                 placeholder="00000-000"
                 value={cep}
                 onChangeText={handleCepChange}
+                onBlur={validateCepField}
                 style={styles.input}
                 keyboardType="numeric"
                 maxLength={9}
@@ -544,18 +668,24 @@ export default function TelaCadastroPet() {
               />
               {fetchingCep && <ActivityIndicator size="small" color="#D4735A" style={styles.cepLoader} />}
             </View>
+            {cepError ? <Text style={styles.fieldErrorText}>{cepError}</Text> : null}
           </View>
           <View style={styles.half}>
             <TextoTema style={styles.label}>Data Desaparecimento <TextoTema style={styles.requiredMark}>*</TextoTema></TextoTema>
             <EntradaTextoTema
               placeholder="dd/mm/aaaa"
               value={disappearanceDate}
-              onChangeText={(value) => setDisappearanceDate(maskDate(value))}
+              onChangeText={(value) => {
+                setDisappearanceDate(maskDate(value));
+                setDateError("");
+              }}
+              onBlur={validateDisappearanceDateField}
               style={styles.input}
               keyboardType="numeric"
               maxLength={10}
               placeholderTextColor="#B0A89A"
             />
+            {dateError ? <Text style={styles.fieldErrorText}>{dateError}</Text> : null}
           </View>
         </View>
 
@@ -657,16 +787,152 @@ export default function TelaCadastroPet() {
 const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: "#FFFFFF" },
   content: { padding: 16, paddingBottom: 40, gap: 14, overflow: "visible" },
-  photoCarousel: { flexDirection: "row", gap: 10, paddingVertical: 4 },
-  photoThumb: { width: 90, height: 90, borderRadius: 12, overflow: "hidden" },
-  photoThumbImg: { width: 90, height: 90 },
-  photoRemove: { position: "absolute", top: 4, right: 4 },
-  photoAdd: {
-    width: 90, height: 90, borderRadius: 12, borderWidth: 2,
-    borderColor: "#D4C9B8", borderStyle: "dashed", backgroundColor: "#F0E9DF",
-    alignItems: "center", justifyContent: "center", gap: 4,
+  photoSection: {
+    backgroundColor: "#F8F3ED",
+    borderWidth: 1,
+    borderColor: "#EAE0D3",
+    borderRadius: 18,
+    padding: 12,
+    gap: 12,
   },
-  photoAddLabel: { fontSize: 11, color: "#8A7B6B", textAlign: "center" },
+  photoHeader: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  photoHeaderText: { flex: 1 },
+  photoTitle: {
+    fontSize: 15,
+    color: "#2A241E",
+    fontFamily: "Lexend_700Bold",
+    marginBottom: 3,
+  },
+  photoSubtitle: {
+    fontSize: 11,
+    lineHeight: 16,
+    color: "#8A7B6B",
+    fontFamily: "Lexend_400Regular",
+  },
+  photoCounter: {
+    minHeight: 30,
+    borderRadius: 15,
+    paddingHorizontal: 10,
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#E9DDD0",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+  },
+  photoCounterText: {
+    fontSize: 12,
+    color: "#5A4F44",
+    fontFamily: "Lexend_700Bold",
+  },
+  photoHero: {
+    height: 190,
+    borderRadius: 16,
+    overflow: "hidden",
+    backgroundColor: "#E8E0D6",
+  },
+  photoHeroImg: { width: "100%", height: "100%" },
+  photoHeroOverlay: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    padding: 10,
+    backgroundColor: "rgba(0,0,0,0.24)",
+  },
+  photoMainBadge: {
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    borderRadius: 14,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    backgroundColor: "rgba(217,119,87,0.94)",
+  },
+  photoMainBadgeText: {
+    fontSize: 11,
+    color: "#FFFFFF",
+    fontFamily: "Lexend_700Bold",
+  },
+  photoRemoveHero: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "rgba(0,0,0,0.46)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  photoHeroEmpty: {
+    minHeight: 176,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: "#D7C6B7",
+    borderStyle: "dashed",
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 18,
+    gap: 7,
+  },
+  photoHeroIcon: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    backgroundColor: "#FBECE5",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 2,
+  },
+  photoHeroEmptyTitle: {
+    fontSize: 15,
+    color: "#2A241E",
+    fontFamily: "Lexend_700Bold",
+  },
+  photoHeroEmptyText: {
+    fontSize: 11,
+    color: "#8A7B6B",
+    fontFamily: "Lexend_400Regular",
+  },
+  photoGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  photoThumb: {
+    width: 72,
+    height: 72,
+    borderRadius: 12,
+    overflow: "hidden",
+    backgroundColor: "#E8E0D6",
+  },
+  photoThumbImg: { width: "100%", height: "100%" },
+  photoRemove: {
+    position: "absolute",
+    top: 5,
+    right: 5,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: "rgba(0,0,0,0.48)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  photoAdd: {
+    width: 72, height: 72, borderRadius: 12, borderWidth: 1.5,
+    borderColor: "#D7C6B7", borderStyle: "dashed", backgroundColor: "#FFFFFF",
+    alignItems: "center", justifyContent: "center", gap: 3,
+  },
+  photoAddLabel: {
+    fontSize: 10,
+    color: "#8A7B6B",
+    textAlign: "center",
+    fontFamily: "Lexend_600SemiBold",
+  },
   row: { flexDirection: "row", gap: 10, position: "relative", overflow: "visible" },
   rowAutocomplete: { zIndex: 50 },
   rowUnderAutocomplete: { flexDirection: "row", gap: 10, position: "relative", zIndex: 1 },
@@ -677,6 +943,12 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: "#DDD5CA", borderRadius: 10,
     paddingHorizontal: 12, height: 40, backgroundColor: "#FFFFFF",
     fontSize: 13, color: "#3D3228", textAlignVertical: "center",
+  },
+  fieldErrorText: {
+    color: "#D94F4F",
+    fontSize: 11,
+    marginTop: 4,
+    fontFamily: "Lexend_500Medium",
   },
   autocompleteContainer: {
     position: "absolute", top: 44, left: 0, right: 0,
@@ -766,4 +1038,77 @@ const styles = StyleSheet.create({
 function toApiDate(maskedDate: string) {
   const [day, month, year] = maskedDate.split("/");
   return `${year}-${month}-${day}`;
+}
+
+function parsePetParam(value?: string): PetDashboardDto | null {
+  if (!value) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(decodeURIComponent(value)) as PetDashboardDto;
+  } catch {
+    return null;
+  }
+}
+
+function validaDataDesaparecimento(dataStr: string): boolean {
+  if (!/^\d{2}\/\d{2}\/\d{4}$/.test(dataStr)) return false;
+
+  const [dia, mes, ano] = dataStr.split("/").map(Number);
+  const data = new Date(ano, mes - 1, dia);
+
+  if (
+    data.getFullYear() !== ano ||
+    data.getMonth() !== mes - 1 ||
+    data.getDate() !== dia
+  ) {
+    return false;
+  }
+
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+  data.setHours(0, 0, 0, 0);
+
+  const limiteAntigo = new Date(hoje);
+  limiteAntigo.setFullYear(limiteAntigo.getFullYear() - 5);
+
+  return data <= hoje && data >= limiteAntigo;
+}
+
+async function geocodificarEndereco(
+  endereco: string,
+): Promise<{ latitude: number; longitude: number } | null> {
+  if (!endereco.trim()) {
+    return null;
+  }
+
+  const geoKey = process.env.EXPO_PUBLIC_GOOGLE_GEOCODING_API_KEY;
+  const geoQuery = encodeURIComponent(endereco);
+
+  if (geoKey) {
+    const geoResponse = await fetch(
+      `https://maps.googleapis.com/maps/api/geocode/json?address=${geoQuery}&key=${geoKey}`,
+    );
+    const geoData = await geoResponse.json();
+    if (geoData.status === "OK" && geoData.results.length > 0) {
+      const loc = geoData.results[0].geometry.location;
+      return { latitude: loc.lat, longitude: loc.lng };
+    }
+  }
+
+  const fallbackResponse = await fetch(
+    `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${geoQuery}`,
+  );
+  const fallbackData = await fallbackResponse.json();
+  const firstResult = Array.isArray(fallbackData) ? fallbackData[0] : null;
+
+  if (!firstResult?.lat || !firstResult?.lon) {
+    return null;
+  }
+
+  return {
+    latitude: Number(firstResult.lat),
+    longitude: Number(firstResult.lon),
+  };
 }

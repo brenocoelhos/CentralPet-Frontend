@@ -8,7 +8,7 @@ export type PetImagemDto = {
 };
 
 export type PetDashboardDto = {
-  id: string;
+  id: string | number;
   name: string;
   nome: string;
   especie: string;
@@ -28,6 +28,9 @@ export type PetDashboardDto = {
   nomeTutor: string;
   telefoneTutor: string;
   usuarioId: string;
+  cep?: string;
+  latitude?: number;
+  longitude?: number;
 };
 
 export type CadastroPetPayload = {
@@ -48,6 +51,7 @@ export type CadastroPetPayload = {
   vacinado: boolean;
   recompensa: boolean;
   dataCadastro?: string;
+  cep?: string;
   latitude?: number;
   longitude?: number;
 };
@@ -124,6 +128,7 @@ export function criarApiPets(http: ClienteHttp, routes: RotasPets) {
       petId: string,
       uri: string,
       fileName = "foto.jpg",
+      webFile?: Blob,
     ): Promise<PetImagemDto> {
       const formData = new FormData();
 
@@ -134,18 +139,26 @@ export function criarApiPets(http: ClienteHttp, routes: RotasPets) {
       else if (extensao === "heic") mimeType = "image/heic";
       else if (extensao === "heif") mimeType = "image/heif";
 
-      let imageUri = uri;
-      if (Platform.OS === "ios") {
-        imageUri = uri.replace("file://", "");
+      if (Platform.OS === "web") {
+        const fileBlob = webFile ?? (await fetch(uri).then((response) => response.blob()));
+        if (!fileBlob) {
+          throw new Error("Arquivo da imagem nao encontrado.");
+        }
+        formData.append("file", fileBlob, fileName);
+      } else {
+        let imageUri = uri;
+        if (Platform.OS === "ios") {
+          imageUri = uri.replace("file://", "");
+        }
+
+        const fileObject = {
+          uri: imageUri,
+          name: fileName,
+          type: mimeType,
+        };
+
+        formData.append("file", JSON.parse(JSON.stringify(fileObject)));
       }
-
-      const fileObject = {
-        uri: imageUri,
-        name: fileName,
-        type: mimeType,
-      };
-
-      formData.append("file", JSON.parse(JSON.stringify(fileObject)));
 
       return http.uploadFormData<PetImagemDto>(
         `/auth/pets/${encodeURIComponent(petId)}/imagens`,

@@ -80,7 +80,7 @@ export default function MeusRegistrosRoute() {
     void loadPets(false);
   }, [loadPets]);
 
-  const handleDelete = async (id: string, nome: string) => {
+  const handleDelete = async (id: string | number, nome: string) => {
     if (!token) {
       Alert.alert(
         "Sessao expirada",
@@ -92,8 +92,8 @@ export default function MeusRegistrosRoute() {
     const deleteRegistro = async () => {
       try {
         Vibration.vibrate(35);
-        await criarApi({ token }).pets.deletePet(id);
-        setPets((prev) => prev.filter((p) => p.id !== id));
+        await criarApi({ token }).pets.deletePet(String(id));
+        setPets((prev) => prev.filter((p) => String(p.id) !== String(id)));
         Vibration.vibrate(20);
       } catch {
         Vibration.vibrate([0, 40, 30, 40]);
@@ -123,6 +123,16 @@ export default function MeusRegistrosRoute() {
     );
   };
 
+  const handleEdit = (pet: PetDashboardDto) => {
+    router.push({
+      pathname: "/cadastro-pet",
+      params: {
+        id: String(pet.id),
+        pet: encodeURIComponent(JSON.stringify(pet)),
+      },
+    });
+  };
+
   const skeletonItems = useMemo(
     () => Array.from({ length: 4 }, (_, i) => String(i)),
     [],
@@ -146,6 +156,19 @@ export default function MeusRegistrosRoute() {
           }
           imageHeight={CARD_IMAGE_HEIGHT}
           cardStyle={styles.petCard}
+          nameRightAccessory={
+            <TouchableOpacity
+              style={styles.inlineEditBtn}
+              onPress={() => handleEdit(item)}
+              activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel={`Editar registro de ${item.nome}`}
+              accessibilityHint="Abre o cadastro com os dados deste pet preenchidos"
+            >
+              <Ionicons name="create-outline" size={13} color="#D97757" />
+              <Text style={styles.inlineEditText}>Editar</Text>
+            </TouchableOpacity>
+          }
         />
         <TouchableOpacity
           style={styles.deleteBtn}
@@ -236,7 +259,7 @@ export default function MeusRegistrosRoute() {
         contentContainerStyle={styles.listContent}
         data={pets}
         numColumns={2}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => String(item.id)}
         renderItem={renderCard}
         columnWrapperStyle={styles.gridRow}
         refreshControl={
@@ -332,6 +355,23 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     zIndex: 10,
+  },
+  inlineEditBtn: {
+    minHeight: 24,
+    borderRadius: 12,
+    paddingHorizontal: 7,
+    borderWidth: 1,
+    borderColor: "rgba(217, 119, 87, 0.34)",
+    backgroundColor: "#FFF7F2",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 3,
+  },
+  inlineEditText: {
+    color: "#D97757",
+    fontFamily: "Lexend_700Bold",
+    fontSize: 10,
   },
   retryButton: {
     marginTop: 8,
