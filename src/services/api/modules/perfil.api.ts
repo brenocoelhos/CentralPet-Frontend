@@ -22,23 +22,43 @@ export function criarApiPerfil(http: ClienteHttp, routes: RotasPerfil) {
     update(payload: AtualizarPerfilPayload) {
       return http.put<Perfil>(routes.update, payload);
     },
-    async uploadFoto(uri: string, fileName = "perfil.jpg") {
+    async uploadFoto(uri: string, fileName = "perfil.jpg", webFile?: Blob) {
       const formData = new FormData();
 
+      // Identifica a extensão e define o MimeType dinâmico igualzinho ao pet
+      const extensao = fileName.split(".").pop()?.toLowerCase() || "jpg";
+      let mimeType = "image/jpeg";
+      if (extensao === "png") mimeType = "image/png";
+      else if (extensao === "webp") mimeType = "image/webp";
+      else if (extensao === "heic") mimeType = "image/heic";
+      else if (extensao === "heif") mimeType = "image/heif";
+
       if (Platform.OS === "web") {
-        const response = await fetch(uri);
-        const blob = await response.blob();
-        formData.append("file", blob, fileName);
+        // Na Web, usa o blob passado ou converte a URI local de forma segura
+        const fileBlob =
+          webFile ?? (await fetch(uri).then((response) => response.blob()));
+        if (!fileBlob) {
+          throw new Error("Arquivo da imagem não encontrado.");
+        }
+        formData.append("file", fileBlob, fileName);
       } else {
+        // No Mobile, trata a URI de acordo com o sistema operacional
+        let imageUri = uri;
+        if (Platform.OS === "ios") {
+          imageUri = uri.replace("file://", "");
+        }
+
         const fileObject = {
-          uri: Platform.OS === "ios" ? uri.replace("file://", "") : uri,
+          uri: imageUri,
           name: fileName,
-          type: "image/jpeg",
+          type: mimeType,
         };
+
+        // Usa o encapsulamento seguro para o FormData do React Native
         formData.append("file", JSON.parse(JSON.stringify(fileObject)));
       }
 
-      // Rota mapeada no .permitAll() do Spring Security
+      // Rota unificada do upload do perfil
       return http.uploadFormData<{ fotoPerfil: string }>(
         "/auth/usuarios/upload-perfil",
         formData,
