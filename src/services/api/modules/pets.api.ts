@@ -1,4 +1,4 @@
-import { Platform } from "react-native";
+﻿import { Platform } from "react-native";
 import type { ClienteHttp } from "../cliente-http";
 import type { RotasPets } from "../rotas";
 
@@ -31,6 +31,7 @@ export type PetDashboardDto = {
   cep?: string;
   latitude?: number;
   longitude?: number;
+  fotoTutor?: string; // <-- ADICIONADO AQUI PARA O FRONTEND ACEITAR O DADO DO JAVA
 };
 
 export type CadastroPetPayload = {
@@ -56,7 +57,9 @@ export type CadastroPetPayload = {
   longitude?: number;
 };
 
-export type AtualizarPetPayload = Partial<Omit<CadastroPetPayload, "usuarioId">>;
+export type AtualizarPetPayload = Partial<
+  Omit<CadastroPetPayload, "usuarioId">
+>;
 
 export type PaginatedResponse<T> = {
   content: T[];
@@ -95,7 +98,8 @@ function toBuscaPetsQuery(params?: Partial<BuscaPetsParams>) {
   if (params.termo) searchParams.set("termo", params.termo);
   if (params.nome) searchParams.set("nome", params.nome);
   if (params.especie) searchParams.set("especie", params.especie);
-  if (params.grupoEspecie) searchParams.set("grupoEspecie", params.grupoEspecie);
+  if (params.grupoEspecie)
+    searchParams.set("grupoEspecie", params.grupoEspecie);
   if (params.raca) searchParams.set("raca", params.raca);
   if (params.cor) searchParams.set("cor", params.cor);
   if (params.porte) searchParams.set("porte", params.porte);
@@ -148,7 +152,8 @@ export function criarApiPets(http: ClienteHttp, routes: RotasPets) {
       else if (extensao === "heif") mimeType = "image/heif";
 
       if (Platform.OS === "web") {
-        const fileBlob = webFile ?? (await fetch(uri).then((response) => response.blob()));
+        const fileBlob =
+          webFile ?? (await fetch(uri).then((response) => response.blob()));
         if (!fileBlob) {
           throw new Error("Arquivo da imagem nao encontrado.");
         }

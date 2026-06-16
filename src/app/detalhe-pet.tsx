@@ -22,6 +22,7 @@ type DetailItem = {
   photos?: string[];
   ownerName?: string;
   ownerPhone?: string;
+  ownerAvatar?: string; // Mapeado no tipo local da rota
   reward?: boolean;
   lastSeenDate?: string;
   lastSeenAddress?: string;
@@ -51,7 +52,8 @@ export default function PetDetailRoute() {
     }
   }, [pet]);
 
-  const petId = typeof id === "string" && id.trim().length > 0 ? id.trim() : null;
+  const petId =
+    typeof id === "string" && id.trim().length > 0 ? id.trim() : null;
 
   const loadPetById = useCallback(async () => {
     if (!petId || parsedPet) {
@@ -91,7 +93,10 @@ export default function PetDetailRoute() {
       <EstruturaApp>
         <View style={styles.centered}>
           <Text style={styles.errorText}>{errorMessage}</Text>
-          <Pressable style={styles.retryButton} onPress={() => void loadPetById()}>
+          <Pressable
+            style={styles.retryButton}
+            onPress={() => void loadPetById()}
+          >
             <Text style={styles.retryButtonText}>Tentar novamente</Text>
           </Pressable>
         </View>
@@ -145,7 +150,11 @@ function mapPetToDetailItem(item: PetDashboardDto): DetailItem {
   const hasFoundKeyword = item.descricao.some((chip) =>
     chip.toLowerCase().includes("encontr"),
   );
-  const photos = item.imagens?.length ? item.imagens : item.fotoUrl ? [item.fotoUrl] : undefined;
+  const photos = item.imagens?.length
+    ? item.imagens
+    : item.fotoUrl
+      ? [item.fotoUrl]
+      : undefined;
 
   return {
     id: String(item.id),
@@ -153,8 +162,8 @@ function mapPetToDetailItem(item: PetDashboardDto): DetailItem {
     time: item.dataCadastro ?? item.dataDesaparecimento,
     name: item.nome,
     type: item.especie,
-    breed: item.raca ?? "Sem raca",
-    size: item.porte ?? "Nao informado",
+    breed: item.raca ?? "Sem raça",
+    size: item.porte ?? "Não informado",
     tags: item.descricao,
     neighborhood: item.localDesaparecimento,
     distance: "",
@@ -162,6 +171,7 @@ function mapPetToDetailItem(item: PetDashboardDto): DetailItem {
     photos,
     ownerName: item.nomeTutor,
     ownerPhone: item.telefoneTutor,
+    ownerAvatar: item.fotoTutor, // <-- CORREÇÃO HISTÓRICA: Vincula o link do S3 aqui!
     reward: item.recompensa ?? false,
     lastSeenDate: item.dataDesaparecimento,
     lastSeenAddress: item.localDesaparecimento,

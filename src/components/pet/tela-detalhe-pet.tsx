@@ -33,6 +33,7 @@ type Occurrence = {
   photos?: string[];
   ownerName?: string;
   ownerPhone?: string;
+  ownerAvatar?: string;
   reward?: boolean;
   lastSeenDate?: string;
   lastSeenAddress?: string;
@@ -106,7 +107,7 @@ const MAPS_ICON: readonly HugeIconElement[] = [
   [
     "path",
     {
-      d: "M5.25345 4.19584L4.02558 4.90813C3.03739 5.48137 2.54329 5.768 2.27164 6.24483C2 6.72165 2 7.30233 2 8.46368V16.6283C2 18.1542 2 18.9172 2.34226 19.3418C2.57001 19.6244 2.88916 19.8143 3.242 19.8773C3.77226 19.9719 4.42148 19.5953 5.71987 18.8421C6.60156 18.3306 7.45011 17.7994 8.50487 17.9435C8.98466 18.009 9.44231 18.2366 10.3576 18.6917L14.1715 20.588C14.9964 20.9982 15.004 21 15.9214 21H18C19.8856 21 20.8284 21 21.4142 20.4013C22 19.8026 22 18.8389 22 16.9117V10.1715C22 8.24423 22 7.2806 21.4142 6.68188C20.8284 6.08316 19.8856 6.08316 18 6.08316H15.9214C15.004 6.08316 14.9964 6.08139 14.1715 5.6712L10.8399 4.01463C9.44884 3.32297 8.75332 2.97714 8.01238 3.00117C7.27143 3.02521 6.59877 3.41542 5.25345 4.19584Z",
+      d: "M5.25345 4.19584L4.02558 4.90813C3.03739 5.48137 2.54329 5.768 2.27164 6.24483C2 6.72165 2 7.30233 2 8.46368V16.6283C2 18.1542 2 18.9172 2.34226 19.3418C2.57001 19.6244 2.88916 19.8143 3.242 19.8773C3.77226 19.9719 4.42148 19.5953 5.71987 18.8421C6.60156 18.3306 7.45011 17.7994 8.50487 17.9435C8.98466 18.009 9.44231 18.2366 10.3576 18.6917L14.1715 20.588C14.9964 20.588 15.004 21 15.9214 21H18C19.8856 21 20.8284 21 21.4142 20.4013C22 19.8026 22 18.8389 22 16.9117V10.1715C22 8.24423 22 7.2806 21.4142 6.68188C20.8284 6.08316 19.8856 6.08316 18 6.08316H15.9214C15.004 6.08316 14.9964 6.08139 14.1715 5.6712L10.8399 4.01463C9.44884 3.32297 8.75332 2.97714 8.01238 3.00117C7.27143 3.02521 6.59877 3.41542 5.25345 4.19584Z",
       stroke: "currentColor",
       strokeLinecap: "round",
       strokeLinejoin: "round",
@@ -219,7 +220,10 @@ const LastSeenMapButton = ({
 
   const openMap = async () => {
     if (!resolvedCoordinate && !address?.trim()) {
-      Alert.alert("Mapa indisponivel", "Nao encontramos um endereco para abrir no mapa.");
+      Alert.alert(
+        "Mapa indisponivel",
+        "Nao encontramos um endereco para abrir no mapa.",
+      );
       return;
     }
 
@@ -229,7 +233,9 @@ const LastSeenMapButton = ({
         nome: name,
         endereco: address ?? "",
         latitude: resolvedCoordinate ? String(resolvedCoordinate.latitude) : "",
-        longitude: resolvedCoordinate ? String(resolvedCoordinate.longitude) : "",
+        longitude: resolvedCoordinate
+          ? String(resolvedCoordinate.longitude)
+          : "",
       },
     });
   };
@@ -242,12 +248,7 @@ const LastSeenMapButton = ({
       accessibilityRole="button"
       accessibilityLabel={`Abrir mapa do ultimo avistamento de ${name}`}
     >
-      <HugeIcon
-        icon={MAPS_ICON}
-        size={22}
-        color={ORANGE}
-        strokeWidth={1.8}
-      />
+      <HugeIcon icon={MAPS_ICON} size={22} color={ORANGE} strokeWidth={1.8} />
     </TouchableOpacity>
   );
 };
@@ -386,6 +387,9 @@ const PhotoCarousel = ({
 export default function TelaDetalhePet({ item }: PetDetailScreenProps) {
   const [activePhoto, setActivePhoto] = useState(0);
 
+  // Solução direta via desestruturação forçada do objeto bruto que chega na view
+  const avatarDoTutor = item?.ownerAvatar || (item as any)?.fotoTutor;
+
   const handleOpenWhatsApp = async () => {
     const cleanedPhone = item.ownerPhone?.replace(/\D/g, "") ?? "";
 
@@ -407,7 +411,6 @@ export default function TelaDetalhePet({ item }: PetDetailScreenProps) {
     }
   };
 
-  // Fallback photos if none provided
   const photos = item.photos?.length
     ? item.photos
     : [
@@ -467,7 +470,6 @@ export default function TelaDetalhePet({ item }: PetDetailScreenProps) {
         <View style={styles.section}>
           <SectionTitle title="CARACTERÍSTICAS" />
           <View style={styles.card}>
-            {/* Grid: Porte + Cor apenas */}
             <View style={styles.charsGrid}>
               <View style={styles.charItem}>
                 <Text style={styles.charLabel}>Porte</Text>
@@ -482,7 +484,6 @@ export default function TelaDetalhePet({ item }: PetDetailScreenProps) {
 
             <View style={styles.charsDividerH} />
 
-            {/* Castrado / Vacinado / Recompensa */}
             <View style={styles.charsCheckRow}>
               <View style={styles.checkItem}>
                 <Ionicons
@@ -531,7 +532,6 @@ export default function TelaDetalhePet({ item }: PetDetailScreenProps) {
               </View>
             </View>
 
-            {/* Tags */}
             <View style={styles.tagsRow}>
               {item.tags.map((tag) => (
                 <TagChip key={tag} label={tag} />
@@ -572,13 +572,21 @@ export default function TelaDetalhePet({ item }: PetDetailScreenProps) {
           </View>
         </View>
 
-        {/* ── Tutor / Quem encontrou ── */}
+        {/* ── Tutor ── */}
         <View style={styles.section}>
           <SectionTitle title="CONTATO DO TUTOR" />
           <View style={styles.card}>
             <View style={styles.ownerRow}>
-              <View style={styles.ownerAvatar}>
-                <Ionicons name="person" size={22} color="#888" />
+              <View style={[styles.ownerAvatar, { overflow: "hidden" }]}>
+                {avatarDoTutor ? (
+                  <Image
+                    source={{ uri: avatarDoTutor }}
+                    style={{ width: "100%", height: "100%" }}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <Ionicons name="person" size={22} color="#888" />
+                )}
               </View>
               <View style={styles.ownerInfo}>
                 <Text style={styles.ownerName}>
@@ -610,33 +618,19 @@ export default function TelaDetalhePet({ item }: PetDetailScreenProps) {
 // ─── Styles ───────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: BG },
-
   scroll: { flex: 1 },
   scrollContent: { paddingTop: 14, paddingBottom: 16 },
-
-  // ── Carousel ──
-  carouselWrapper: {
-    marginBottom: 16,
-  },
-  carouselContent: {
-    paddingHorizontal: CAROUSEL_SIDE_PADDING,
-    gap: PHOTO_GAP,
-  },
+  carouselWrapper: { marginBottom: 16 },
+  carouselContent: { paddingHorizontal: CAROUSEL_SIDE_PADDING, gap: PHOTO_GAP },
   photoCard: {
     width: PHOTO_WIDTH,
     height: PHOTO_HEIGHT,
     borderRadius: 20,
     overflow: "hidden",
     backgroundColor: "#E8E4DF",
-    boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
     elevation: 4,
   },
-  photo: {
-    width: "100%",
-    height: "100%",
-  },
-
-  // Dots
+  photo: { width: "100%", height: "100%" },
   dotsRow: {
     flexDirection: "row",
     justifyContent: "center",
@@ -644,25 +638,10 @@ const styles = StyleSheet.create({
     gap: 6,
     marginTop: 12,
   },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: "#D9D3CF",
-  },
-  dotActive: {
-    width: 18,
-    backgroundColor: ORANGE,
-  },
-
-  // ── Identity Card ──
-  identityCard: {
-    paddingHorizontal: 16,
-    marginBottom: 20,
-  },
-  identityTop: {
-    marginBottom: 10,
-  },
+  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: "#D9D3CF" },
+  dotActive: { width: 18, backgroundColor: ORANGE },
+  identityCard: { paddingHorizontal: 16, marginBottom: 20 },
+  identityTop: { marginBottom: 10 },
   identityBadgeRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -678,54 +657,20 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 6,
   },
-  rewardText: {
-    fontFamily: "Lexend_700Bold",
-    fontSize: 10,
-    color: "#B8860B",
-  },
+  rewardText: { fontFamily: "Lexend_700Bold", fontSize: 10, color: "#B8860B" },
   petName: {
     fontFamily: "Lexend_700Bold",
     fontSize: 26,
     color: "#1a1a1a",
     marginBottom: 2,
   },
-  petBreed: {
-    fontFamily: "Lexend_400Regular",
-    fontSize: 14,
-    color: "#666",
-  },
-  identityMeta: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  metaItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 3,
-  },
-  metaText: {
-    fontFamily: "Lexend_400Regular",
-    fontSize: 12,
-    color: "#888",
-  },
-  metaDot: {
-    width: 3,
-    height: 3,
-    borderRadius: 2,
-    backgroundColor: "#ccc",
-  },
-  metaTime: {
-    fontFamily: "Lexend_400Regular",
-    fontSize: 12,
-    color: "#aaa",
-  },
-
-  // ── Sections ──
-  section: {
-    marginBottom: 20,
-    paddingHorizontal: 16,
-  },
+  petBreed: { fontFamily: "Lexend_400Regular", fontSize: 14, color: "#666" },
+  identityMeta: { flexDirection: "row", alignItems: "center", gap: 6 },
+  metaItem: { flexDirection: "row", alignItems: "center", gap: 3 },
+  metaText: { fontFamily: "Lexend_400Regular", fontSize: 12, color: "#888" },
+  metaDot: { width: 3, height: 3, borderRadius: 2, backgroundColor: "#ccc" },
+  metaTime: { fontFamily: "Lexend_400Regular", fontSize: 12, color: "#aaa" },
+  section: { marginBottom: 20, paddingHorizontal: 16 },
   sectionTitle: {
     fontFamily: "Lexend_700Bold",
     fontSize: 11,
@@ -733,99 +678,37 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
     marginBottom: 10,
   },
-
-  // Card
   card: {
     backgroundColor: "#F5F2EC",
     borderRadius: 16,
     padding: 14,
-    boxShadow: "0px 2px 6px rgba(0,0,0,0.05)",
     elevation: 1,
   },
-
-  // Badge
-  badge: {
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  badgeText: {
-    fontFamily: "Lexend_700Bold",
-    fontSize: 10,
-    letterSpacing: 0.4,
-  },
-
-  // Chips
-  tagsRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 6,
-    marginTop: 12,
-  },
+  badge: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: 6 },
+  badgeText: { fontFamily: "Lexend_700Bold", fontSize: 10, letterSpacing: 0.4 },
+  tagsRow: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 12 },
   chip: {
     backgroundColor: "#E8E4DF",
     borderRadius: 8,
     paddingHorizontal: 9,
     paddingVertical: 3,
   },
-  chipText: {
-    fontFamily: "Lexend_500Medium",
-    fontSize: 11,
-    color: "#555",
-  },
-
-  // Chars grid (só Porte e Cor)
-  charsGrid: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-  },
-  charItem: {
-    flex: 1,
-    alignItems: "center",
-  },
+  chipText: { fontFamily: "Lexend_500Medium", fontSize: 11, color: "#555" },
+  charsGrid: { flexDirection: "row", justifyContent: "space-around" },
+  charItem: { flex: 1, alignItems: "center" },
   charLabel: {
     fontFamily: "Lexend_400Regular",
     fontSize: 11,
     color: "#999",
     marginBottom: 4,
   },
-  charValue: {
-    fontFamily: "Lexend_700Bold",
-    fontSize: 13,
-    color: "#1a1a1a",
-  },
-  charDivider: {
-    width: 1,
-    backgroundColor: "#E0DBD6",
-    marginVertical: 2,
-  },
-  charsDividerH: {
-    height: 1,
-    backgroundColor: "#E0DBD6",
-    marginVertical: 12,
-  },
-
-  // Checks
-  charsCheckRow: {
-    flexDirection: "row",
-    gap: 20,
-    marginBottom: 4,
-  },
-  checkItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  checkLabel: {
-    fontFamily: "Lexend_500Medium",
-    fontSize: 13,
-    color: "#555",
-  },
-  checkLabelOff: {
-    color: "#C0BBB5",
-  },
-
-  // InfoRow
+  charValue: { fontFamily: "Lexend_700Bold", fontSize: 13, color: "#1a1a1a" },
+  charDivider: { width: 1, backgroundColor: "#E0DBD6", marginVertical: 2 },
+  charsDividerH: { height: 1, backgroundColor: "#E0DBD6", marginVertical: 12 },
+  charsCheckRow: { flexDirection: "row", gap: 20, marginBottom: 4 },
+  checkItem: { flexDirection: "row", alignItems: "center", gap: 6 },
+  checkLabel: { fontFamily: "Lexend_500Medium", fontSize: 13, color: "#555" },
+  checkLabelOff: { color: "#C0BBB5" },
   infoRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -841,31 +724,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   infoTexts: { flex: 1 },
-  infoLabel: {
-    fontFamily: "Lexend_400Regular",
-    fontSize: 11,
-    color: "#999",
-  },
+  infoLabel: { fontFamily: "Lexend_400Regular", fontSize: 11, color: "#999" },
   infoValue: {
     fontFamily: "Lexend_600SemiBold",
     fontSize: 13,
     color: "#1a1a1a",
   },
-  infoSeparator: {
-    height: 1,
-    backgroundColor: "#E0DBD6",
-    marginVertical: 10,
-  },
-  lastSeenLocationRow: {
-    flexDirection: "row",
-    alignItems: "stretch",
-    gap: 10,
-  },
-  lastSeenAddress: {
-    flex: 1,
-    minWidth: 0,
-    justifyContent: "center",
-  },
+  infoSeparator: { height: 1, backgroundColor: "#E0DBD6", marginVertical: 10 },
+  lastSeenLocationRow: { flexDirection: "row", alignItems: "stretch", gap: 10 },
+  lastSeenAddress: { flex: 1, minWidth: 0, justifyContent: "center" },
   mapButton: {
     width: TouchTarget.min,
     height: TouchTarget.min,
@@ -876,12 +743,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  // Owner
-  ownerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
+  ownerRow: { flexDirection: "row", alignItems: "center", gap: 12 },
   ownerAvatar: {
     width: 44,
     height: 44,
@@ -891,16 +753,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   ownerInfo: { flex: 1 },
-  ownerName: {
-    fontFamily: "Lexend_700Bold",
-    fontSize: 15,
-    color: "#1a1a1a",
-  },
-  ownerSub: {
-    fontFamily: "Lexend_400Regular",
-    fontSize: 12,
-    color: "#888",
-  },
+  ownerName: { fontFamily: "Lexend_700Bold", fontSize: 15, color: "#1a1a1a" },
+  ownerSub: { fontFamily: "Lexend_400Regular", fontSize: 12, color: "#888" },
   callBtn: {
     width: TouchTarget.min,
     height: TouchTarget.min,

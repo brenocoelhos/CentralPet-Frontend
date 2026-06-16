@@ -86,9 +86,9 @@ export default function TelaPerfil() {
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
-      allowsEditing: true, // Permite ao utilizador cortar a imagem
-      aspect: [1, 1], // Força um quadrado perfeito
-      quality: 0.8,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.6, // 🚨 ATUALIZADO: Comprime a captura inicial do ImagePicker para 60%
     });
 
     if (!result.canceled) {
@@ -96,18 +96,16 @@ export default function TelaPerfil() {
         setUploadingFoto(true);
         const asset = result.assets[0];
 
-        // Reduz a resolução para poupar largura de banda e tempo
+        // Reduz a resolução e comprime mais o arquivo final
         const manipResult = await ImageManipulator.manipulateAsync(
           asset.uri,
           [{ resize: { width: 500, height: 500 } }],
-          { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG },
+          { compress: 0.6, format: ImageManipulator.SaveFormat.JPEG }, // 🚨 ATUALIZADO: Mudado de 0.8 para 0.6 para moldar o peso final do S3
         );
 
         const api = getApi();
-        // Chama a nova função do perfil.api.ts
         const response = await (api as any).perfil.uploadFoto(manipResult.uri);
 
-        // Atualiza a imagem no contexto (aparece na hora)
         updateUser({ fotoPerfil: response.fotoPerfil });
       } catch (error: any) {
         console.error("=== ERRO AO SUBIR FOTO DE PERFIL ===");
@@ -248,7 +246,6 @@ export default function TelaPerfil() {
 
       {/* Menu */}
       <View style={styles.menuContainer}>
-        {/* Saude do pet — em breve */}
         <View style={[styles.menuItem, styles.menuItemDisabled]}>
           <View style={[styles.menuIconWrap, styles.menuIconWrapDisabled]}>
             <Ionicons name="medkit-outline" size={20} color="#B8B8B8" />
@@ -266,7 +263,6 @@ export default function TelaPerfil() {
 
         <View style={styles.menuDivider} />
 
-        {/* Meus registros */}
         <TouchableOpacity
           style={[styles.menuItem, !user && styles.menuItemDisabled]}
           activeOpacity={user ? 0.85 : 1}
@@ -285,8 +281,14 @@ export default function TelaPerfil() {
             />
           </View>
           <View style={styles.menuTextWrap}>
-            <Text style={[styles.menuTitle, !user && styles.menuTextDisabled]}>Meus registros</Text>
-            <Text style={[styles.menuDescription, !user && styles.menuTextDisabled]}>Veja e edite seus pets cadastrados</Text>
+            <Text style={[styles.menuTitle, !user && styles.menuTextDisabled]}>
+              Meus registros
+            </Text>
+            <Text
+              style={[styles.menuDescription, !user && styles.menuTextDisabled]}
+            >
+              Veja e edite seus pets cadastrados
+            </Text>
           </View>
           <Ionicons
             name="chevron-forward"
@@ -297,7 +299,6 @@ export default function TelaPerfil() {
 
         <View style={styles.menuDivider} />
 
-        {/* Contatos de emergência */}
         <TouchableOpacity
           style={[styles.menuItem, !user && styles.menuItemDisabled]}
           activeOpacity={user ? 0.85 : 1}
@@ -334,25 +335,39 @@ export default function TelaPerfil() {
 
         <View style={styles.menuDivider} />
 
-        {/* Histórico de avistamentos */}
         <TouchableOpacity
           style={[styles.menuItem, !user && styles.menuItemDisabled]}
           activeOpacity={user ? 0.85 : 1}
           disabled={!user}
         >
-          <View style={[styles.menuIconWrap, !user && styles.menuIconWrapDisabled]}>
-            <Ionicons name="eye-outline" size={20} color={user ? "#8A7060" : "#B8B8B8"} />
+          <View
+            style={[styles.menuIconWrap, !user && styles.menuIconWrapDisabled]}
+          >
+            <Ionicons
+              name="eye-outline"
+              size={20}
+              color={user ? "#8A7060" : "#B8B8B8"}
+            />
           </View>
           <View style={styles.menuTextWrap}>
-            <Text style={[styles.menuTitle, !user && styles.menuTextDisabled]}>Histórico de avistamentos</Text>
-            <Text style={[styles.menuDescription, !user && styles.menuTextDisabled]}>Reportes que você enviou</Text>
+            <Text style={[styles.menuTitle, !user && styles.menuTextDisabled]}>
+              Histórico de avistamentos
+            </Text>
+            <Text
+              style={[styles.menuDescription, !user && styles.menuTextDisabled]}
+            >
+              Reportes que você enviou
+            </Text>
           </View>
-          <Ionicons name="chevron-forward" size={18} color={user ? "#B7AE9F" : "#D0D0D0"} />
+          <Ionicons
+            name="chevron-forward"
+            size={18}
+            color={user ? "#B7AE9F" : "#D0D0D0"}
+          />
         </TouchableOpacity>
 
         <View style={styles.menuDivider} />
 
-        {/* Notificações com toggle */}
         <View style={[styles.menuItem, !user && styles.menuItemDisabled]}>
           <View
             style={[styles.menuIconWrap, !user && styles.menuIconWrapDisabled]}
@@ -385,7 +400,6 @@ export default function TelaPerfil() {
 
         <View style={styles.menuDivider} />
 
-        {/* Sair */}
         <TouchableOpacity
           style={[styles.menuItem, !user && styles.menuItemDisabled]}
           activeOpacity={user ? 0.85 : 1}
@@ -425,28 +439,16 @@ export default function TelaPerfil() {
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-  },
-  scrollContent: {
-    paddingBottom: 32,
-  },
+  root: { flex: 1, backgroundColor: "#FFFFFF" },
+  scrollContent: { paddingBottom: 32 },
   centered: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#FFFFFF",
   },
-  topSection: {
-    paddingHorizontal: 20,
-    paddingTop: 0,
-  },
-  avatarWrapper: {
-    alignItems: "center",
-    marginTop: 16,
-    marginBottom: 22,
-  },
+  topSection: { paddingHorizontal: 20, paddingTop: 0 },
+  avatarWrapper: { alignItems: "center", marginTop: 16, marginBottom: 22 },
   avatarCircle: {
     width: 88,
     height: 88,
@@ -457,11 +459,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     position: "relative",
   },
-  avatarImage: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
-  },
+  avatarImage: { width: 88, height: 88, borderRadius: 44 },
   editBadge: {
     position: "absolute",
     bottom: 0,
@@ -492,21 +490,14 @@ const styles = StyleSheet.create({
     color: "#1A1A1A",
     marginBottom: 2,
   },
-  avatarEmail: {
-    fontSize: 13,
-    color: "#8E8476",
-    marginTop: 2,
-  },
+  avatarEmail: { fontSize: 13, color: "#8E8476", marginTop: 2 },
   locationRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 3,
     marginTop: 4,
   },
-  locationText: {
-    fontSize: 12,
-    color: "#8E8476",
-  },
+  locationText: { fontSize: 12, color: "#8E8476" },
   verifiedBadge: {
     flexDirection: "row",
     alignItems: "center",
@@ -517,11 +508,7 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     marginTop: 8,
   },
-  verifiedText: {
-    fontSize: 11,
-    color: "#FFFFFF",
-    fontWeight: "600",
-  },
+  verifiedText: { fontSize: 11, color: "#FFFFFF", fontWeight: "600" },
   authButton: {
     backgroundColor: AppColors.brand,
     borderRadius: Radius.pill,
@@ -531,7 +518,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     marginBottom: 22,
-    boxShadow: "0px 6px 12px rgba(217,119,87,0.4)",
     elevation: 6,
   },
   authButtonText: {
@@ -552,15 +538,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#EAE5DA",
   },
-  statsErrorWrap: {
-    marginHorizontal: 20,
-    marginBottom: 14,
-    gap: 8,
-  },
-  statsErrorText: {
-    color: AppColors.danger,
-    fontSize: 13,
-  },
+  statsErrorWrap: { marginHorizontal: 20, marginBottom: 14, gap: 8 },
+  statsErrorText: { color: AppColors.danger, fontSize: 13 },
   retryButton: {
     minHeight: TouchTarget.min,
     borderRadius: Radius.pill,
@@ -575,28 +554,11 @@ const styles = StyleSheet.create({
     fontFamily: "Lexend_600SemiBold",
     fontSize: 13,
   },
-  statItem: {
-    flex: 1,
-    alignItems: "center",
-    gap: 2,
-  },
-  statDivider: {
-    width: 1,
-    height: 32,
-    backgroundColor: "#EAE5DA",
-  },
-  statValue: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#1A1A1A",
-  },
-  statValueGreen: {
-    color: "#4CAF50",
-  },
-  statLabel: {
-    fontSize: 11,
-    color: "#8E8476",
-  },
+  statItem: { flex: 1, alignItems: "center", gap: 2 },
+  statDivider: { width: 1, height: 32, backgroundColor: "#EAE5DA" },
+  statValue: { fontSize: 20, fontWeight: "700", color: "#1A1A1A" },
+  statValueGreen: { color: "#4CAF50" },
+  statLabel: { fontSize: 11, color: "#8E8476" },
   menuContainer: {
     borderTopWidth: 1,
     borderBottomWidth: 1,
@@ -610,9 +572,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     backgroundColor: "#FFFFFF",
   },
-  menuItemDisabled: {
-    backgroundColor: "#F8F8F8",
-  },
+  menuItemDisabled: { backgroundColor: "#F8F8F8" },
   menuIconWrap: {
     width: 36,
     height: 36,
@@ -621,27 +581,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#F0EBE0",
   },
-  menuIconWrapDisabled: {
-    backgroundColor: "#EEEEEE",
-  },
-  menuTextWrap: {
-    flex: 1,
-    gap: 2,
-  },
-  menuTitle: {
-    fontSize: 15,
-    fontWeight: "400",
-    color: "#1F1F1F",
-  },
-  menuDescription: {
-    fontSize: 12,
-    color: "#8E8476",
-  },
-  menuTextDisabled: {
-    color: "#B8B8B8",
-  },
-  menuDivider: {
-    height: 1,
-    backgroundColor: "#EAE5DA",
-  },
+  menuIconWrapDisabled: { backgroundColor: "#EEEEEE" },
+  menuTextWrap: { flex: 1, gap: 2 },
+  menuTitle: { fontSize: 15, fontWeight: "400", color: "#1F1F1F" },
+  menuDescription: { fontSize: 12, color: "#8E8476" },
+  menuTextDisabled: { color: "#B8B8B8" },
+  menuDivider: { height: 1, backgroundColor: "#EAE5DA" },
 });

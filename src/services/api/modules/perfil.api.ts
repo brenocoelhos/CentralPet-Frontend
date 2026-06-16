@@ -22,19 +22,45 @@ export function criarApiPerfil(http: ClienteHttp, routes: RotasPerfil) {
     update(payload: AtualizarPerfilPayload) {
       return http.put<Perfil>(routes.update, payload);
     },
-    uploadFoto(uri: string, fileName = "perfil.jpg") {
+    async uploadFoto(uri: string, fileName = "perfil.jpg", webFile?: Blob) {
       const formData = new FormData();
-      const fileObject = {
-        uri: Platform.OS === "ios" ? uri.replace("file://", "") : uri,
-        name: fileName,
-        type: "image/jpeg",
-      };
 
-      // O React Native precisa deste truque com JSON.parse para enviar o ficheiro corretamente no FormData
-      formData.append("file", JSON.parse(JSON.stringify(fileObject)));
+      // Identifica a extensão e define o MimeType dinâmico igualzinho ao pet
+      const extensao = fileName.split(".").pop()?.toLowerCase() || "jpg";
+      let mimeType = "image/jpeg";
+      if (extensao === "png") mimeType = "image/png";
+      else if (extensao === "webp") mimeType = "image/webp";
+      else if (extensao === "heic") mimeType = "image/heic";
+      else if (extensao === "heif") mimeType = "image/heif";
 
-      return http.uploadFormData<{ fotoPerfil: string; message: string }>(
-        "/auth/perfil/foto",
+      if (Platform.OS === "web") {
+        // Na Web, usa o blob passado ou converte a URI local de forma segura
+        const fileBlob =
+          webFile ?? (await fetch(uri).then((response) => response.blob()));
+        if (!fileBlob) {
+          throw new Error("Arquivo da imagem não encontrado.");
+        }
+        formData.append("file", fileBlob, fileName);
+      } else {
+        // No Mobile, trata a URI de acordo com o sistema operacional
+        let imageUri = uri;
+        if (Platform.OS === "ios") {
+          imageUri = uri.replace("file://", "");
+        }
+
+        const fileObject = {
+          uri: imageUri,
+          name: fileName,
+          type: mimeType,
+        };
+
+        // Usa o encapsulamento seguro para o FormData do React Native
+        formData.append("file", JSON.parse(JSON.stringify(fileObject)));
+      }
+
+      // Rota unificada do upload do perfil
+      return http.uploadFormData<{ fotoPerfil: string }>(
+        "/auth/usuarios/upload-perfil",
         formData,
       );
     },
