@@ -1,5 +1,6 @@
 import { useAutenticacao } from "@/context/contexto-autenticacao";
 import { criarApi } from "@/services/api";
+import type { PetDashboardDto } from "@/services/api/modules/pets.api";
 import { exibirAlertaErroApi } from "@/utils/alerta-erro-api";
 import { maskCEP, maskDate, maskPhone } from "@/utils/validadores";
 import { Ionicons } from "@expo/vector-icons";
@@ -24,7 +25,6 @@ import {
 } from "react-native";
 import { EntradaTextoTema } from "../entrada-texto-tema";
 import { TextoTema } from "../texto-tema";
-import type { PetDashboardDto } from "@/services/api/modules/pets.api";
 
 // Lista rica para o autocomplete de espécies conhecidas
 const ALL_SPECIES = [
@@ -734,7 +734,7 @@ export default function TelaCadastroPet() {
         <View>
           <TextoTema style={styles.label}>Características / Descrição</TextoTema>
           <EntradaTextoTema
-            placeholder="Digite marcas, coleira e aperte Concluído"
+            placeholder="Digite ropuas, coleira e aperte Concluído"
             value={descriptionInput}
             onChangeText={setDescriptionInput}
             onSubmitEditing={addDescriptionChip}

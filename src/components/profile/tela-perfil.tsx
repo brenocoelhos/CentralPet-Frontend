@@ -335,39 +335,6 @@ export default function TelaPerfil() {
 
         <View style={styles.menuDivider} />
 
-        <TouchableOpacity
-          style={[styles.menuItem, !user && styles.menuItemDisabled]}
-          activeOpacity={user ? 0.85 : 1}
-          disabled={!user}
-        >
-          <View
-            style={[styles.menuIconWrap, !user && styles.menuIconWrapDisabled]}
-          >
-            <Ionicons
-              name="eye-outline"
-              size={20}
-              color={user ? "#8A7060" : "#B8B8B8"}
-            />
-          </View>
-          <View style={styles.menuTextWrap}>
-            <Text style={[styles.menuTitle, !user && styles.menuTextDisabled]}>
-              Histórico de avistamentos
-            </Text>
-            <Text
-              style={[styles.menuDescription, !user && styles.menuTextDisabled]}
-            >
-              Reportes que você enviou
-            </Text>
-          </View>
-          <Ionicons
-            name="chevron-forward"
-            size={18}
-            color={user ? "#B7AE9F" : "#D0D0D0"}
-          />
-        </TouchableOpacity>
-
-        <View style={styles.menuDivider} />
-
         <View style={[styles.menuItem, !user && styles.menuItemDisabled]}>
           <View
             style={[styles.menuIconWrap, !user && styles.menuIconWrapDisabled]}
