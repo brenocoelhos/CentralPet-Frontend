@@ -1,4 +1,5 @@
-﻿import {
+﻿import LayoutComRodape from "@/components/layout/layout-com-rodape";
+import {
   ProvedorAutenticacao,
   useAutenticacao,
 } from "@/context/contexto-autenticacao";
@@ -212,7 +213,9 @@ export default function RootLayout() {
   return (
     <ProvedorAutenticacao>
       <NotificacoesSetup />
-      <AppStack />
+      <LayoutComRodape>
+        <AppStack />
+      </LayoutComRodape>
     </ProvedorAutenticacao>
   );
 }

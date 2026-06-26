@@ -12,22 +12,26 @@ type FooterItem = {
 
 const FOOTER_ITEMS: FooterItem[] = [
   {
-    route: "/painel",
+    route: "/home",
     icon: "home-outline",
     activeIcon: "home",
+    matches: ["/home"],
+  },
+  {
+    route: "/adocao",
+    icon: "paw-outline",
+    matches: ["/adocao"],
+  },
+  {
+    route: "/novo",
+    icon: "add-circle-outline",
+    activeIcon: "add-circle",
+    matches: ["/novo"],
+  },
+  {
+    route: "/painel",
+    icon: "location-outline",
     matches: ["/", "/painel", "/index"],
-  },
-  {
-    route: "/busca",
-    icon: "search-outline",
-    activeIcon: "search",
-    matches: ["/busca"],
-  },
-  {
-    route: "/cadastro-pet",
-    icon: "add-outline",
-    activeIcon: "add",
-    matches: ["/cadastro-pet"],
   },
   {
     route: "/perfil",
@@ -38,15 +42,12 @@ const FOOTER_ITEMS: FooterItem[] = [
 ];
 
 const FOOTER_LABELS: Record<string, string> = {
-  "/painel": "Ir para painel",
-  "/busca": "Ir para busca",
-  "/cadastro-pet": "Cadastrar pet",
+  "/home": "Ir para início",
+  "/adocao": "Abrir adoção",
+  "/novo": "Nova funcionalidade",
+  "/painel": "Abrir mapa",
   "/perfil": "Abrir perfil",
 };
-
-// Mantive o HOME_ROUTES caso você use para alguma outra validação futura,
-// mas a navegação agora não precisa mais dessas verificações complexas.
-const HOME_ROUTES = new Set(["/", "/painel", "/index"]);
 
 export default function RodapeApp() {
   const router = useRouter();
@@ -54,16 +55,18 @@ export default function RodapeApp() {
   const insets = useSafeAreaInsets();
 
   const handleNavigate = (route: string) => {
-    // 1. Evita recarregar se já estiver na mesma aba
     if (pathname === route) return;
-
-    // 2. Usa o navigate para aproveitar a tela que já está na memória
     router.navigate(route as never);
   };
 
   return (
     <View
-      style={[styles.wrapper, { paddingBottom: Math.max(insets.bottom, 14) }]}
+      style={[
+        styles.wrapper,
+        {
+          bottom: Math.max(insets.bottom, 16),
+        },
+      ]}
     >
       <View style={styles.nav}>
         {FOOTER_ITEMS.map((item) => {
@@ -83,9 +86,10 @@ export default function RodapeApp() {
               <View style={styles.iconWrapper}>
                 <Ionicons
                   name={iconName}
-                  size={item.route === "/cadastro-pet" ? 36 : 32}
+                  size={28}
                   color={active ? "#D97757" : "#7C7C7C"}
                 />
+                {active && <View style={styles.dot} />}
               </View>
             </TouchableOpacity>
           );
@@ -97,11 +101,18 @@ export default function RodapeApp() {
 
 const styles = StyleSheet.create({
   wrapper: {
-    borderTopWidth: 1,
-    borderTopColor: "#F0EDE8",
+    position: "absolute",
+    left: 24,
+    right: 24,
     backgroundColor: "#FFFFFF",
-    paddingTop: 12,
-    paddingHorizontal: 24,
+    borderRadius: 32,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 24,
+    elevation: 12,
   },
   nav: {
     flexDirection: "row",
@@ -109,7 +120,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   item: {
-    minWidth: 54,
+    flex: 1,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -118,5 +129,12 @@ const styles = StyleSheet.create({
     height: 48,
     alignItems: "center",
     justifyContent: "center",
+    gap: 4,
+  },
+  dot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "#D97757",
   },
 });
