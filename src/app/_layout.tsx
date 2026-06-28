@@ -27,6 +27,11 @@ const styles = StyleSheet.create({
     fontSize: 22,
     color: "#D97757",
   },
+  logoAdoptionAccent: {
+    fontFamily: "Lexend_700Bold",
+    fontSize: 22,
+    color: "#1A1A1A",
+  },
   notifBtn: {
     width: 36,
     height: 36,
@@ -132,6 +137,26 @@ function AppStack() {
         name="detalhe-pet"
         options={{
           title: "Detalhes",
+        }}
+      />
+
+      <Stack.Screen
+        name="adocao"
+        options={{
+          headerTitle: () => (
+            <Text>
+              <Text style={styles.logoAdoptionAccent}>Adoção</Text>
+              <Text style={styles.logoAccent}>Pet</Text>
+            </Text>
+          ),
+          headerLeft: () => null,
+        }}
+      />
+
+      <Stack.Screen
+        name="detalhe-adocao"
+        options={{
+          headerShown: false,
         }}
       />
 

@@ -786,7 +786,7 @@ export default function TelaCadastroPet() {
 
 const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: "#FFFFFF" },
-  content: { padding: 16, paddingBottom: 40, gap: 14, overflow: "visible" },
+  content: { padding: 16, paddingBottom: 150, gap: 14, overflow: "visible" },
   photoSection: {
     backgroundColor: "#F8F3ED",
     borderWidth: 1,

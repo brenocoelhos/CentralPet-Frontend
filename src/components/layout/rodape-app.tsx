@@ -23,12 +23,6 @@ const FOOTER_ITEMS: FooterItem[] = [
     matches: ["/adocao"],
   },
   {
-    route: "/novo",
-    icon: "add-circle-outline",
-    activeIcon: "add-circle",
-    matches: ["/novo"],
-  },
-  {
     route: "/painel",
     icon: "location-outline",
     matches: ["/", "/painel", "/index"],
@@ -44,7 +38,6 @@ const FOOTER_ITEMS: FooterItem[] = [
 const FOOTER_LABELS: Record<string, string> = {
   "/home": "Ir para início",
   "/adocao": "Abrir adoção",
-  "/novo": "Nova funcionalidade",
   "/painel": "Abrir mapa",
   "/perfil": "Abrir perfil",
 };
@@ -64,7 +57,7 @@ export default function RodapeApp() {
       style={[
         styles.wrapper,
         {
-          bottom: Math.max(insets.bottom, 16),
+          marginBottom: Math.max(insets.bottom, 16),
         },
       ]}
     >
@@ -101,9 +94,7 @@ export default function RodapeApp() {
 
 const styles = StyleSheet.create({
   wrapper: {
-    position: "absolute",
-    left: 24,
-    right: 24,
+    marginHorizontal: 24,
     backgroundColor: "#FFFFFF",
     borderRadius: 32,
     paddingVertical: 12,

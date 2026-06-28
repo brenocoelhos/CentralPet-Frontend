@@ -10,7 +10,7 @@ type PetCardProps = {
   breed: string;
   location: string;
   imageUrl?: string;
-  status?: "PERDIDO" | "ENCONTRADO";
+  status?: "PERDIDO" | "ENCONTRADO" | "ADOÇÃO";
   hasNewMessage?: boolean;
   onPress?: () => void;
   cardStyle?: object;
