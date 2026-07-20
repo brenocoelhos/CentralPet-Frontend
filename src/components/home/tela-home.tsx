@@ -1,3 +1,4 @@
+import SinoNotificacoes from "@/components/notificacoes/sino-notificacoes";
 import { AppColors, Radius, TouchTarget } from "@/constants/tema";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { router } from "expo-router";
@@ -41,13 +42,7 @@ export default function TelaHome() {
               <Text style={styles.logoAccent}>Pet</Text>
             </Text>
           </View>
-          <TouchableOpacity
-            style={styles.notifBtn}
-            accessibilityRole="button"
-            accessibilityLabel="Ver notificações"
-          >
-            <Ionicons name="notifications-outline" size={20} color="#1a1a1a" />
-          </TouchableOpacity>
+          <SinoNotificacoes style={styles.notifBtn} />
         </View>
 
         {/* ── Saudação ── */}

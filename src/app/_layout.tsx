@@ -1,4 +1,5 @@
 ﻿import LayoutComRodape from "@/components/layout/layout-com-rodape";
+import SinoNotificacoes from "@/components/notificacoes/sino-notificacoes";
 import {
   ProvedorAutenticacao,
   useAutenticacao,
@@ -75,13 +76,7 @@ function AppStack() {
           ),
           headerLeft: () => null,
           headerRight: () => (
-            <TouchableOpacity style={styles.notifBtn}>
-              <Ionicons
-                name="notifications-outline"
-                size={22}
-                color="#1a1a1a"
-              />
-            </TouchableOpacity>
+            <SinoNotificacoes style={{ marginRight: 8 }} />
           ),
         }}
       />
@@ -89,6 +84,11 @@ function AppStack() {
       <Stack.Screen
         name="detalhe-pet-adocao"
         options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="notificacoes"
+        options={{ title: "Notificações" }}
       />
 
       <Stack.Screen
@@ -102,13 +102,7 @@ function AppStack() {
           ),
           headerLeft: () => null,
           headerRight: () => (
-            <TouchableOpacity style={styles.notifBtn}>
-              <Ionicons
-                name="notifications-outline"
-                size={22}
-                color="#1a1a1a"
-              />
-            </TouchableOpacity>
+            <SinoNotificacoes style={{ marginRight: 8 }} />
           ),
         }}
       />

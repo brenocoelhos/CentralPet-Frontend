@@ -77,6 +77,13 @@
           "locationAlwaysAndWhenInUsePermission": "O CentralPet usa sua localização para alertar sobre pets perdidos perto de você.",
           "locationWhenInUsePermission": "O CentralPet usa sua localização para alertar sobre pets perdidos perto de você."
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/logo.png",
+          "color": "#D97757"
+        }
       ]
     ],
     "experiments": {

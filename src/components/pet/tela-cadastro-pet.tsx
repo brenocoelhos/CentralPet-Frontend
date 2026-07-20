@@ -1,6 +1,9 @@
 import { useAutenticacao } from "@/context/contexto-autenticacao";
 import { criarApi } from "@/services/api";
-import type { PetDashboardDto } from "@/services/api/modules/pets.api";
+import type {
+  CadastroPetPayload,
+  PetDashboardDto,
+} from "@/services/api/modules/pets.api";
 import { exibirAlertaErroApi } from "@/utils/alerta-erro-api";
 import { maskCEP, maskDate, maskPhone } from "@/utils/validadores";
 import { Ionicons } from "@expo/vector-icons";
@@ -157,8 +160,8 @@ export default function TelaCadastroPet() {
     setBreed(petData.raca || "");
     setColor(petData.cor || "");
     setSize(petData.porte === "Medio" ? "Médio" : petData.porte || "Médio");
-    setIdade((petData as any).idade || "");
-    setCep((petData as any).cep || "");
+    setIdade(petData.idade || "");
+    setCep(petData.cep || "");
     setCepInvalido(false);
     setCepError("");
     setDateError("");
@@ -397,7 +400,7 @@ export default function TelaCadastroPet() {
         return `${b.getUTCFullYear()}-${pad(b.getUTCMonth() + 1)}-${pad(b.getUTCDate())}T${pad(b.getUTCHours())}:${pad(b.getUTCMinutes())}:${pad(b.getUTCSeconds())}-03:00`;
       })();
 
-      const payload: any = {
+      const payload: CadastroPetPayload = {
         usuarioId,
         nome: name.trim(),
         dataCadastro: nowBrasilia,

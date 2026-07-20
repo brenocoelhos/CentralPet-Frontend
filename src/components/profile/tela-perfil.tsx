@@ -1,5 +1,6 @@
 ﻿import { AppColors, Radius, TouchTarget } from "@/constants/tema";
 import { useAutenticacao } from "@/context/contexto-autenticacao";
+import { exibirAlertaErroApi } from "@/utils/alerta-erro-api";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import * as ImageManipulator from "expo-image-manipulator";
@@ -103,18 +104,14 @@ export default function TelaPerfil() {
           { compress: 0.6, format: ImageManipulator.SaveFormat.JPEG }, // 🚨 ATUALIZADO: Mudado de 0.8 para 0.6 para moldar o peso final do S3
         );
 
-        const api = getApi();
-        const response = await (api as any).perfil.uploadFoto(manipResult.uri);
+        const response = await getApi().perfil.uploadFoto(manipResult.uri);
 
         updateUser({ fotoPerfil: response.fotoPerfil });
-      } catch (error: any) {
-        console.error("=== ERRO AO SUBIR FOTO DE PERFIL ===");
-        console.error("Mensagem:", error.message);
-        if (error.status) console.error("Status da API:", error.status);
-        if (error.data) console.error("Resposta da API:", error.data);
-
-        Alert.alert(
+      } catch (error) {
+        console.error("Erro ao subir foto de perfil:", error);
+        exibirAlertaErroApi(
           "Erro",
+          error,
           "Não foi possível atualizar a foto de perfil. Tente novamente.",
         );
       } finally {
@@ -153,6 +150,8 @@ export default function TelaPerfil() {
             onPress={handlePickProfileImage}
             disabled={!user || uploadingFoto}
             activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel="Alterar foto de perfil"
           >
             {user?.fotoPerfil ? (
               <Image
@@ -236,6 +235,8 @@ export default function TelaPerfil() {
               <Pressable
                 style={styles.retryButton}
                 onPress={() => void loadStats()}
+                accessibilityRole="button"
+                accessibilityLabel="Tentar carregar estatísticas novamente"
               >
                 <Text style={styles.retryButtonText}>Tentar novamente</Text>
               </Pressable>
@@ -362,6 +363,7 @@ export default function TelaPerfil() {
             trackColor={{ false: "#E0D9CF", true: "#D97757" }}
             thumbColor="#FFFFFF"
             ios_backgroundColor="#E0D9CF"
+            accessibilityLabel="Ativar notificações de pets na região"
           />
         </View>
 

@@ -9,6 +9,7 @@ const CONFIG_KEY = "firebaseConfig";
 const CONFIG_MESSAGE_TYPE = "centralpet:fcm-config";
 const CONFIG_ACK_TYPE = "centralpet:fcm-config-ack";
 const OPEN_PET_MESSAGE_TYPE = "centralpet:open-pet";
+const RECEIVED_MESSAGE_TYPE = "centralpet:notification-received";
 
 let messagingInitialized = false;
 
@@ -73,6 +74,19 @@ function initializeMessaging(config) {
       badge: payload.notification?.badge || "/assets/images/logo.png",
       data: { petId },
     });
+
+    self.clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((windowClients) => {
+        for (const client of windowClients) {
+          client.postMessage({
+            type: RECEIVED_MESSAGE_TYPE,
+            title,
+            body,
+            petId,
+          });
+        }
+      });
   });
 
   messagingInitialized = true;

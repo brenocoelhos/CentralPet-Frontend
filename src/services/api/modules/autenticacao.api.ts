@@ -42,6 +42,7 @@ export type LoginResponse =
       usuarioId?: string;
       nome?: string;
       email?: string;
+      fotoPerfil?: string;
     };
 
 export type AuthMessageResponse = string;

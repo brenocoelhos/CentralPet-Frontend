@@ -5,6 +5,7 @@ import {
     hasFirebaseMessagingConfig,
 } from "@/lib/configuracao-firebase";
 import type { criarApi } from "@/services/api";
+import { adicionarNotificacao } from "@/services/notificacoes/armazenamento-notificacoes";
 import { router } from "expo-router";
 import { getApp, getApps, initializeApp } from "firebase/app";
 import {
@@ -20,6 +21,7 @@ const SERVICE_WORKER_PATH = "/firebase-messaging-sw.js";
 const CONFIG_MESSAGE_TYPE = "centralpet:fcm-config";
 const CONFIG_ACK_TYPE = "centralpet:fcm-config-ack";
 const OPEN_PET_MESSAGE_TYPE = "centralpet:open-pet";
+const RECEIVED_MESSAGE_TYPE = "centralpet:notification-received";
 
 type NotificacaoPetData = {
   petId?: string;
@@ -176,10 +178,27 @@ export function useNotificacoesPush(
     }
 
     const onServiceWorkerMessage = (event: MessageEvent) => {
-      const data = event.data as { type?: string; petId?: string } | undefined;
+      const data = event.data as
+        | {
+            type?: string;
+            petId?: string;
+            title?: string;
+            body?: string;
+          }
+        | undefined;
 
       if (data?.type === OPEN_PET_MESSAGE_TYPE) {
         abrirDetalhePetPorId(data.petId);
+        return;
+      }
+
+      if (data?.type === RECEIVED_MESSAGE_TYPE) {
+        void adicionarNotificacao({
+          titulo: data.title ?? "CentralPet",
+          corpo: data.body,
+          petId: data.petId,
+          tipo: data.petId ? "pet_perdido" : "outro",
+        });
       }
     };
 
@@ -258,6 +277,14 @@ export function useNotificacoesPush(
 
         const data = payload.data as NotificacaoPetData | undefined;
         const title = payload.notification?.title ?? "CentralPet";
+
+        void adicionarNotificacao({
+          titulo: title,
+          corpo: payload.notification?.body,
+          petId: data?.petId,
+          tipo: data?.tipo ?? (data?.petId ? "pet_perdido" : "outro"),
+        });
+
         const notification = new Notification(title, {
           body: payload.notification?.body,
           icon: payload.notification?.icon,

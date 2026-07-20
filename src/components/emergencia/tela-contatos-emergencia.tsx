@@ -10,6 +10,26 @@ import {
 } from "react-native";
 import { TextoTema as Text } from "../texto-tema";
 
+// Paleta acolhedora específica desta tela (contatos de emergência), distinta
+// do AppColors neutro usado no resto do app. Centralizada aqui pra não
+// espalhar os mesmos hex em dezenas de lugares do StyleSheet.
+const PaletaEmergencia = {
+  fundo: "#FFFDF9",
+  heroFundo: "#FFF3EC",
+  heroBorda: "#F2DFD4",
+  textoTitulo: "#2D221A",
+  textoSubtitulo: "#7D6B5A",
+  abaFundo: "#F2ECE6",
+  abaBorda: "#E5D9CE",
+  abaTexto: "#6F6358",
+  cardBorda: "#EFE5DC",
+  categoriaTexto: "#A06B54",
+  chipAtivoFundo: "#E6F7EC",
+  chipAtivoTexto: "#466A4F",
+  distanciaFundo: "#FDEADE",
+  distanciaTexto: "#8F4B36",
+} as const;
+
 type Aba = "meus" | "regiao";
 
 type Contato = {
@@ -123,7 +143,7 @@ function CardContato({ item }: { item: Contato }) {
         <Text style={styles.cardTitle}>{item.nome}</Text>
         {typeof item.distanciaKm === "number" ? (
           <View style={styles.distanciaBadge}>
-            <Ionicons name="location-outline" size={12} color="#8F4B36" />
+            <Ionicons name="location-outline" size={12} color={PaletaEmergencia.distanciaTexto} />
             <Text style={styles.distanciaText}>{item.distanciaKm.toFixed(1)} km</Text>
           </View>
         ) : null}
@@ -132,27 +152,27 @@ function CardContato({ item }: { item: Contato }) {
       <Text style={styles.cardCategoria}>{item.categoria}</Text>
 
       <View style={styles.infoRow}>
-        <Ionicons name="call-outline" size={14} color="#8E8476" />
+        <Ionicons name="call-outline" size={14} color={AppColors.textSecondary} />
         <Text style={styles.infoText}>{item.telefone}</Text>
       </View>
 
       {item.endereco ? (
         <View style={styles.infoRow}>
-          <Ionicons name="location-outline" size={14} color="#8E8476" />
+          <Ionicons name="location-outline" size={14} color={AppColors.textSecondary} />
           <Text style={styles.infoText}>{item.endereco}</Text>
         </View>
       ) : null}
 
       {item.horario ? (
         <View style={styles.infoRow}>
-          <Ionicons name="time-outline" size={14} color="#8E8476" />
+          <Ionicons name="time-outline" size={14} color={AppColors.textSecondary} />
           <Text style={styles.infoText}>{item.horario}</Text>
         </View>
       ) : null}
 
       {item.especialidade ? (
         <View style={styles.infoRow}>
-          <Ionicons name="medkit-outline" size={14} color="#8E8476" />
+          <Ionicons name="medkit-outline" size={14} color={AppColors.textSecondary} />
           <Text style={styles.infoText}>{item.especialidade}</Text>
         </View>
       ) : null}
@@ -246,26 +266,26 @@ export default function TelaContatosEmergencia() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: "#FFFDF9",
+    backgroundColor: PaletaEmergencia.fundo,
   },
   hero: {
     paddingHorizontal: 16,
     paddingTop: 16,
     paddingBottom: 10,
-    backgroundColor: "#FFF3EC",
+    backgroundColor: PaletaEmergencia.heroFundo,
     borderBottomWidth: 1,
-    borderBottomColor: "#F2DFD4",
+    borderBottomColor: PaletaEmergencia.heroBorda,
   },
   heroTitle: {
     fontSize: 21,
-    color: "#2D221A",
+    color: PaletaEmergencia.textoTitulo,
     fontWeight: "700",
   },
   heroSubtitle: {
     marginTop: 4,
     fontSize: 13,
     lineHeight: 18,
-    color: "#7D6B5A",
+    color: PaletaEmergencia.textoSubtitulo,
   },
   abaContainer: {
     flexDirection: "row",
@@ -276,24 +296,24 @@ const styles = StyleSheet.create({
   abaButton: {
     flex: 1,
     minHeight: TouchTarget.min,
-    backgroundColor: "#F2ECE6",
+    backgroundColor: PaletaEmergencia.abaFundo,
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: "#E5D9CE",
+    borderColor: PaletaEmergencia.abaBorda,
     paddingVertical: 10,
     alignItems: "center",
   },
   abaButtonAtiva: {
-    backgroundColor: "#D97757",
-    borderColor: "#D97757",
+    backgroundColor: AppColors.brand,
+    borderColor: AppColors.brand,
   },
   abaText: {
     fontSize: 13,
-    color: "#6F6358",
+    color: PaletaEmergencia.abaTexto,
     fontWeight: "600",
   },
   abaTextAtiva: {
-    color: "#FFFFFF",
+    color: AppColors.surface,
   },
   listaContainer: {
     padding: 16,
@@ -319,15 +339,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   retryButtonText: {
-    color: "#FFFFFF",
+    color: AppColors.surface,
     fontFamily: "Lexend_600SemiBold",
     fontSize: 13,
   },
   card: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 14,
+    backgroundColor: AppColors.surface,
+    borderRadius: Radius.md,
     borderWidth: 1,
-    borderColor: "#EFE5DC",
+    borderColor: PaletaEmergencia.cardBorda,
     padding: 12,
     gap: 8,
     boxShadow: "0px 4px 10px rgba(0,0,0,0.06)",
@@ -342,12 +362,12 @@ const styles = StyleSheet.create({
   cardTitle: {
     flex: 1,
     fontSize: 15,
-    color: "#2D221A",
+    color: PaletaEmergencia.textoTitulo,
     fontWeight: "700",
   },
   cardCategoria: {
     fontSize: 12,
-    color: "#A06B54",
+    color: PaletaEmergencia.categoriaTexto,
     fontWeight: "600",
   },
   infoRow: {
@@ -358,7 +378,7 @@ const styles = StyleSheet.create({
   infoText: {
     flex: 1,
     fontSize: 12,
-    color: "#6F6358",
+    color: PaletaEmergencia.abaTexto,
     lineHeight: 16,
   },
   footerRow: {
@@ -374,19 +394,19 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
   },
   statusChipAtivo: {
-    backgroundColor: "#E6F7EC",
+    backgroundColor: PaletaEmergencia.chipAtivoFundo,
   },
   statusChipInativo: {
-    backgroundColor: "#F2ECE6",
+    backgroundColor: PaletaEmergencia.abaFundo,
   },
   statusChipText: {
     fontSize: 11,
-    color: "#466A4F",
+    color: PaletaEmergencia.chipAtivoTexto,
     fontWeight: "600",
   },
   destaqueText: {
     fontSize: 11,
-    color: "#8E8476",
+    color: AppColors.textSecondary,
     flex: 1,
     textAlign: "right",
   },
@@ -397,11 +417,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
-    backgroundColor: "#FDEADE",
+    backgroundColor: PaletaEmergencia.distanciaFundo,
   },
   distanciaText: {
     fontSize: 11,
-    color: "#8F4B36",
+    color: PaletaEmergencia.distanciaTexto,
     fontWeight: "700",
   },
 });

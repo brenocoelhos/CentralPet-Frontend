@@ -149,7 +149,7 @@ export function ProvedorAutenticacao({ children }: PropsWithChildren) {
   }, []);
 
   const signInWithToken = useCallback(
-    async (nextToken: string, loginPayload?: any) => {
+    async (nextToken: string, loginPayload?: LoginResponse) => {
       let currentUser: UsuarioAutenticado;
 
       if (
