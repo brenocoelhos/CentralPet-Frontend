@@ -1,15 +1,10 @@
-import { Text, View } from "react-native";
+import TelaAdocao from "@/components/adocao/tela-adocao";
+import EstruturaApp from "@/components/layout/estrutura-app";
 
-export default function HomeScreen() {
+export default function AdocaoScreen() {
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text>Em desenvolvimento.</Text>
-    </View>
+    <EstruturaApp>
+      <TelaAdocao />
+    </EstruturaApp>
   );
 }

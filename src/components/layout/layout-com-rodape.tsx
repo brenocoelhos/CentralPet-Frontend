@@ -8,6 +8,7 @@ const TELAS_SEM_RODAPE = [
   "/cadastro-usuario",
   "/esqueci-senha",
   "/redefinir-senha",
+  "/detalhe-pet-adocao",
 ];
 
 export default function LayoutComRodape({

@@ -4,7 +4,11 @@ import { StyleSheet, View } from "react-native";
 
 import RodapeApp from "@/components/layout/rodape-app";
 
-const ROUTES_WITHOUT_SHELL = new Set(["/login", "/cadastro-usuario"]);
+const ROUTES_WITHOUT_SHELL = new Set([
+  "/login",
+  "/cadastro-usuario",
+  "/detalhe-pet-adocao",
+]);
 
 export default function EstruturaApp({ children }: PropsWithChildren) {
   const pathname = usePathname();

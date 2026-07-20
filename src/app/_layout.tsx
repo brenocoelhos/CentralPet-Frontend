@@ -62,6 +62,35 @@ function AppStack() {
       />
       <Stack.Screen name="index" options={{ title: "Inicio" }} />
 
+      <Stack.Screen name="home" options={{ headerShown: false }} />
+
+      <Stack.Screen
+        name="adocao"
+        options={{
+          headerTitle: () => (
+            <Text>
+              <Text style={styles.logoBold}>Central</Text>
+              <Text style={styles.logoAccent}>Pet</Text>
+            </Text>
+          ),
+          headerLeft: () => null,
+          headerRight: () => (
+            <TouchableOpacity style={styles.notifBtn}>
+              <Ionicons
+                name="notifications-outline"
+                size={22}
+                color="#1a1a1a"
+              />
+            </TouchableOpacity>
+          ),
+        }}
+      />
+
+      <Stack.Screen
+        name="detalhe-pet-adocao"
+        options={{ headerShown: false }}
+      />
+
       <Stack.Screen
         name="painel"
         options={{

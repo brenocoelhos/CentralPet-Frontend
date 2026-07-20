@@ -1,15 +1,10 @@
-import { Text, View } from "react-native";
+import EstruturaApp from "@/components/layout/estrutura-app";
+import TelaHome from "@/components/home/tela-home";
 
 export default function HomeScreen() {
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text>Em desenvolvimento.</Text>
-    </View>
+    <EstruturaApp>
+      <TelaHome />
+    </EstruturaApp>
   );
 }
