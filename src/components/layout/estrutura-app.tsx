@@ -1,23 +1,13 @@
-﻿import { usePathname } from "expo-router";
-import { type PropsWithChildren } from "react";
+﻿import { type PropsWithChildren } from "react";
 import { StyleSheet, View } from "react-native";
 
-import RodapeApp from "@/components/layout/rodape-app";
-
-const ROUTES_WITHOUT_SHELL = new Set([
-  "/login",
-  "/cadastro-usuario",
-  "/detalhe-pet-adocao",
-]);
-
+// O rodapé flutuante (RodapeApp) já é renderizado uma única vez em
+// LayoutComRodape (src/app/_layout.tsx), que envolve toda a Stack. Este
+// componente cuida só do container de conteúdo de cada tela.
 export default function EstruturaApp({ children }: PropsWithChildren) {
-  const pathname = usePathname();
-  const showShell = !ROUTES_WITHOUT_SHELL.has(pathname);
-
   return (
     <View style={styles.root}>
       <View style={styles.content}>{children}</View>
-      {showShell ? <RodapeApp /> : null}
     </View>
   );
 }

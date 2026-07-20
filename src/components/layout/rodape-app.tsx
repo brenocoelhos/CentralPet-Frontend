@@ -1,6 +1,7 @@
 ﻿import { Ionicons } from "@expo/vector-icons";
+import { BlurView } from "expo-blur";
 import { usePathname, useRouter } from "expo-router";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { Platform, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type FooterItem = {
@@ -30,7 +31,8 @@ const FOOTER_ITEMS: FooterItem[] = [
   },
   {
     route: "/painel",
-    icon: "location-outline",
+    icon: "megaphone-outline",
+    activeIcon: "megaphone",
     matches: ["/", "/painel", "/index"],
   },
   {
@@ -45,7 +47,7 @@ const FOOTER_LABELS: Record<string, string> = {
   "/home": "Ir para início",
   "/adocao": "Abrir adoção",
   "/novo": "Nova funcionalidade",
-  "/painel": "Abrir mapa",
+  "/painel": "Abrir alertas de pets perdidos",
   "/perfil": "Abrir perfil",
 };
 
@@ -68,32 +70,41 @@ export default function RodapeApp() {
         },
       ]}
     >
-      <View style={styles.nav}>
-        {FOOTER_ITEMS.map((item) => {
-          const active = item.matches.includes(pathname);
-          const iconName =
-            active && item.activeIcon ? item.activeIcon : item.icon;
+      <View style={styles.glass}>
+        <BlurView
+          intensity={68}
+          tint="light"
+          experimentalBlurMethod="dimezisBlurView"
+          style={StyleSheet.absoluteFillObject}
+        />
+        <View style={styles.glassSheen} pointerEvents="none" />
+        <View style={styles.nav}>
+          {FOOTER_ITEMS.map((item) => {
+            const active = item.matches.includes(pathname);
+            const iconName =
+              active && item.activeIcon ? item.activeIcon : item.icon;
 
-          return (
-            <TouchableOpacity
-              key={item.route}
-              activeOpacity={0.85}
-              onPress={() => handleNavigate(item.route)}
-              style={styles.item}
-              accessibilityRole="button"
-              accessibilityLabel={FOOTER_LABELS[item.route] ?? "Navegar"}
-            >
-              <View style={styles.iconWrapper}>
-                <Ionicons
-                  name={iconName}
-                  size={28}
-                  color={active ? "#D97757" : "#7C7C7C"}
-                />
-                {active && <View style={styles.dot} />}
-              </View>
-            </TouchableOpacity>
-          );
-        })}
+            return (
+              <TouchableOpacity
+                key={item.route}
+                activeOpacity={0.85}
+                onPress={() => handleNavigate(item.route)}
+                style={styles.item}
+                accessibilityRole="button"
+                accessibilityLabel={FOOTER_LABELS[item.route] ?? "Navegar"}
+              >
+                <View style={styles.iconWrapper}>
+                  <Ionicons
+                    name={iconName}
+                    size={28}
+                    color={active ? "#D97757" : "#3C3C3C"}
+                  />
+                  {active && <View style={styles.dot} />}
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
       </View>
     </View>
   );
@@ -104,20 +115,30 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 24,
     right: 24,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 32,
-    paddingVertical: 12,
-    paddingHorizontal: 8,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.12,
+    shadowOpacity: 0.16,
     shadowRadius: 24,
     elevation: 12,
+  },
+  glass: {
+    borderRadius: 32,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.5)",
+    backgroundColor:
+      Platform.OS === "android" ? "rgba(255,255,255,0.78)" : "rgba(255,255,255,0.35)",
+  },
+  glassSheen: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(255,255,255,0.14)",
   },
   nav: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    paddingVertical: 12,
+    paddingHorizontal: 8,
   },
   item: {
     flex: 1,

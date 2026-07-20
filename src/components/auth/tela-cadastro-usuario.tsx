@@ -210,7 +210,7 @@ export default function TelaCadastroUsuario() {
         typeof loginResponse === "object" ? loginResponse : undefined,
       );
 
-      router.replace("/painel");
+      router.replace("/home");
     } catch (error) {
       exibirAlertaErroApi(
         "Falha no cadastro",

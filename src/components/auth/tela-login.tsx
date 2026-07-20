@@ -46,7 +46,7 @@ export default function TelaLogin() {
       }
 
       await signInWithToken(token, response);
-      router.replace("/painel");
+      router.replace("/home");
     } catch (error) {
       exibirAlertaErroApi(
         "Falha no login",

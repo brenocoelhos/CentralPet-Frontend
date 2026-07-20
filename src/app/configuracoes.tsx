@@ -14,6 +14,7 @@ export default function ConfiguracoesRoute() {
         <Text style={styles.description}>
           Ajuste preferencias da conta e personalize sua experiencia no app.
         </Text>
+        <Text style={styles.badge}>Em desenvolvimento</Text>
       </View>
     </EstruturaApp>
   );
@@ -47,5 +48,13 @@ const styles = StyleSheet.create({
     color: "#746C5F",
     textAlign: "center",
     lineHeight: 20,
+  },
+  badge: {
+    marginTop: 8,
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#8A7060",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
 });
