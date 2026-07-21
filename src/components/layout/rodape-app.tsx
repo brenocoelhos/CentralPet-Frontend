@@ -46,7 +46,7 @@ const FOOTER_ITEMS: FooterItem[] = [
 const FOOTER_LABELS: Record<string, string> = {
   "/home": "Ir para início",
   "/adocao": "Abrir adoção",
-  "/novo": "Nova funcionalidade",
+  "/novo": "Cadastrar pet",
   "/painel": "Abrir alertas de pets perdidos",
   "/perfil": "Abrir perfil",
 };

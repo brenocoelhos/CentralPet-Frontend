@@ -191,7 +191,9 @@ export default function TelaDetalhePetAdocao({ pet }: TelaDetalhePetAdocaoProps)
               </View>
               <View style={styles.locationTexts}>
                 <Text style={styles.locationText}>{pet.localizacao}</Text>
-                <Text style={styles.locationDistance}>{pet.distancia}</Text>
+                {pet.distancia ? (
+                  <Text style={styles.locationDistance}>{pet.distancia}</Text>
+                ) : null}
               </View>
               <Ionicons name="chevron-forward" size={18} color="#B7AFA4" />
             </TouchableOpacity>

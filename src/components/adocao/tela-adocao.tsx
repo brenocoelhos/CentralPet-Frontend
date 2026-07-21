@@ -7,10 +7,11 @@ import {
   HORIZONTAL_PADDING,
 } from "@/constants/layout-grid";
 import { AppColors } from "@/constants/tema";
-import { PETS_ADOCAO_MOCK, type PetAdocao } from "@/data/pets-adocao-mock";
+import { listarTodosPetsAdocao, type PetAdocao } from "@/data/pets-adocao-mock";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useFocusEffect } from "@react-navigation/native";
 import { router } from "expo-router";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 
 const FILTERS = ["Todos", "Cães", "Gatos"] as const;
@@ -46,16 +47,33 @@ const FilterBar = ({
 
 export default function TelaAdocao() {
   const [activeFilter, setActiveFilter] = useState<Filter>("Todos");
+  const [pets, setPets] = useState<PetAdocao[]>([]);
+  const [carregando, setCarregando] = useState(true);
+
+  useFocusEffect(
+    useCallback(() => {
+      let ativo = true;
+      void listarTodosPetsAdocao().then((lista) => {
+        if (ativo) {
+          setPets(lista);
+          setCarregando(false);
+        }
+      });
+      return () => {
+        ativo = false;
+      };
+    }, []),
+  );
 
   const filtered: PetAdocao[] = useMemo(() => {
     if (activeFilter === "Cães") {
-      return PETS_ADOCAO_MOCK.filter((pet) => pet.especie === "Cão");
+      return pets.filter((pet) => pet.especie === "Cão");
     }
     if (activeFilter === "Gatos") {
-      return PETS_ADOCAO_MOCK.filter((pet) => pet.especie === "Gato");
+      return pets.filter((pet) => pet.especie === "Gato");
     }
-    return PETS_ADOCAO_MOCK;
-  }, [activeFilter]);
+    return pets;
+  }, [activeFilter, pets]);
 
   const renderCard = ({ item }: { item: PetAdocao }) => (
     <View style={styles.itemWrapper}>
@@ -63,7 +81,7 @@ export default function TelaAdocao() {
         variant="dashboard"
         name={item.nome}
         breed={item.raca}
-        location={`${item.localizacao} · ${item.distancia}`}
+        location={item.distancia ? `${item.localizacao} · ${item.distancia}` : item.localizacao}
         imageUrl={item.fotos[0]}
         status={item.idade}
         imageHeight={CARD_IMAGE_HEIGHT}
@@ -87,7 +105,7 @@ export default function TelaAdocao() {
     </>
   );
 
-  const listEmpty = (
+  const listEmpty = carregando ? null : (
     <View style={styles.emptyState}>
       <Ionicons name="paw-outline" size={48} color="#ccc" />
       <Text style={styles.emptyText}>Nenhum pet disponível com esse filtro</Text>

@@ -1,15 +1,10 @@
-import { Text, View } from "react-native";
+import EstruturaApp from "@/components/layout/estrutura-app";
+import TelaNovo from "@/components/novo/tela-novo";
 
-export default function HomeScreen() {
+export default function NovoScreen() {
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text>Em desenvolvimento.</Text>
-    </View>
+    <EstruturaApp>
+      <TelaNovo />
+    </EstruturaApp>
   );
 }

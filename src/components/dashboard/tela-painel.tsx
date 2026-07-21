@@ -251,25 +251,6 @@ export default function TelaPainel() {
         }
         showsVerticalScrollIndicator={false}
       />
-
-      {/* ── FAB ── */}
-      <View style={styles.fabContainer}>
-        <Pressable
-          style={styles.fab}
-          onPress={() => router.push("/cadastro-pet")}
-          accessibilityRole="button"
-          accessibilityLabel="Abrir cadastro de pet"
-          accessibilityHint="Vai para o formulario de cadastro"
-        >
-          <Ionicons
-            name="add-circle-outline"
-            size={20}
-            color="#fff"
-            style={{ marginRight: 8 }}
-          />
-          <Text style={styles.fabText}>Realizar cadastro</Text>
-        </Pressable>
-      </View>
     </View>
   );
 }
@@ -390,31 +371,6 @@ const styles = StyleSheet.create({
   skeletonCard: {
     opacity: 0.45,
     backgroundColor: "#E8E2D8",
-  },
-
-  // FAB
-  fabContainer: {
-    position: "absolute",
-    bottom: 24,
-    left: 16,
-    right: 16,
-  },
-  fab: {
-    minHeight: TouchTarget.min,
-    backgroundColor: ORANGE,
-    borderRadius: Radius.pill,
-    paddingVertical: 18,
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "center",
-    boxShadow: "0px 6px 12px rgba(217,119,87,0.4)",
-    elevation: 6,
-  },
-  fabText: {
-    fontFamily: "Lexend_700Bold",
-    color: "#fff",
-    fontSize: 16,
-    letterSpacing: 0.2,
   },
 });
 

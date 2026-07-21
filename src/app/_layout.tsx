@@ -151,6 +151,8 @@ function AppStack() {
         }}
       />
 
+      <Stack.Screen name="novo" options={{ headerShown: false }} />
+
       <Stack.Screen
         name="detalhe-pet"
         options={{

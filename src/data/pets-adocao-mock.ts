@@ -1,6 +1,12 @@
-// Dados de exemplo para as telas de adoção.
+// Dados das telas de adoção.
 // TODO: substituir por uma chamada real assim que o backend expuser um
 // endpoint de pets disponíveis para adoção (hoje `pets.api.ts` só cobre pets perdidos).
+// Enquanto isso, os pets cadastrados pelo próprio usuário ficam guardados
+// localmente (AsyncStorage) e são somados aos pets de exemplo abaixo.
+
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const STORAGE_KEY_LOCAIS = "@centralpet:pets-adocao-locais";
 
 export type ContatoResponsavelAdocao = {
   nome: string;
@@ -23,7 +29,7 @@ export type PetAdocao = {
   castrado: boolean;
   vermifugado: boolean;
   localizacao: string;
-  distancia: string;
+  distancia?: string;
   fotos: string[];
   responsavel: ContatoResponsavelAdocao;
 };
@@ -173,6 +179,33 @@ export const PETS_ADOCAO_MOCK: PetAdocao[] = [
   },
 ];
 
-export function buscarPetAdocaoPorId(id: string): PetAdocao | undefined {
-  return PETS_ADOCAO_MOCK.find((pet) => pet.id === id);
+async function lerPetsAdocaoLocais(): Promise<PetAdocao[]> {
+  try {
+    const raw = await AsyncStorage.getItem(STORAGE_KEY_LOCAIS);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function listarTodosPetsAdocao(): Promise<PetAdocao[]> {
+  const locais = await lerPetsAdocaoLocais();
+  return [...locais, ...PETS_ADOCAO_MOCK];
+}
+
+export async function adicionarPetAdocao(pet: PetAdocao): Promise<void> {
+  const locais = await lerPetsAdocaoLocais();
+  await AsyncStorage.setItem(
+    STORAGE_KEY_LOCAIS,
+    JSON.stringify([pet, ...locais]),
+  );
+}
+
+export async function buscarPetAdocaoPorId(
+  id: string,
+): Promise<PetAdocao | undefined> {
+  const todos = await listarTodosPetsAdocao();
+  return todos.find((pet) => pet.id === id);
 }

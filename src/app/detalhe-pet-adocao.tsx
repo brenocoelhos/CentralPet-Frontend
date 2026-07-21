@@ -1,20 +1,48 @@
 import EstruturaApp from "@/components/layout/estrutura-app";
 import TelaDetalhePetAdocao from "@/components/pet/tela-detalhe-pet-adocao";
-import { buscarPetAdocaoPorId } from "@/data/pets-adocao-mock";
+import { buscarPetAdocaoPorId, type PetAdocao } from "@/data/pets-adocao-mock";
 import { router, useLocalSearchParams } from "expo-router";
-import { useEffect } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
 export default function PetDetailAdocaoRoute() {
   const { id } = useLocalSearchParams<{ id?: string }>();
-  const pet = id ? buscarPetAdocaoPorId(id) : undefined;
+  const [pet, setPet] = useState<PetAdocao | null | undefined>(undefined);
 
   useEffect(() => {
-    if (!id || pet) {
+    let ativo = true;
+
+    if (!id) {
+      setPet(null);
       return;
     }
-    router.replace("/adocao");
-  }, [id, pet]);
+
+    void buscarPetAdocaoPorId(id).then((encontrado) => {
+      if (ativo) {
+        setPet(encontrado ?? null);
+      }
+    });
+
+    return () => {
+      ativo = false;
+    };
+  }, [id]);
+
+  useEffect(() => {
+    if (pet === null) {
+      router.replace("/adocao");
+    }
+  }, [pet]);
+
+  if (pet === undefined) {
+    return (
+      <EstruturaApp>
+        <View style={styles.centered}>
+          <ActivityIndicator color="#D97757" />
+        </View>
+      </EstruturaApp>
+    );
+  }
 
   if (!pet) {
     return (
