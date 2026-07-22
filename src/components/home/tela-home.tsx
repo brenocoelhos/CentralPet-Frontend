@@ -1,5 +1,6 @@
+import { CartaoFuncionalidade } from "@/components/home/cartao-funcionalidade";
 import SinoNotificacoes from "@/components/notificacoes/sino-notificacoes";
-import { AppColors, Radius, TouchTarget } from "@/constants/tema";
+import { AppColors, Radius } from "@/constants/tema";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { router } from "expo-router";
 import {
@@ -54,58 +55,32 @@ export default function TelaHome() {
         </View>
 
         {/* ── Card Pets Perdidos ── */}
-        <TouchableOpacity
-          style={styles.featureCard}
-          activeOpacity={0.9}
+        <CartaoFuncionalidade
+          title="Pets Perdidos"
+          description="Ajude a reencontrar pets desaparecidos na sua região."
+          image={IMG_PETS_PERDIDOS}
+          buttonText="Ver alertas próximos"
+          buttonColor={ORANGE}
+          icon="location"
+          iconBg="#F7E3DB"
+          iconColor={ORANGE}
           onPress={() => router.push("/painel")}
-          accessibilityRole="button"
           accessibilityLabel="Ver alertas de pets perdidos próximos"
-        >
-          <Image
-            source={{ uri: IMG_PETS_PERDIDOS }}
-            style={styles.featureImage}
-            resizeMode="cover"
-          />
-          <View style={[styles.featureIconBadge, { backgroundColor: ORANGE }]}>
-            <Ionicons name="paw" size={20} color="#fff" />
-          </View>
-          <View style={styles.featureBody}>
-            <Text style={styles.featureTitle}>Pets Perdidos</Text>
-            <Text style={styles.featureDesc}>
-              Ajude a reencontrar pets desaparecidos na sua região.
-            </Text>
-            <View style={[styles.featureCta, { backgroundColor: ORANGE }]}>
-              <Text style={styles.featureCtaText}>Ver alertas próximos</Text>
-            </View>
-          </View>
-        </TouchableOpacity>
+        />
 
         {/* ── Card Adoção ── */}
-        <TouchableOpacity
-          style={styles.featureCard}
-          activeOpacity={0.9}
+        <CartaoFuncionalidade
+          title="Adoção"
+          description="Encontre seu novo melhor amigo em ONGs parceiras."
+          image={IMG_ADOCAO}
+          buttonText="Encontrar um amigo"
+          buttonColor={GREEN}
+          icon="heart"
+          iconBg="#E9F7EA"
+          iconColor={GREEN}
           onPress={() => router.push("/adocao")}
-          accessibilityRole="button"
           accessibilityLabel="Encontrar um pet para adoção"
-        >
-          <Image
-            source={{ uri: IMG_ADOCAO }}
-            style={styles.featureImage}
-            resizeMode="cover"
-          />
-          <View style={[styles.featureIconBadge, { backgroundColor: GREEN }]}>
-            <Ionicons name="heart" size={18} color="#fff" />
-          </View>
-          <View style={styles.featureBody}>
-            <Text style={styles.featureTitle}>Adoção</Text>
-            <Text style={styles.featureDesc}>
-              Encontre seu novo melhor amigo em ONGs parceiras.
-            </Text>
-            <View style={[styles.featureCta, { backgroundColor: GREEN }]}>
-              <Text style={styles.featureCtaText}>Encontrar um amigo</Text>
-            </View>
-          </View>
-        </TouchableOpacity>
+        />
 
         {/* ── Apoie a Causa ── */}
         <TouchableOpacity
@@ -194,52 +169,6 @@ const styles = StyleSheet.create({
     fontFamily: "Lexend_400Regular",
     fontSize: 14,
     color: "#8E8476",
-  },
-
-  featureCard: {
-    borderRadius: Radius.lg,
-    backgroundColor: "#F5F2EC",
-    overflow: "hidden",
-    marginBottom: 16,
-    boxShadow: "0px 3px 8px rgba(0,0,0,0.08)",
-    elevation: 3,
-  },
-  featureImage: { width: "100%", height: 150, backgroundColor: "#E8E4DF" },
-  featureIconBadge: {
-    position: "absolute",
-    top: 128,
-    left: 16,
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 3,
-    borderColor: BG,
-  },
-  featureBody: { padding: 16, paddingTop: 28 },
-  featureTitle: {
-    fontFamily: "Lexend_700Bold",
-    fontSize: 18,
-    color: "#1A1A1A",
-    marginBottom: 4,
-  },
-  featureDesc: {
-    fontFamily: "Lexend_400Regular",
-    fontSize: 13,
-    color: "#7A7268",
-    marginBottom: 14,
-  },
-  featureCta: {
-    minHeight: TouchTarget.min,
-    borderRadius: Radius.pill,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  featureCtaText: {
-    fontFamily: "Lexend_600SemiBold",
-    fontSize: 14,
-    color: "#fff",
   },
 
   donateCard: {
