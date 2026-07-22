@@ -1,16 +1,17 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import {
-  ImageBackground,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    type ImageSourcePropType,
+    ImageBackground,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 type CartaoFuncionalidadeProps = {
   title: string;
   description: string;
-  image: string;
+  image: ImageSourcePropType;
   buttonText: string;
   buttonColor: string;
   iconColor: string;
@@ -34,7 +35,7 @@ export function CartaoFuncionalidade({
 }: CartaoFuncionalidadeProps) {
   return (
     <ImageBackground
-      source={{ uri: image }}
+      source={image}
       imageStyle={styles.image}
       style={styles.card}
     >
@@ -71,7 +72,10 @@ const styles = StyleSheet.create({
     boxShadow: "0px 3px 8px rgba(0,0,0,0.1)",
     elevation: 3,
   },
-  image: { borderRadius: 24 },
+  image: {
+    borderRadius: 24,
+    transform: [{ scale: 1.06 }, { translateX: -8 }],
+  },
   overlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(255,255,255,0.28)",

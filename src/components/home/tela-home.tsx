@@ -4,13 +4,13 @@ import { AppColors, Radius } from "@/constants/tema";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { router } from "expo-router";
 import {
-  Alert,
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Alert,
+    Image,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -18,10 +18,8 @@ const ORANGE = AppColors.brand;
 const GREEN = "#3F9142";
 const BG = AppColors.surface;
 
-const IMG_PETS_PERDIDOS =
-  "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=800&q=80";
-const IMG_ADOCAO =
-  "https://images.unsplash.com/photo-1552053831-71594a27632d?w=800&q=80";
+const IMG_PETS_PERDIDOS = require("../../../assets/images/petperdido.png");
+const IMG_ADOCAO = require("../../../assets/images/petadocao.png");
 const IMG_HISTORIA =
   "https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?w=800&q=80";
 

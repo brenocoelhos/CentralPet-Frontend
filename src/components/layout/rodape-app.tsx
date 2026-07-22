@@ -1,7 +1,7 @@
 ﻿import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { usePathname, useRouter } from "expo-router";
-import { Platform, StyleSheet, TouchableOpacity, View } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type FooterItem = {
@@ -20,25 +20,26 @@ const FOOTER_ITEMS: FooterItem[] = [
   },
   {
     route: "/adocao",
-    icon: "paw-outline",
+    icon: "heart-outline",
+    activeIcon: "heart-outline",
     matches: ["/adocao"],
   },
   {
     route: "/novo",
     icon: "add-circle-outline",
-    activeIcon: "add-circle",
+    activeIcon: "add-circle-outline",
     matches: ["/novo"],
   },
   {
     route: "/painel",
-    icon: "megaphone-outline",
-    activeIcon: "megaphone",
+    icon: "location-outline",
+    activeIcon: "location-outline",
     matches: ["/", "/painel", "/index"],
   },
   {
     route: "/perfil",
     icon: "person-outline",
-    activeIcon: "person",
+    activeIcon: "person-outline",
     matches: ["/perfil"],
   },
 ];
@@ -89,7 +90,7 @@ export default function RodapeApp() {
                 key={item.route}
                 activeOpacity={0.85}
                 onPress={() => handleNavigate(item.route)}
-                style={styles.item}
+                style={[styles.item, active && styles.itemActive]}
                 accessibilityRole="button"
                 accessibilityLabel={FOOTER_LABELS[item.route] ?? "Navegar"}
               >
@@ -117,21 +118,20 @@ const styles = StyleSheet.create({
     right: 24,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.16,
-    shadowRadius: 24,
-    elevation: 12,
+    shadowOpacity: 0.12,
+    shadowRadius: 18,
+    elevation: 8,
   },
   glass: {
     borderRadius: 32,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.5)",
-    backgroundColor:
-      Platform.OS === "android" ? "rgba(255,255,255,0.78)" : "rgba(255,255,255,0.35)",
+    borderColor: "rgba(255,255,255,0.7)",
+    backgroundColor: "rgba(255,255,255,0.6)",
   },
   glassSheen: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(255,255,255,0.14)",
+    backgroundColor: "rgba(255,255,255,0.08)",
   },
   nav: {
     flexDirection: "row",
@@ -142,12 +142,23 @@ const styles = StyleSheet.create({
   },
   item: {
     flex: 1,
+    minHeight: 52,
+    marginHorizontal: 2,
+    borderRadius: 20,
+    overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
+  },
+  itemActive: {
+    backgroundColor: "rgba(255,255,255,0.22)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.5)",
   },
   iconWrapper: {
     width: 48,
     height: 48,
+    borderRadius: 24,
+    backgroundColor: "transparent",
     alignItems: "center",
     justifyContent: "center",
     gap: 4,
