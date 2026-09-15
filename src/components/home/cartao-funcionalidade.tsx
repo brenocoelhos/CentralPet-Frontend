@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
     transform: [{ scale: 1.06 }, { translateX: -8 }],
   },
   overlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: "rgba(255,255,255,0.28)",
   },
   content: {

@@ -76,7 +76,7 @@ export default function RodapeApp() {
           intensity={68}
           tint="light"
           experimentalBlurMethod="dimezisBlurView"
-          style={StyleSheet.absoluteFillObject}
+          style={StyleSheet.absoluteFill}
         />
         <View style={styles.glassSheen} pointerEvents="none" />
         <View style={styles.nav}>
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.6)",
   },
   glassSheen: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: "rgba(255,255,255,0.08)",
   },
   nav: {

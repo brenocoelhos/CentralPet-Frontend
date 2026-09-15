@@ -84,7 +84,8 @@
           "icon": "./assets/images/logo.png",
           "color": "#D97757"
         }
-      ]
+      ],
+      "expo-status-bar"
     ],
     "experiments": {
       "typedRoutes": true,

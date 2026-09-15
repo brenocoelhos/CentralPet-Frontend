@@ -9,8 +9,7 @@ import {
 import { AppColors } from "@/constants/tema";
 import { listarTodosPetsAdocao, type PetAdocao } from "@/data/pets-adocao-mock";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useFocusEffect } from "@react-navigation/native";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 
