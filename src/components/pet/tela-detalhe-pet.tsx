@@ -1,4 +1,4 @@
-﻿import { Radius, TouchTarget } from "@/constants/tema";
+import { Radius, TouchTarget } from "@/constants/tema";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import * as Linking from "expo-linking";
 import { router } from "expo-router";
@@ -421,7 +421,7 @@ export default function TelaDetalhePet({ item }: PetDetailScreenProps) {
 
   return (
     <SafeAreaView style={styles.safe} edges={["right", "bottom", "left"]}>
-      <StatusBar barStyle="dark-content" backgroundColor={BG} />
+      <StatusBar barStyle="dark-content" />
 
       <ScrollView
         style={styles.scroll}

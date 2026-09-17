@@ -1,8 +1,8 @@
-﻿import { Radius, TouchTarget } from "@/constants/tema";
+import { Radius, TouchTarget } from "@/constants/tema";
 import { Ionicons } from "@expo/vector-icons";
 import type React from "react";
 import type { ComponentProps, ReactNode } from "react";
-import { StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
+import { StyleSheet, View, type ViewProps } from "react-native";
 import { EntradaTextoTema } from "../entrada-texto-tema";
 import { TextoTema as Text } from "../texto-tema";
 
@@ -14,8 +14,8 @@ type AuthInputFieldProps = Omit<InputProps, "style"> & {
   errorText?: string;
   leftIconName?: IconName;
   rightAccessory?: ReactNode;
-  containerStyle?: StyleProp<ViewStyle>;
-  fieldStyle?: StyleProp<ViewStyle>;
+  containerStyle?: ViewProps["style"];
+  fieldStyle?: ViewProps["style"];
   disabled?: boolean;
 };
 

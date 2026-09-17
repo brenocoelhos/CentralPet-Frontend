@@ -122,7 +122,7 @@ export default function TelaAdocao() {
         columnWrapperStyle={styles.gridRow}
         renderItem={renderCard}
         ListHeaderComponent={listHeader}
-        ListEmptyComponent={listEmpty}
+        ListEmptyComponent={listEmpty ?? undefined}
         ListFooterComponent={<View style={{ height: 110 }} />}
         showsVerticalScrollIndicator={false}
       />

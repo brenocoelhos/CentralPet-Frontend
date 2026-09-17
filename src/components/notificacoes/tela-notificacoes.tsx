@@ -143,10 +143,10 @@ export default function TelaNotificacoes() {
             >
               <Text style={styles.marcarTodasText}>Marcar todas como lidas</Text>
             </Pressable>
-          ) : null
+          ) : undefined
         }
         ListEmptyComponent={
-          carregando ? null : (
+          carregando ? undefined : (
             <View style={styles.emptyState}>
               <Ionicons name="notifications-outline" size={44} color="#ccc" />
               <Text style={styles.emptyTitle}>Nenhuma notificação ainda</Text>

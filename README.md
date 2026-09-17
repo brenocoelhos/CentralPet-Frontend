@@ -4,9 +4,9 @@ Frontend mobile/web do projeto CentralPet, desenvolvido com Expo, React Native e
 
 ## Stack
 
-- Expo SDK 55
+- Expo SDK 58 (58.0.0-preview.3)
 - React 19
-- React Native 0.83
+- React Native 0.88 (release candidate)
 - Expo Router
 - Firebase Authentication
 - TypeScript
@@ -48,21 +48,29 @@ src/
 
 ## Requisitos
 
-- Node.js 20 ou superior recomendado
+- Node.js 22.13+ (linha 22), 24.3+ (linha 24) ou 26+
 - npm
 - Expo CLI via `npx`
 
 ## Instalacao
 
 ```bash
-npm install
+npm install --legacy-peer-deps
 ```
+
+O SDK 58 ainda esta em preview. A opcao `--legacy-peer-deps` e necessaria
+porque os intervalos de peer dependencies de algumas bibliotecas nao aceitam
+a versao release candidate do React Native. Use tambem essa opcao com `npm ci`.
+As versoes dos modulos nativos seguem as indicadas pelo Expo SDK 58.
 
 ## Executando o projeto
 
 ```bash
 npm run start
 ```
+
+Use Expo Go compativel com SDK 58. Apos atualizar o SDK, encerre o Metro
+anterior e execute `npm start -- --clear` para gerar um novo QR code.
 
 Comandos uteis:
 

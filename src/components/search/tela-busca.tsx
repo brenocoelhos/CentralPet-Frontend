@@ -1,4 +1,4 @@
-﻿import CartaoPet from "@/components/pet/cartao-pet";
+import CartaoPet from "@/components/pet/cartao-pet";
 import {
   CARD_HEIGHT,
   CARD_IMAGE_HEIGHT,
@@ -256,7 +256,7 @@ export default function TelaBusca() {
         ListEmptyComponent={
           shouldSearch ? (
             <Text style={styles.emptyText}>Nenhum pet perdido encontrado.</Text>
-          ) : null
+          ) : undefined
         }
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}

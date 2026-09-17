@@ -1,4 +1,4 @@
-﻿import { forwardRef } from "react";
+import { forwardRef, type ComponentRef } from "react";
 import {
     StyleSheet,
     TextInput,
@@ -7,7 +7,7 @@ import {
 
 export type ThemedTextInputProps = TextInputProps;
 
-export const EntradaTextoTema = forwardRef<TextInput, ThemedTextInputProps>(
+export const EntradaTextoTema = forwardRef<ComponentRef<typeof TextInput>, ThemedTextInputProps>(
   ({ style, ...rest }, ref) => {
     return <TextInput ref={ref} style={[styles.input, style]} {...rest} />;
   },
